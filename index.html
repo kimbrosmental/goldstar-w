@@ -10,6 +10,11 @@
   <nav id="navbar">
     <div class="container">
       <div class="logo">골드★스타</div>
+      <div class="menu-btn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
       <ul class="nav-links">
         <li><a href="#section1">섹션 1</a></li>
         <li><a href="#section2">섹션 2</a></li>
@@ -85,6 +90,23 @@
                 block: 'start'
             });
         });
+    });
+
+    // 모바일 메뉴 토글
+    const menuBtn = document.querySelector('.menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+    
+    menuBtn.addEventListener('click', () => {
+      menuBtn.classList.toggle('active');
+      navLinks.classList.toggle('active');
+    });
+
+    // 메뉴 항목 클릭 시 메뉴 닫기
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        menuBtn.classList.remove('active');
+        navLinks.classList.remove('active');
+      });
     });
   </script>
 </body>

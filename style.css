@@ -180,14 +180,126 @@ main {
   }
 }
 
-@media (max-width: 768px) {
+@media screen and (max-width: 1024px) {
+  .nav-links {
+    gap: 20px;
+  }
+
+  .nav-links a {
+    font-size: 18px;
+  }
+
+  .logo {
+    font-size: 28px;
+  }
+
+  .section .content {
+    padding: 30px 20px;
+  }
+
   .content.img-left,
   .content.img-right {
     flex-direction: column;
+    text-align: center;
+  }
+
+  .section img {
+    max-width: 400px;
+  }
+
+  .section p {
+    font-size: 20px;
+  }
+
+  #section5 .contact-buttons img {
+    width: 200px;
+    height: 140px;
+  }
+}
+
+/* 모바일 디바이스 (768px 이하) */
+@media screen and (max-width: 768px) {
+  #navbar {
+    height: 70px;
   }
 
   .nav-links {
-    display: none;
+    position: fixed;
+    top: 70px;
+    left: -100%;
+    width: 100%;
+    height: calc(100vh - 70px);
+    background-color: #333333;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    transition: 0.3s;
+  }
+
+  .nav-links.active {
+    left: 0;
+  }
+
+  .logo {
+    font-size: 24px;
+  }
+
+  /* 모바일 메뉴 버튼 추가 */
+  .menu-btn {
+    display: block;
+    cursor: pointer;
+    padding: 10px;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .menu-btn span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: #ffffff;
+    transition: 0.3s;
+  }
+
+  /* 메뉴 활성화 시 X 모양으로 변경 */
+  .menu-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(8px, 8px);
+  }
+
+  .menu-btn.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .menu-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+  }
+
+  .section {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .section img {
+    max-width: 300px;
+  }
+
+  .section p {
+    font-size: 18px;
+  }
+
+  #section5 {
+    height: auto;
+    min-height: 400px;
+  }
+
+  #section5 .contact-buttons {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  #section5 .contact-buttons img {
+    width: 160px;
+    height: 120px;
   }
 }
 
