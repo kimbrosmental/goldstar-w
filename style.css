@@ -14,7 +14,7 @@ body {
 /* 네비게이션 바 크기 조정 */
 #navbar {
   height: 80px; /* 1.5배 */
-  background-color: #004D40; /* 진한 청록색 */
+  background-color: #003D33; /* 더 진한 청녹색 */
   position: fixed;
   width: 100%;
   top: 0;
@@ -181,8 +181,8 @@ body {
     bottom: 30px;
     width: 50px;
     height: 50px;
-    background-color: #004D40;
-    border: 2px solid #004D40;
+    background-color: #003D33;
+    border: 2px solid #003D33;
     border-radius: 50%;
     color: #ffffff;
     font-size: 20px;
@@ -196,21 +196,97 @@ body {
 }
 
 #scrollToTop:hover {
-    background-color: #00695C;
-    border-color: #00695C;
-    color: #ffffff;
+    background-color: #004D40;
+    border-color: #004D40;
 }
 
 @keyframes glowButton {
     from {
-        box-shadow: 0 0 5px #004D40,
-                    0 0 10px #004D40,
-                    0 0 15px #004D40;
+        box-shadow: 0 0 5px #003D33,
+                    0 0 10px #003D33,
+                    0 0 15px #003D33;
     }
     to {
-        box-shadow: 0 0 10px #00695C,
-                    0 0 20px #00695C,
-                    0 0 30px #00695C;
+        box-shadow: 0 0 10px #004D40,
+                    0 0 20px #004D40,
+                    0 0 30px #004D40;
+    }
+}
+
+/* 회사 정보 영역 추가 */
+.company-info {
+    width: 100%;
+    background-color: #333333;
+    padding: 40px 0;
+    margin-top: 60px;
+}
+
+.company-info .content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    color: #ffffff;
+}
+
+.company-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+}
+
+.info-section h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #ffffff;
+}
+
+.info-section p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #cccccc;
+    margin: 5px 0;
+}
+
+/* 고정 소셜 아이콘 스타일링 */
+.fixed-social-icons {
+    position: fixed;
+    left: calc((100% - 1200px) / 2 + 20px); /* 1200px 영역의 좌측에 배치 */
+    top: 100px; /* 네비게이션 바 아래에 위치 */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 999;
+}
+
+.social-icon {
+    display: block;
+    width: 50px;
+    height: 50px;
+    transition: transform 0.3s ease;
+}
+
+.social-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.social-icon:hover {
+    transform: scale(1.1);
+}
+
+/* 반응형 대응 */
+@media screen and (max-width: 1200px) {
+    .fixed-social-icons {
+        left: 20px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .fixed-social-icons {
+        top: auto;
+        bottom: 20px;
+        flex-direction: row;
     }
 }
 
@@ -259,10 +335,16 @@ body {
     font-size: 20px;
   }
 
-  #section5 .contact-buttons img {
-    width: 200px;
-    height: 140px;
-  }
+  #section5 .contact-buttons {
+        flex-direction: column;  /* 수직 배치로 변경 */
+        gap: 30px;              /* 간격 조정 */
+        align-items: center;     /* 가운데 정렬 */
+    }
+
+    #section5 .contact-buttons img {
+        width: 250px;           /* 이미지 크기 조정 */
+        height: 160px;
+    }
 }
 
 /* 모바일 디바이스 (768px 이하) */
@@ -333,6 +415,17 @@ body {
     height: auto;
     min-height: 500px;
   }
+
+  #section5 .contact-buttons {
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+    }
+
+    #section5 .contact-buttons img {
+        width: 200px;
+        height: 140px;
+    }
 }
 
 /* 스크롤 패딩 추가 */
