@@ -18,10 +18,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         socialIcon.classList.add('playing');
 
-        // 5.5초 후 static으로 복귀
+        // 4.0초 후 static으로 복귀
         setTimeout(() => {
             socialIcon.classList.remove('playing');
             isPlaying = false;
-        }, 5500); // GIF 재생 시간과 동일
+        }, 4000); // GIF 재생 시간과 동일
     });
 });
