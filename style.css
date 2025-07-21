@@ -383,39 +383,41 @@ body,
     position: relative;
 }
 
-.social-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+.kakao-static,
+.kakao-hover {
     position: absolute;
     top: 0;
     left: 0;
-    transition: opacity 0.3s ease;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.kakao-static {
+    opacity: 1;
 }
 
 .kakao-hover {
     opacity: 0;
+    pointer-events: none;
 }
 
-.social-icon:hover .kakao-static {
+/* GIF 재생 관련 스타일 */
+.social-icon.playing .kakao-static {
     opacity: 0;
 }
 
-.social-icon:hover .kakao-hover {
+.social-icon.playing .kakao-hover {
     opacity: 1;
+    animation: playFullGif 5.5s forwards;
 }
 
-/* 반응형 대응 */
-@media screen and (max-width: 1200px) {
-    .fixed-social-icons {
-        left: 20px;
+@keyframes playFullGif {
+    0% {
+        opacity: 1;
     }
-}
-
-@media screen and (max-width: 768px) {
-    .fixed-social-icons {
-        top: auto;
-        bottom: 20px;
+    100% {
+        opacity: 1;
     }
 }
 

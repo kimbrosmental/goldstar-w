@@ -161,8 +161,11 @@
     </div>
 </footer>
 
+<!-- 자바스크립트 파일 연결 -->
+<script src="hover-gif.js"></script>
+
+<!-- 모바일 메뉴 토글 스크립트 -->
 <script>
-    // 모바일 메뉴 토글
     const menuBtn = document.querySelector('.menu-btn');
     const navLinks = document.querySelector('.nav-links');
     
@@ -171,13 +174,12 @@
       navLinks.classList.toggle('active');
     });
 
-    // 메뉴 항목 클릭 시 메뉴 닫기
     document.querySelectorAll('.nav-links a').forEach(link => {
       link.addEventListener('click', () => {
         menuBtn.classList.remove('active');
         navLinks.classList.remove('active');
       });
     });
-  </script>
+</script>
 </body>
 </html>
