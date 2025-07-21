@@ -234,48 +234,145 @@ body {
     }
 }
 
-/* 회사 정보 영역 추가 */
+/* 회사 정보 영역 스타일 수정 */
 .company-info {
     width: 100%;
+    height: 200px;
     background-color: #333333;
-    padding: 40px 0;
-    margin-top: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
 }
 
-.company-info .content {
+.info-content {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
-    color: #ffffff;
+    padding: 0 40px;
 }
 
 .company-info-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 40px;
+    margin: 0 auto;
 }
 
 .info-section h3 {
-    font-size: 20px;
-    margin-bottom: 15px;
+    font-size: 12px;
     color: #ffffff;
+    margin-bottom: 8px;
+    font-weight: 600;
 }
 
 .info-section p {
-    font-size: 16px;
-    line-height: 1.6;
+    font-size: 11px;
+    line-height: 1.3;
     color: #cccccc;
-    margin: 5px 0;
+    margin: 3px 0;
 }
 
-/* 고정 소셜 아이콘 스타일링 */
+/* 반응형 처리 */
+@media screen and (max-width: 1200px) {
+    .info-content {
+        padding: 0 20px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .company-info {
+        height: auto;
+        padding: 20px 0;
+    }
+    
+    .company-info-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .info-section h3 {
+        font-size: 11px;
+    }
+    
+    .info-section p {
+        font-size: 10px;
+    }
+}
+
+/* 청녹색 네비게이션 바 수정 */
+#navbar {
+    height: 80px; /* 1.5배 */
+    background-color: #003D33; /* 더 진한 청녹색 */
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+#navbar .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+}
+
+/* 스크롤 버튼 수정 */
+#scrollToTop {
+    position: fixed;
+    right: calc((100% - 1200px) / 2 + 20px);
+    bottom: 30px;
+    width: 50px;
+    height: 50px;
+    background-color: #003D33;
+    border: 2px solid #003D33;
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    transition: all 0.3s ease;
+    animation: glowButton 1.5s ease-in-out infinite alternate;
+}
+
+#scrollToTop:hover {
+    background-color: #004D40;
+    border-color: #004D40;
+}
+
+@keyframes glowButton {
+    from {
+        box-shadow: 0 0 5px #003D33,
+                    0 0 10px #003D33,
+                    0 0 15px #003D33;
+    }
+    to {
+        box-shadow: 0 0 10px #004D40,
+                    0 0 20px #004D40,
+                    0 0 30px #004D40;
+    }
+}
+
+/* 배경색 전체 검정으로 통일 */
+body, 
+.section,
+.section .content {
+    background-color: #000000;
+}
+
+/* 고정 소셜 아이콘 스타일링 수정 */
 .fixed-social-icons {
     position: fixed;
-    left: calc((100% - 1200px) / 2 + 20px); /* 1200px 영역의 좌측에 배치 */
-    top: 100px; /* 네비게이션 바 아래에 위치 */
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    left: calc((100% - 1200px) / 2 + 20px);
+    top: 100px;
     z-index: 999;
 }
 
@@ -283,17 +380,29 @@ body {
     display: block;
     width: 200px;
     height: 75px;
-    transition: transform 0.3s ease;
+    position: relative;
 }
 
 .social-icon img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity 0.3s ease;
 }
 
-.social-icon:hover {
-    transform: scale(1.1);
+.kakao-hover {
+    opacity: 0;
+}
+
+.social-icon:hover .kakao-static {
+    opacity: 0;
+}
+
+.social-icon:hover .kakao-hover {
+    opacity: 1;
 }
 
 /* 반응형 대응 */
@@ -307,7 +416,6 @@ body {
     .fixed-social-icons {
         top: auto;
         bottom: 20px;
-        flex-direction: row;
     }
 }
 
