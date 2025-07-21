@@ -32,6 +32,17 @@ body {
 }
 
 .logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    width: 200px;
+    height: 75px;
+    object-fit: contain;
+}
+
+.logo {
     font-size: 36px;
     color: #ffffff;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
@@ -79,22 +90,32 @@ body {
     width: 100%;
     max-width: 1200px;
     height: 900px;
-    background-color: #000000; /* 1200px 영역 배경색을 검정으로 변경 */
+    background-color: #000000;
     display: flex;
-    align-items: center;
+    flex-direction: column; /* 수직 방향 정렬 */
+    justify-content: center; /* 세로 중앙 정렬 */
+    align-items: center; /* 가로 중앙 정렬 */
     padding: 40px;
     position: relative;
-    /* 테두리 관련 속성 제거 */
     border: none;
     animation: none;
+}
+
+/* 섹션별 제목 스타일 */
+.section h2 {
+    text-align: center;
+    color: #FFD700;
+    font-size: 36px;
+    margin-bottom: 40px;
 }
 
 /* 이미지 레이아웃 스타일 */
 .content.img-left,
 .content.img-right {
-    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 40px;
+    text-align: center;
+    gap: 30px;
 }
 
 .content.img-left img,
@@ -260,8 +281,8 @@ body {
 
 .social-icon {
     display: block;
-    width: 50px;
-    height: 50px;
+    width: 200px;
+    height: 75px;
     transition: transform 0.3s ease;
 }
 
@@ -446,4 +467,125 @@ html {
   line-height: 1.6;
   margin: 20px 0;
   color: #ffffff; /* 텍스트 색상을 흰색으로 변경 */
+}
+
+/* Hero 섹션 스타일 */
+.hero-content {
+    text-align: center;
+    color: #ffffff;
+}
+
+.hero-content h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.hero-content .subtitle {
+    font-size: 24px;
+    color: #FFD700;
+    margin-bottom: 40px;
+}
+
+/* 히어로 이미지 스타일 수정 */
+.hero-image img {
+    width: 400px;
+    height: 400px;
+    object-fit: cover;
+    opacity: 0.9; /* 50% 투명도 적용 */
+    transition: opacity 0.3s ease; /* 부드러운 투명도 전환 효과 */
+}
+
+/* 선택적: 호버 시 투명도 원래대로 */
+.hero-image img:hover {
+    opacity: 1;
+}
+
+/* 반응형 대응 */
+@media screen and (max-width: 768px) {
+    .hero-image img {
+        width: 100%;
+        max-width: 400px;
+        height: 400px;
+    }
+}
+
+/* 스토리 섹션 스타일 */
+.story-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 40px;
+    width: 100%;
+    max-width: 1000px; /* 적절한 최대 너비 설정 */
+    margin: 0 auto;
+}
+
+.story-item {
+    text-align: center;
+    padding: 30px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 10px;
+}
+
+.story-item h3 {
+    font-size: 36px;
+    color: #FFD700;
+    margin-bottom: 15px;
+}
+
+/* 프로세스 플로우 스타일 */
+.process-flow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.process-step {
+    text-align: center;
+    flex: 1;
+}
+
+.process-step img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+/* 실적 섹션 스타일 */
+.achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-bottom: 40px;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto 40px auto;
+}
+
+.achievement-item {
+    text-align: center;
+    padding: 30px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 10px;
+}
+
+.achievement-item h3 {
+    font-size: 36px;
+    color: #FFD700;
+    margin-bottom: 15px;
+}
+
+/* 모바일 반응형 */
+@media screen and (max-width: 768px) {
+    .logo img {
+        width: 150px;
+        height: 56px;
+    }
 }
