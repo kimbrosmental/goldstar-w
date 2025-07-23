@@ -1,0 +1,408 @@
+/* style.css */
+/* ------------------ 기본 설정 ------------------ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body,
+.section,
+.section .content {
+  background-color: #000000;
+}
+
+/* ------------------ 네비게이션 ------------------ */
+#navbar {
+  height: 80px;
+  background-color: #003D33;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+}
+
+#navbar .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 20px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-size: 36px;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+  animation: glowLuxury 2s ease-in-out infinite alternate;
+}
+
+.logo img {
+  width: 200px;
+  height: 75px;
+  object-fit: contain;
+}
+
+@keyframes glowLuxury {
+  from {
+    text-shadow:
+      0 0 5px rgba(255,255,255,0.6),
+      0 0 10px rgba(255,255,255,0.4),
+      0 0 15px rgba(255,255,255,0.2);
+  }
+  to {
+    text-shadow:
+      0 0 10px rgba(255,255,255,0.8),
+      0 0 20px rgba(255,255,255,0.6),
+      0 0 30px rgba(255,255,255,0.4);
+  }
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 24px;
+}
+
+/* ------------------ 섹션 ------------------ */
+.section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  height: 900px;
+}
+
+.section .content {
+  width: 100%;
+  max-width: 1200px;
+  height: 900px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  position: relative;
+}
+
+.section h2 {
+  text-align: center;
+  color: #FFD700;
+  font-size: 36px;
+  margin-bottom: 40px;
+}
+
+.section p {
+  font-size: 24px;
+  line-height: 1.6;
+  margin: 20px 0;
+  color: #ffffff;
+}
+
+/* ------------------ Hero ------------------ */
+.hero-content {
+  text-align: center;
+  color: #ffffff;
+}
+
+.hero-content h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.hero-content .subtitle {
+  font-size: 24px;
+  color: #FFD700;
+  margin-bottom: 40px;
+}
+
+.hero-image img {
+  width: 400px;
+  height: 400px;
+  object-fit: cover;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.hero-image img:hover {
+  opacity: 1;
+}
+
+/* ------------------ 그리드 섹션 ------------------ */
+.story-grid,
+.achievement-grid,
+.process-flow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.story-item,
+.achievement-item {
+  text-align: center;
+  padding: 30px;
+  background: rgba(255,215,0,0.1);
+  border-radius: 10px;
+}
+
+.story-item h3,
+.achievement-item h3 {
+  font-size: 36px;
+  color: #FFD700;
+  margin-bottom: 15px;
+}
+
+.process-step {
+  text-align: center;
+}
+
+.process-step img {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 20px;
+}
+
+/* ------------------ 문의 버튼 ------------------ */
+.contact-buttons {
+  display: flex;
+  gap: 60px;
+  justify-content: center;
+}
+
+.contact-buttons img {
+  width: 300px;
+  height: 200px;
+  object-fit: contain;
+}
+
+/* ------------------ 고정 아이콘 ------------------ */
+.fixed-social-icons {
+  position: fixed;
+  left: calc((100% - 1200px) / 2 + 20px);
+  top: 100px;
+  z-index: 999;
+}
+
+.social-icon {
+  display: block;
+  width: 200px;
+  height: 75px;
+  position: relative;
+}
+
+.kakao-static,
+.kakao-hover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.kakao-static { opacity: 1; }
+.kakao-hover  { opacity: 0; pointer-events: none; }
+
+.social-icon.playing .kakao-static { opacity: 0; }
+.social-icon.playing .kakao-hover  {
+  opacity: 1;
+  animation: playFullGif 5.5s forwards;
+}
+
+@keyframes playFullGif {
+  0%, 100% { opacity: 1; }
+}
+
+/* ------------------ 스크롤 위로 ------------------ */
+#scrollToTop {
+  position: fixed;
+  right: calc((100% - 1200px) / 2 + 20px);
+  bottom: 30px;
+  width: 50px;
+  height: 50px;
+  background-color: #003D33;
+  border: 2px solid #003D33;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  transition: all 0.3s ease;
+  animation: glowButton 1.5s ease-in-out infinite alternate;
+}
+
+#scrollToTop:hover {
+  background-color: #004D40;
+  border-color: #004D40;
+}
+
+@keyframes glowButton {
+  from {
+    box-shadow:
+      0 0 5px #003D33,
+      0 0 10px #003D33,
+      0 0 15px #003D33;
+  }
+  to {
+    box-shadow:
+      0 0 10px #004D40,
+      0 0 20px #004D40,
+      0 0 30px #004D40;
+  }
+}
+
+/* ------------------ 푸터 ------------------ */
+.company-info {
+  width: 100%;
+  height: 200px;
+  background-color: #333333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+}
+
+.info-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.company-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  margin: 0 auto;
+}
+
+.info-section h3 {
+  font-size: 12px;
+  color: #ffffff;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.info-section p {
+  font-size: 11px;
+  line-height: 1.3;
+  color: #cccccc;
+  margin: 3px 0;
+}
+
+/* ------------------ 반응형 ------------------ */
+@media screen and (max-width: 1024px) {
+  .nav-links { gap: 20px; }
+  .nav-links a { font-size: 18px; }
+  .logo img { width: 160px; }
+  .logo { font-size: 28px; }
+  .hero-content h1 { font-size: 32px; }
+  .hero-content .subtitle { font-size: 18px; }
+  .hero-image img { width: 90%; max-width: 350px; }
+  .story-grid,
+  .achievement-grid,
+  .process-flow { grid-template-columns: 1fr 1fr; gap: 20px; }
+  .process-step img { width: 160px; height: 160px; }
+  #section5 .contact-buttons { flex-direction: column; gap: 20px; align-items: center; }
+  #section5 .contact-buttons img { width: 240px; }
+  .fixed-social-icons { left: 10px; top: 80px; }
+  .company-info-grid { grid-template-columns: 1fr 1fr; }
+  #scrollToTop { right: 20px; bottom: 20px; }
+}
+
+@media screen and (max-width: 768px) {
+  #navbar { height: 70px; }
+  .nav-links {
+    position: fixed;
+    top: 70px;
+    left: -100%;
+    width: 100%;
+    height: calc(100vh - 70px);
+    background-color: #333;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    transition: 0.3s;
+    z-index: 1000;
+  }
+  .nav-links.active { left: 0; }
+  .menu-btn { display: flex; flex-direction: column; cursor: pointer; padding: 10px; gap: 5px; }
+  .menu-btn span { display: block; width: 25px; height: 3px; background-color: #fff; }
+  .section, .section .content { height: auto; padding: 60px 20px; }
+  .hero-content h1 { font-size: 28px; }
+  .hero-content .subtitle { font-size: 16px; }
+  .hero-image img { width: 100%; max-width: 300px; }
+  .story-grid, .achievement-grid, .process-flow { grid-template-columns: 1fr; }
+  .process-step img { width: 120px; height: 120px; }
+  .section p { font-size: 16px; }
+  .contact-buttons img { width: 200px; }
+  .company-info { height: auto; padding: 30px 20px; }
+  .company-info-grid { grid-template-columns: 1fr; text-align: center; }
+  .info-section h3 { font-size: 13px; }
+  .info-section p { font-size: 12px; }
+  .fixed-social-icons { left: 10px; top: auto; bottom: 80px; }
+  #scrollToTop { right: 10px; bottom: 20px; }
+  html { scroll-padding-top: 70px; }
+  .logo img { width: 140px; }
+}
+
+/* ===================== 금 시세 박스 스타일 ===================== */
+.price-box{
+  width: 100%;
+  max-width: 620px;
+  margin: 50px auto 0;
+  padding: 24px 28px;
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 12px;
+  background: rgba(255,215,0,0.05);
+  color: #fff;
+  text-align: center;
+}
+.price-title{
+  font-size: 28px;
+  color: #FFD700;
+  margin-bottom: 18px;
+  font-weight: 700;
+}
+.main-price{
+  font-size: 56px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -1px;
+}
+.change-line{
+  margin-top: 12px;
+  font-size: 26px;
+  font-weight: 600;
+}
+.change-line.up{
+  color: #ff5252;
+}
+.change-line.down{
+  color: #4fc3f7;
+}
+.price-updated{
+  margin-top: 10px;
+  font-size: 14px;
+  color: #cccccc;
+}
