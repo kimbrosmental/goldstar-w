@@ -406,3 +406,58 @@ body,
   font-size: 14px;
   color: #cccccc;
 }
+
+/* ===== 금 시세/공급 가격 박스 ===== */
+.price-box{
+  width: 100%;
+  max-width: 680px;
+  margin: 32px auto 0;
+  padding: 26px 32px;
+  border-radius: 12px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.price-title{
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.main-price{
+  font-size: 52px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  color: #fff;
+  text-align: center;
+}
+
+.change-line{
+  margin-top: 12px;
+  font-size: 26px;
+  font-weight: 600;
+  text-align: center;
+}
+.change-line.up{ color:#ff5252; }
+.change-line.down{ color:#4fc3f7; }
+
+/* 금(골드 톤) */
+.gold-box{
+  border: 1px solid rgba(255,215,0,0.3);
+  background: rgba(255,215,0,0.05);
+  color: #fff;
+}
+.gold-box .price-title{ color:#FFD700; }
+
+/* 공급(파란 톤) */
+.supply-box{
+  border: 1px solid rgba(80,150,255,0.4);
+  background: rgba(80,150,255,0.08);
+  color:#ffffff;
+}
+.supply-box .price-title.supply{ color:#4fc3f7; }
+.supply-price{ color:#e0f7ff; }
+
+/* 히어로 이미지 제거 */
+.hero-image{ display:none; }

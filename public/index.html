@@ -14,9 +14,7 @@
             <img src="img/logo.png" alt="골드스타 로고">
         </div>
         <div class="menu-btn">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span></span><span></span><span></span>
         </div>
         <ul class="nav-links">
           <li><a href="#section1">섹션 1</a></li>
@@ -29,40 +27,42 @@
     <div id="scroll-progress"></div>
   </nav>
 
-  <button id="scrollToTop">
-      <i class="fas fa-arrow-up"></i>
-  </button>
+  <button id="scrollToTop"><i class="fas fa-arrow-up"></i></button>
 
   <div class="fixed-social-icons">
     <a href="#" class="social-icon">
-        <img src="img/카카오톡 문의.png" alt="카카오톡 상담" class="kakao-static">
+        <img src="img/카카오톡 문의.png"  alt="카카오톡 상담" class="kakao-static">
         <img src="img/카카오톡 문의2.gif" alt="카카오톡 상담" class="kakao-hover">
     </a>
   </div>
 
   <main>
     <section id="section1" class="section">
-        <div class="content">
-            <div class="hero-content">
-                <h1>우간다에서 시작된 기회,<br>한국에서 금이 싸진다.</h1>
-                <p class="subtitle">글로벌 금맥을 잇는 새로운 연결, 지금 당신이 만날 수 있습니다.</p>
-                <div class="hero-image">
-                    <img src="img/uganda-gold-map.png" alt="우간다 금광 지도">
-                </div>
-            </div>
+      <div class="content">
 
-            <!-- ================== 오늘의 금 시세 박스 ================== -->
-            <div class="price-box" id="priceBox">
-              <h2 class="price-title">오늘의 금 시세</h2>
-              <div id="mainPrice" class="main-price">로딩중…</div>
-              <div id="priceChange" class="change-line"></div>
-              <div id="lastUpdated" class="price-updated"></div>
-            </div>
-            <!-- ====================================================== -->
-
+        <!-- 이미지 제거 -->
+        <div class="hero-content">
+          <h1>우간다에서 시작된 기회,<br>한국에서 금이 싸진다.</h1>
+          <p class="subtitle">글로벌 금맥을 잇는 새로운 연결, 지금 당신이 만날 수 있습니다.</p>
         </div>
+
+        <!-- ===== 오늘의 금 시세 (3.75g) : 전체 가운데 정렬 ===== -->
+        <div class="price-box gold-box" id="priceBox">
+          <h2 class="price-title">오늘의 금 시세 (3.75g)</h2>
+          <div id="mainPrice" class="main-price">로딩중…</div>
+          <div id="priceChange" class="change-line"></div>
+        </div>
+
+        <!-- ===== 공급 가격 (3.75g) : 파란톤, 금액 가운데 정렬 ===== -->
+        <div class="price-box supply-box">
+          <h2 class="price-title supply">공급 가격 (3.75g)</h2>
+          <div class="main-price supply-price">530,000원</div>
+        </div>
+
+      </div>
     </section>
 
+    <!-- 이하 기존 섹션 동일 -->
     <section id="section2" class="section">
         <div class="content">
             <div class="story-content">
@@ -171,21 +171,17 @@
       </div>
   </footer>
 
-  <!-- 자바스크립트 파일 연결 -->
   <script src="hover-gif.js"></script>
 
-  <!-- 모바일 메뉴 토글 스크립트 -->
   <script>
-      const menuBtn = document.querySelector('.menu-btn');
-      const navLinks = document.querySelector('.nav-links');
-      
-      menuBtn.addEventListener('click', () => {
-        menuBtn.classList.toggle('active');
-        navLinks.classList.toggle('active');
-      });
+    const menuBtn = document.querySelector('.menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+    menuBtn.addEventListener('click', () => {
+      menuBtn.classList.toggle('active');
+      navLinks.classList.toggle('active');
+    });
   </script>
 
-  <!-- 부드러운 앵커 스크롤 -->
   <script>
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
@@ -198,17 +194,15 @@
     });
   </script>
 
-  <!-- 메뉴 클릭 시 닫기 -->
   <script>
-      document.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', () => {
-          menuBtn.classList.remove('active');
-          navLinks.classList.remove('active');
-        });
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        menuBtn.classList.remove('active');
+        navLinks.classList.remove('active');
       });
+    });
   </script>
 
-  <!-- 맨위로 버튼 스크롤 동작 추가 -->
   <script>
     const scrollToTopBtn = document.getElementById('scrollToTop');
     scrollToTopBtn.addEventListener('click', () => {
@@ -216,61 +210,55 @@
     });
   </script>
 
-<!-- ================= 금 시세 파싱 & 캐시 ================= -->
-<script>
-  const API_URL  = '/price';      // 위 PHP 파일 경로
-  const CACHE_KEY = 'gold_price_cache_v1';
+  <!-- 금 시세 API 호출 -->
+  <script>
+    const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
+    const CACHE_KEY = 'gold_price_cache_v2';
+    const fmtNum    = n => Number(n).toLocaleString('ko-KR');
 
-  function getCache(){
-    try{ return JSON.parse(localStorage.getItem(CACHE_KEY)); }catch(e){ return null; }
-  }
-  function setCache(d){
-    try{ localStorage.setItem(CACHE_KEY, JSON.stringify(d)); }catch(e){}
-  }
-
-  function renderPrice(data, fromCache=false){
-    const priceEl  = document.getElementById('mainPrice');
-    const changeEl = document.getElementById('priceChange');
-    const timeEl   = document.getElementById('lastUpdated');
-
-    priceEl.textContent = data?.price ? data.price + '원' : '–';
-
-    const arrow = data?.trend === 'up' ? '▲' : data?.trend === 'down' ? '▼' : '';
-    changeEl.textContent = data?.percent ? `${arrow} ${data.percent}` : '';
-    changeEl.className = 'change-line' + (data?.trend==='up'?' up':data?.trend==='down'?' down':'');
-
-    if (data?.updatedAt) {
-      const d = new Date(data.updatedAt);
-      const pad = n => String(n).padStart(2,'0');
-      timeEl.textContent =
-        `최근 업데이트: ${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} `
-        + `${pad(d.getHours())}:${pad(d.getMinutes())}` + (fromCache?' (캐시)':'');
-    } else {
-      timeEl.textContent = '';
+    function getCache(){
+      try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch(e){ return null; }
     }
-  }
+    function setCache(d){
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch(e){}
+    }
 
-  async function loadGoldPrice(){
-    // 캐시 먼저
-    const cache = getCache();
-    if(cache) renderPrice(cache, true);
+    function renderPrice(d, fromCache=false){
+      const priceEl  = document.getElementById('mainPrice');
+      const changeEl = document.getElementById('priceChange');
 
-    try{
-      const data = await fetch(API_URL, {cache:'no-store'}).then(r=>r.json());
-      if(!data.price) throw new Error('parse_fail');
-      renderPrice(data, false);
-      setCache(data);
-    }catch(e){
-      // 실패해도 에러 문구 없음. 캐시 있으면 그대로 유지.
-      if(!cache){
-        renderPrice({price:null, percent:null, trend:'flat', updatedAt:null}, true);
+      if(!d || !d.price){
+        priceEl.textContent  = '–';
+        changeEl.textContent = '';
+        changeEl.className = 'change-line';
+        return;
+      }
+
+      priceEl.textContent = fmtNum(d.price) + '원';
+
+      const arrow = d.trend === 'up' ? '▲' : d.trend === 'down' ? '▼' : '';
+      const pct   = d.percent ? d.percent : '';
+      const chg   = d.change  ? fmtNum(d.change) + '원' : '';
+
+      changeEl.textContent = `${arrow} ${pct} ${chg}`.trim();
+      changeEl.className   = 'change-line' + (d.trend==='up'?' up':d.trend==='down'?' down':'');
+    }
+
+    async function loadGoldPrice(){
+      const cache = getCache();
+      if(cache) renderPrice(cache, true);
+
+      try{
+        const data = await fetch(API_URL, { cache:'no-store' }).then(r=>r.json());
+        if(!data.price) throw new Error('no_price');
+        renderPrice(data, false);
+        setCache(data);
+      }catch(e){
+        if(!cache){ renderPrice(null, false); }
       }
     }
-  }
 
-  document.addEventListener('DOMContentLoaded', loadGoldPrice);
-</script>
-<!-- ======================================================= -->
-
+    document.addEventListener('DOMContentLoaded', loadGoldPrice);
+  </script>
 </body>
 </html>
