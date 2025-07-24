@@ -1,416 +1,105 @@
-/* style.css */
 /* ------------------ 기본 설정 ------------------ */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body,.section,.section .content{background-color:#000000;}
+
+/* 네비게이션 */
+#navbar{height:80px;background-color:#003D33;position:fixed;width:100%;top:0;z-index:1000;}
+#navbar .container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;height:100%;padding:0 20px;}
+.logo{display:flex;align-items:center;font-size:36px;color:#fff;text-shadow:0 0 10px rgba(255,255,255,.6);animation:glowLuxury 2s ease-in-out infinite alternate;}
+.logo img{width:200px;height:75px;object-fit:contain;}
+@keyframes glowLuxury{
+  from{text-shadow:0 0 5px rgba(255,255,255,.6),0 0 10px rgba(255,255,255,.4),0 0 15px rgba(255,255,255,.2);}
+  to{text-shadow:0 0 10px rgba(255,255,255,.8),0 0 20px rgba(255,255,255,.6),0 0 30px rgba(255,255,255,.4);}
+}
+.nav-links{display:flex;gap:30px;list-style:none;}
+.nav-links a{color:#fff;text-decoration:none;font-size:24px;}
+
+/* 섹션 */
+.section{width:100%;display:flex;justify-content:center;height:1200px;}
+.section .content{width:100%;max-width:1200px;height:900px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;position:relative;}
+.section h2{text-align:center;color:#FFD700;font-size:36px;margin-bottom:40px;}
+.section p{font-size:24px;line-height:1.6;margin:20px 0;color:#fff;}
+
+/* Hero 이미지 제거 */
+.hero-image{display:none;}
+
+/* 그리드 */
+.story-grid,.achievement-grid,.process-flow{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;width:100%;max-width:1000px;margin:0 auto;}
+.story-item,.achievement-item{text-align:center;padding:30px;background:rgba(255,215,0,.1);border-radius:10px;}
+.story-item h3,.achievement-item h3{font-size:36px;color:#FFD700;margin-bottom:15px;}
+.process-step{text-align:center;}
+.process-step img{width:200px;height:200px;border-radius:50%;object-fit:cover;margin-bottom:20px;}
+
+/* 문의 버튼 */
+.contact-buttons{display:flex;gap:60px;justify-content:center;}
+.contact-buttons img{width:300px;height:200px;object-fit:contain;}
+
+/* 고정 아이콘 */
+.fixed-social-icons{position:fixed;left:calc((100% - 1200px)/2 + 20px);top:100px;z-index:999;}
+.social-icon{display:block;width:200px;height:75px;position:relative;}
+.kakao-static,.kakao-hover{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;}
+.kakao-static{opacity:1;}
+.kakao-hover{opacity:0;pointer-events:none;}
+.social-icon.playing .kakao-static{opacity:0;}
+.social-icon.playing .kakao-hover{opacity:1;animation:playFullGif 5.5s forwards;}
+@keyframes playFullGif{0%,100%{opacity:1;}}
+
+/* scroll top */
+#scrollToTop{position:fixed;right:calc((100% - 1200px)/2 + 20px);bottom:30px;width:50px;height:50px;background:#003D33;border:2px solid #003D33;border-radius:50%;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:999;transition:.3s;animation:glowButton 1.5s ease-in-out infinite alternate;}
+#scrollToTop:hover{background:#004D40;border-color:#004D40;}
+@keyframes glowButton{
+  from{box-shadow:0 0 5px #003D33,0 0 10px #003D33,0 0 15px #003D33;}
+  to{box-shadow:0 0 10px #004D40,0 0 20px #004D40,0 0 30px #004D40;}
 }
 
-body,
-.section,
-.section .content {
-  background-color: #000000;
+/* footer */
+.company-info{width:100%;height:200px;background:#333;display:flex;align-items:center;justify-content:center;padding:0;margin:0;}
+.info-content{width:100%;max-width:1200px;margin:0 auto;padding:0 40px;}
+.company-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin:0 auto;}
+.info-section h3{font-size:12px;color:#fff;margin-bottom:8px;font-weight:600;}
+.info-section p{font-size:11px;line-height:1.3;color:#ccc;margin:3px 0;}
+
+/* 반응형 */
+@media screen and (max-width:1024px){
+  .nav-links{gap:20px;}
+  .nav-links a{font-size:18px;}
+  .logo img{width:160px;}
+  .logo{font-size:28px;}
+  .section,.section .content{height:auto;padding:60px 20px;}
+  .story-grid,.achievement-grid,.process-flow{grid-template-columns:1fr 1fr;gap:20px;}
+  .process-step img{width:160px;height:160px;}
+  #section5 .contact-buttons{flex-direction:column;gap:20px;align-items:center;}
+  #section5 .contact-buttons img{width:240px;}
+  .fixed-social-icons{left:10px;top:80px;}
+  .company-info-grid{grid-template-columns:1fr 1fr;}
+  #scrollToTop{right:20px;bottom:20px;}
 }
 
-/* ------------------ 네비게이션 ------------------ */
-#navbar {
-  height: 80px;
-  background-color: #003D33;
-  position: fixed;
+@media screen and (max-width:768px){
+  #navbar{height:70px;}
+  .nav-links{position:fixed;top:70px;left:-100%;width:100%;height:calc(100vh - 70px);background:#333;flex-direction:column;align-items:center;padding:20px 0;transition:.3s;z-index:1000;}
+  .nav-links.active{left:0;}
+  .menu-btn{display:flex;flex-direction:column;cursor:pointer;padding:10px;gap:5px;}
+  .menu-btn span{display:block;width:25px;height:3px;background:#fff;}
+  .story-grid,.achievement-grid,.process-flow{grid-template-columns:1fr;}
+  .process-step img{width:120px;height:120px;}
+  .section p{font-size:16px;}
+  .contact-buttons img{width:200px;}
+  .company-info{height:auto;padding:30px 20px;}
+  .company-info-grid{grid-template-columns:1fr;text-align:center;}
+  .info-section h3{font-size:13px;}
+  .info-section p{font-size:12px;}
+  .fixed-social-icons{left:10px;top:auto;bottom:80px;}
+  #scrollToTop{right:10px;bottom:20px;}
+  html{scroll-padding-top:70px;}
+  .logo img{width:140px;}
+}
+
+
+/* ===== 금 시세 / 공급 가격 박스 ===== */
+.price-box {
   width: 100%;
-  top: 0;
-  z-index: 1000;
-}
-
-#navbar .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 100%;
-  padding: 0 20px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  font-size: 36px;
-  color: #ffffff;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
-  animation: glowLuxury 2s ease-in-out infinite alternate;
-}
-
-.logo img {
-  width: 200px;
-  height: 75px;
-  object-fit: contain;
-}
-
-@keyframes glowLuxury {
-  from {
-    text-shadow:
-      0 0 5px rgba(255,255,255,0.6),
-      0 0 10px rgba(255,255,255,0.4),
-      0 0 15px rgba(255,255,255,0.2);
-  }
-  to {
-    text-shadow:
-      0 0 10px rgba(255,255,255,0.8),
-      0 0 20px rgba(255,255,255,0.6),
-      0 0 30px rgba(255,255,255,0.4);
-  }
-}
-
-.nav-links {
-  display: flex;
-  gap: 30px;
-  list-style: none;
-}
-
-.nav-links a {
-  color: #ffffff;
-  text-decoration: none;
-  font-size: 24px;
-}
-
-/* ------------------ 섹션 ------------------ */
-.section {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  height: 900px;
-}
-
-.section .content {
-  width: 100%;
-  max-width: 1200px;
-  height: 900px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
-  position: relative;
-}
-
-.section h2 {
-  text-align: center;
-  color: #FFD700;
-  font-size: 36px;
-  margin-bottom: 40px;
-}
-
-.section p {
-  font-size: 24px;
-  line-height: 1.6;
-  margin: 20px 0;
-  color: #ffffff;
-}
-
-/* ------------------ Hero ------------------ */
-.hero-content {
-  text-align: center;
-  color: #ffffff;
-}
-
-.hero-content h1 {
-  font-size: 48px;
-  margin-bottom: 20px;
-  line-height: 1.2;
-}
-
-.hero-content .subtitle {
-  font-size: 24px;
-  color: #FFD700;
-  margin-bottom: 40px;
-}
-
-.hero-image img {
-  width: 400px;
-  height: 400px;
-  object-fit: cover;
-  opacity: 0.9;
-  transition: opacity 0.3s ease;
-}
-
-.hero-image img:hover {
-  opacity: 1;
-}
-
-/* ------------------ 그리드 섹션 ------------------ */
-.story-grid,
-.achievement-grid,
-.process-flow {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.story-item,
-.achievement-item {
-  text-align: center;
-  padding: 30px;
-  background: rgba(255,215,0,0.1);
-  border-radius: 10px;
-}
-
-.story-item h3,
-.achievement-item h3 {
-  font-size: 36px;
-  color: #FFD700;
-  margin-bottom: 15px;
-}
-
-.process-step {
-  text-align: center;
-}
-
-.process-step img {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 20px;
-}
-
-/* ------------------ 문의 버튼 ------------------ */
-.contact-buttons {
-  display: flex;
-  gap: 60px;
-  justify-content: center;
-}
-
-.contact-buttons img {
-  width: 300px;
-  height: 200px;
-  object-fit: contain;
-}
-
-/* ------------------ 고정 아이콘 ------------------ */
-.fixed-social-icons {
-  position: fixed;
-  left: calc((100% - 1200px) / 2 + 20px);
-  top: 100px;
-  z-index: 999;
-}
-
-.social-icon {
-  display: block;
-  width: 200px;
-  height: 75px;
-  position: relative;
-}
-
-.kakao-static,
-.kakao-hover {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.kakao-static { opacity: 1; }
-.kakao-hover  { opacity: 0; pointer-events: none; }
-
-.social-icon.playing .kakao-static { opacity: 0; }
-.social-icon.playing .kakao-hover  {
-  opacity: 1;
-  animation: playFullGif 5.5s forwards;
-}
-
-@keyframes playFullGif {
-  0%, 100% { opacity: 1; }
-}
-
-/* ------------------ 스크롤 위로 ------------------ */
-#scrollToTop {
-  position: fixed;
-  right: calc((100% - 1200px) / 2 + 20px);
-  bottom: 30px;
-  width: 50px;
-  height: 50px;
-  background-color: #003D33;
-  border: 2px solid #003D33;
-  border-radius: 50%;
-  color: #ffffff;
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  transition: all 0.3s ease;
-  animation: glowButton 1.5s ease-in-out infinite alternate;
-}
-
-#scrollToTop:hover {
-  background-color: #004D40;
-  border-color: #004D40;
-}
-
-@keyframes glowButton {
-  from {
-    box-shadow:
-      0 0 5px #003D33,
-      0 0 10px #003D33,
-      0 0 15px #003D33;
-  }
-  to {
-    box-shadow:
-      0 0 10px #004D40,
-      0 0 20px #004D40,
-      0 0 30px #004D40;
-  }
-}
-
-/* ------------------ 푸터 ------------------ */
-.company-info {
-  width: 100%;
-  height: 200px;
-  background-color: #333333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  margin: 0;
-}
-
-.info-content {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 40px;
-}
-
-.company-info-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 40px;
-  margin: 0 auto;
-}
-
-.info-section h3 {
-  font-size: 12px;
-  color: #ffffff;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
-.info-section p {
-  font-size: 11px;
-  line-height: 1.3;
-  color: #cccccc;
-  margin: 3px 0;
-}
-
-/* ------------------ 반응형 ------------------ */
-@media screen and (max-width: 1024px) {
-  .nav-links { gap: 20px; }
-  .nav-links a { font-size: 18px; }
-  .logo img { width: 160px; }
-  .logo { font-size: 28px; }
-  .hero-content h1 { font-size: 32px; }
-  .hero-content .subtitle { font-size: 18px; }
-  .hero-image img { width: 90%; max-width: 350px; }
-  .story-grid,
-  .achievement-grid,
-  .process-flow { grid-template-columns: 1fr 1fr; gap: 20px; }
-  .process-step img { width: 160px; height: 160px; }
-  #section5 .contact-buttons { flex-direction: column; gap: 20px; align-items: center; }
-  #section5 .contact-buttons img { width: 240px; }
-  .fixed-social-icons { left: 10px; top: 80px; }
-  .company-info-grid { grid-template-columns: 1fr 1fr; }
-  #scrollToTop { right: 20px; bottom: 20px; }
-}
-
-@media screen and (max-width: 768px) {
-  #navbar { height: 70px; }
-  .nav-links {
-    position: fixed;
-    top: 70px;
-    left: -100%;
-    width: 100%;
-    height: calc(100vh - 70px);
-    background-color: #333;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 0;
-    transition: 0.3s;
-    z-index: 1000;
-  }
-  .nav-links.active { left: 0; }
-  .menu-btn { display: flex; flex-direction: column; cursor: pointer; padding: 10px; gap: 5px; }
-  .menu-btn span { display: block; width: 25px; height: 3px; background-color: #fff; }
-  .section, .section .content { height: auto; padding: 60px 20px; }
-  .hero-content h1 { font-size: 28px; }
-  .hero-content .subtitle { font-size: 16px; }
-  .hero-image img { width: 100%; max-width: 300px; }
-  .story-grid, .achievement-grid, .process-flow { grid-template-columns: 1fr; }
-  .process-step img { width: 120px; height: 120px; }
-  .section p { font-size: 16px; }
-  .contact-buttons img { width: 200px; }
-  .company-info { height: auto; padding: 30px 20px; }
-  .company-info-grid { grid-template-columns: 1fr; text-align: center; }
-  .info-section h3 { font-size: 13px; }
-  .info-section p { font-size: 12px; }
-  .fixed-social-icons { left: 10px; top: auto; bottom: 80px; }
-  #scrollToTop { right: 10px; bottom: 20px; }
-  html { scroll-padding-top: 70px; }
-  .logo img { width: 140px; }
-}
-
-/* ===================== 금 시세 박스 스타일 ===================== */
-.price-box{
-  width: 100%;
-  max-width: 620px;
-  margin: 50px auto 0;
-  padding: 24px 28px;
-  border: 1px solid rgba(255,215,0,0.3);
-  border-radius: 12px;
-  background: rgba(255,215,0,0.05);
-  color: #fff;
-  text-align: center;
-}
-.price-title{
-  font-size: 28px;
-  color: #FFD700;
-  margin-bottom: 18px;
-  font-weight: 700;
-}
-.main-price{
-  font-size: 56px;
-  font-weight: 700;
-  color: #ffffff;
-  letter-spacing: -1px;
-}
-.change-line{
-  margin-top: 12px;
-  font-size: 26px;
-  font-weight: 600;
-}
-.change-line.up{
-  color: #ff5252;
-}
-.change-line.down{
-  color: #4fc3f7;
-}
-.price-updated{
-  margin-top: 10px;
-  font-size: 14px;
-  color: #cccccc;
-}
-
-/* ===== 금 시세/공급 가격 박스 ===== */
-.price-box{
-  width: 100%;
-  max-width: 680px;
+  max-width: 800px;    /* 이전 크기로 복원 */
   margin: 32px auto 0;
   padding: 26px 32px;
   border-radius: 12px;
@@ -418,46 +107,201 @@ body,
   text-align: center;
 }
 
-.price-title{
+/* 오늘의 금 시세 박스에만 이미지 + 텍스트 flex 레이아웃 */
+.gold-box .gold-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.price-image {
+  width: 100px;        /* 적당한 크기로 조절 */
+  height: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.gold-text {
+  text-align: left;    /* 이미지 옆 텍스트는 좌측 정렬 */
+}
+
+/* 나머지 금 시세 / 공급 가격 스타일은 기존 그대로 */
+.price-title {
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 8px;
 }
-
-.main-price{
+.main-price {
   font-size: 52px;
   font-weight: 700;
   letter-spacing: -1px;
   line-height: 1.1;
   color: #fff;
-  text-align: center;
 }
-
-.change-line{
+.change-line {
   margin-top: 12px;
   font-size: 26px;
   font-weight: 600;
-  text-align: center;
+  text-align: left;
 }
-.change-line.up{ color:#ff5252; }
-.change-line.down{ color:#4fc3f7; }
+.change-line.up { color: #ff5252; }
+.change-line.down { color: #4fc3f7; }
 
-/* 금(골드 톤) */
-.gold-box{
+/* 골드 톤 박스 */
+.gold-box {
   border: 1px solid rgba(255,215,0,0.3);
   background: rgba(255,215,0,0.05);
   color: #fff;
 }
-.gold-box .price-title{ color:#FFD700; }
+.gold-box .price-title { color: #FFD700; }
 
-/* 공급(파란 톤) */
-.supply-box{
+/* 공급 박스 */
+.supply-box {
   border: 1px solid rgba(80,150,255,0.4);
   background: rgba(80,150,255,0.08);
+  color: #fff;
+}
+.supply-box .price-title.supply { color: #4fc3f7; }
+.supply-price { color: #e0f7ff; }
+
+
+/* ===== 훅 문구 ===== */
+.hook{
+  margin:60px auto 0;
+  max-width:900px;
+  text-align:center;
+  line-height:1.4;
+  font-size:34px;
+  font-weight:700;
   color:#ffffff;
 }
-.supply-box .price-title.supply{ color:#4fc3f7; }
-.supply-price{ color:#e0f7ff; }
+.hook .line{
+  display:block;
+  position:relative;
+  margin:6px 0;
+  animation:fadeUp 1s ease both, shine 3s linear infinite;
+  background:linear-gradient(90deg,#FFD700 0%, #ffae00 40%, #ffffff 60%, #FFD700 100%);
+  background-size:200% 100%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  color:transparent;
+  text-shadow:0 0 6px rgba(255,215,0,.15);
+}
+.hook .line2{animation-delay:.3s;}
+.hook .line3{animation-delay:.6s;}
+/* 파란색 & 더 크게 */
+.hook .line4{
+  animation-delay:.9s;
+  background:none;
+  -webkit-background-clip:initial;
+  background-clip:initial;
+  -webkit-text-fill-color:#4fc3f7;
+  color:#4fc3f7;
+  text-shadow:0 0 8px rgba(79,195,247,.3);
+  font-size:44px;
+}
+.hook::before{
+  content:"";
+  display:block;
+  height:6em; /* 두 줄 간격 */
+}
 
-/* 히어로 이미지 제거 */
-.hero-image{ display:none; }
+/* 빛나는 금빛 가로줄 */
+.shine-bar{
+  display:block;
+  width:80%;
+  max-width:600px;
+  height:4px;
+  margin:28px auto 0;
+  border-radius:2px;
+  background:linear-gradient(90deg,
+    rgba(255,215,0,.15) 0%,
+    rgba(255,215,0,.35) 20%,
+    rgba(255,255,255,.9) 50%,
+    rgba(255,215,0,.35) 80%,
+    rgba(255,215,0,.15) 100%);
+  background-size:200% 100%;
+  box-shadow:0 0 12px rgba(255,215,0,.6);
+  animation:shineBar 3s linear infinite;
+}
+@keyframes shineBar{
+  0%{background-position:0% 50%;}
+  100%{background-position:200% 50%;}
+}
+
+/* 애니메이션 */
+@keyframes fadeUp{
+  0%{opacity:0;transform:translateY(20px);}
+  100%{opacity:1;transform:translateY(0);}
+}
+@keyframes shine{
+  0%{background-position:0% 50%;}
+  100%{background-position:200% 50%;}
+}
+/* ===== 스크롤 진행률 바 ===== */
+#navbar{ position:fixed; top:0; left:0; width:100%; z-index:1000; /* 기존 그대로 */ }
+#navbar{ position:fixed; top:0; left:0; width:100%; z-index:1000; }
+
+#scroll-progress{
+  position:absolute;
+  left:0;
+  bottom:0;
+  height:4px;
+  width:0;
+  background:linear-gradient(90deg,#FFD700 0%, #ffae00 40%, #ffffff 60%, #FFD700 100%);
+  background-size:200% 100%;
+  box-shadow:0 0 6px rgba(255,215,0,.6);
+  pointer-events:none;
+  transition:width .2s linear;
+  animation:progressShine 3s linear infinite;
+}
+
+@keyframes progressShine{
+  0%{background-position:0% 50%;}
+  100%{background-position:200% 50%;}
+}
+/* ===== 가격 섹션 레이아웃 ===== */
+.price-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* 우측 정렬 */
+  gap: 24px;
+  margin-top: 40px;
+}
+
+/* 좌측 이미지 */
+.price-image-wrap {
+  flex-shrink: 0;
+}
+.price-image {
+  width: 180px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* 우측 박스 감싸기 */
+.price-box-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ——— 박스 너비 조정 (수정) ——— */
+.price-box {
+  max-width: 700px;    /* 기존 300px → 400px */
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* 반응형: 모바일에서는 세로로 쌓기 */
+@media (max-width: 768px) {
+  .price-section {
+    flex-direction: column;
+    align-items: center;
+  }
+  .price-image {
+    margin-bottom: 16px;
+  }
+}

@@ -10,19 +10,19 @@
 <body>
   <nav id="navbar">
     <div class="container">
-        <div class="logo">
-            <img src="img/logo.png" alt="골드스타 로고">
-        </div>
-        <div class="menu-btn">
-          <span></span><span></span><span></span>
-        </div>
-        <ul class="nav-links">
-          <li><a href="#section1">섹션 1</a></li>
-          <li><a href="#section2">섹션 2</a></li>
-          <li><a href="#section3">섹션 3</a></li>
-          <li><a href="#section4">섹션 4</a></li>
-          <li><a href="#section5">섹션 5</a></li>
-        </ul>
+      <div class="logo">
+        <img src="img/logo.png" alt="골드스타 로고">
+      </div>
+      <div class="menu-btn">
+        <span></span><span></span><span></span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#section1">섹션 1</a></li>
+        <li><a href="#section2">섹션 2</a></li>
+        <li><a href="#section3">섹션 3</a></li>
+        <li><a href="#section4">섹션 4</a></li>
+        <li><a href="#section5">섹션 5</a></li>
+      </ul>
     </div>
     <div id="scroll-progress"></div>
   </nav>
@@ -31,8 +31,8 @@
 
   <div class="fixed-social-icons">
     <a href="#" class="social-icon">
-        <img src="img/카카오톡 문의.png"  alt="카카오톡 상담" class="kakao-static">
-        <img src="img/카카오톡 문의2.gif" alt="카카오톡 상담" class="kakao-hover">
+      <img src="img/카카오톡 문의.png" alt="카카오톡 상담" class="kakao-static">
+      <img src="img/카카오톡 문의2.gif" alt="카카오톡 상담" class="kakao-hover">
     </a>
   </div>
 
@@ -40,23 +40,33 @@
     <section id="section1" class="section">
       <div class="content">
 
-        <!-- 이미지 제거 -->
-        <div class="hero-content">
-          <h1>우간다에서 시작된 기회,<br>한국에서 금이 싸진다.</h1>
-          <p class="subtitle">글로벌 금맥을 잇는 새로운 연결, 지금 당신이 만날 수 있습니다.</p>
-        </div>
+        <!-- 훅 문구 -->
+        <h2 class="hook">
+          <span class="line line1">“금은 결국 오른다.”</span>
+          <span class="line line2">“다만, 합리적 금액에 살 수 있는 순간은 짧다.”</span>
+          <span class="line line3">지금이 바로 그 순간입니다,</span>
+          <span class="line line4"><strong>준비되셨나요?</strong></span>
+          <span class="shine-bar" aria-hidden="true"></span>
+        </h2>
 
-        <!-- ===== 오늘의 금 시세 (3.75g) : 전체 가운데 정렬 ===== -->
+        <!-- 오늘의 금 시세 박스 -->
         <div class="price-box gold-box" id="priceBox">
-          <h2 class="price-title">오늘의 금 시세 (3.75g)</h2>
-          <div id="mainPrice" class="main-price">로딩중…</div>
-          <div id="priceChange" class="change-line"></div>
+          <div class="gold-content">
+            <!-- 좌측 이미지 -->
+            <img src="img/gold-bar.jpg" alt="골드바 이미지" class="price-image">
+            <!-- 우측 텍스트 -->
+            <div class="gold-text">
+              <h2 class="price-title">오늘의 금 시세 (3.75g)</h2>
+              <div id="mainPrice" class="main-price">로딩중…</div>
+              <div id="priceChange" class="change-line"></div>
+            </div>
+          </div>
         </div>
 
-        <!-- ===== 공급 가격 (3.75g) : 파란톤, 금액 가운데 정렬 ===== -->
+        <!-- 공급 가격 박스 -->
         <div class="price-box supply-box">
           <h2 class="price-title supply">공급 가격 (3.75g)</h2>
-          <div class="main-price supply-price">530,000원</div>
+          <div class="main-price supply-price">520,000원</div>
         </div>
 
       </div>
@@ -64,115 +74,114 @@
 
     <!-- 이하 기존 섹션 동일 -->
     <section id="section2" class="section">
-        <div class="content">
-            <div class="story-content">
-                <h2>검은 대륙의 금맥</h2>
-                <div class="story-grid">
-                    <div class="story-item">
-                        <h3>3,200톤</h3>
-                        <p>2023년 우간다 금 매장량 발견</p>
-                    </div>
-                    <div class="story-item">
-                        <h3>글로벌 주목</h3>
-                        <p>CNN, BBC 등 해외 언론 집중 보도</p>
-                    </div>
-                    <div class="story-item">
-                        <h3>독점 계약</h3>
-                        <p>중국 광산업체들과 채굴 독점 계약 체결</p>
-                    </div>
-                </div>
+      <div class="content">
+        <div class="story-content">
+          <h2>검은 대륙의 금맥</h2>
+          <div class="story-grid">
+            <div class="story-item">
+              <h3>3,200톤</h3>
+              <p>2023년 우간다 금 매장량 발견</p>
             </div>
+            <div class="story-item">
+              <h3>글로벌 주목</h3>
+              <p>CNN, BBC 등 해외 언론 집중 보도</p>
+            </div>
+            <div class="story-item">
+              <h3>독점 계약</h3>
+              <p>중국 광산업체들과 채굴 독점 계약 체결</p>
+            </div>
+          </div>
         </div>
+      </div>
     </section>
 
     <section id="section3" class="section">
-        <div class="content">
-            <div class="process-content">
-                <h2>유통 구조의 혁신</h2>
-                <div class="process-flow">
-                    <div class="process-step">
-                        <img src="img/mining.jpg" alt="채굴">
-                        <p>우간다 금 매장지</p>
-                    </div>
-                    <div class="process-step">
-                        <img src="img/transport.jpg" alt="운송">
-                        <p>실시간 금 운송/수입</p>
-                    </div>
-                    <div class="process-step">
-                        <img src="img/delivery.jpg" alt="공급">
-                        <p>플랫폼 회원 공동 공급</p>
-                    </div>
-                </div>
+      <div class="content">
+        <div class="process-content">
+          <h2>유통 구조의 혁신</h2>
+          <div class="process-flow">
+            <div class="process-step">
+              <img src="img/mining.jpg" alt="채굴">
+              <p>우간다 금 매장지</p>
             </div>
+            <div class="process-step">
+              <img src="img/transport.jpg" alt="운송">
+              <p>실시간 금 운송/수입</p>
+            </div>
+            <div class="process-step">
+              <img src="img/delivery.jpg" alt="공급">
+              <p>플랫폼 회원 공동 공급</p>
+            </div>
+          </div>
         </div>
+      </div>
     </section>
 
     <section id="section4" class="section">
-        <div class="content">
-            <div class="achievement-content">
-                <h2>실제 공급 성과</h2>
-                <div class="achievement-grid">
-                    <div class="achievement-item">
-                        <h3>192kg</h3>
-                        <p>총 공급 완료량</p>
-                    </div>
-                    <div class="achievement-item">
-                        <h3>13.4%</h3>
-                        <p>시세 대비 평균 할인율</p>
-                    </div>
-                    <div class="achievement-item">
-                        <h3>1,982명</h3>
-                        <p>누적 참여 회원</p>
-                    </div>
-                </div>
-                <div class="testimonials">
-                    <img src="img/gold-delivery.jpg" alt="실제 금괴 배송">
-                </div>
+      <div class="content">
+        <div class="achievement-content">
+          <h2>실제 공급 성과</h2>
+          <div class="achievement-grid">
+            <div class="achievement-item">
+              <h3>192kg</h3>
+              <p>총 공급 완료량</p>
             </div>
+            <div class="achievement-item">
+              <h3>13.4%</h3>
+              <p>시세 대비 평균 할인율</p>
+            </div>
+            <div class="achievement-item">
+              <h3>1,982명</h3>
+              <p>누적 참여 회원</p>
+            </div>
+          </div>
+          <div class="testimonials">
+            <img src="img/gold-delivery.jpg" alt="실제 금괴 배송">
+          </div>
         </div>
+      </div>
     </section>
 
     <section id="section5" class="section">
-        <div class="content center">
-            <h2>지금 바로 문의하세요</h2>
-            <p>골드스타와 함께 새로운 투자의 기회를 시작하세요</p>
-            <div class="contact-buttons">
-                <a href="#"><img src="img/카카오톡 문의.gif" alt="카카오톡 문의"/></a>
-                <a href="#"><img src="img/텔레그램 문의.gif" alt="텔레그램 문의"/></a>
-            </div>
+      <div class="content center">
+        <h2>지금 바로 문의하세요</h2>
+        <p>골드스타와 함께 새로운 투자의 기회를 시작하세요</p>
+        <div class="contact-buttons">
+          <a href="#"><img src="img/카카오톡 문의.gif" alt="카카오톡 문의"/></a>
+          <a href="#"><img src="img/텔레그램 문의.gif" alt="텔레그램 문의"/></a>
         </div>
+      </div>
     </section>
   </main>
 
   <footer class="company-info">
-      <div class="info-content">
-          <div class="company-info-grid">
-              <div class="info-section">
-                  <h3>회사 정보</h3>
-                  <p>상호명: 골드스타</p>
-                  <p>대표이사: 홍길동</p>
-                  <p>사업자등록번호: 123-45-67890</p>
-                  <p>통신판매업: 제2025-서울강남-0000호</p>
-              </div>
-              <div class="info-section">
-                  <h3>연락처</h3>
-                  <p>주소: 서울특별시 강남구 테헤란로 123</p>
-                  <p>대표전화: 02-1234-5678</p>
-                  <p>이메일: info@goldstar.com</p>
-                  <p>팩스: 02-1234-5679</p>
-              </div>
-              <div class="info-section">
-                  <h3>고객지원</h3>
-                  <p>운영시간: 평일 09:00 - 18:00</p>
-                  <p>점심시간: 12:00 - 13:00</p>
-                  <p>토/일/공휴일 휴무</p>
-              </div>
-          </div>
+    <div class="info-content">
+      <div class="company-info-grid">
+        <div class="info-section">
+          <h3>회사 정보</h3>
+          <p>상호명: 골드스타</p>
+          <p>대표이사: 홍길동</p>
+          <p>사업자등록번호: 123-45-67890</p>
+          <p>통신판매업: 제2025-서울강남-0000호</p>
+        </div>
+        <div class="info-section">
+          <h3>연락처</h3>
+          <p>주소: 서울특별시 강남구 테헤란로 123</p>
+          <p>대표전화: 02-1234-5678</p>
+          <p>이메일: info@goldstar.com</p>
+          <p>팩스: 02-1234-5679</p>
+        </div>
+        <div class="info-section">
+          <h3>고객지원</h3>
+          <p>운영시간: 평일 09:00 - 18:00</p>
+          <p>점심시간: 12:00 - 13:00</p>
+          <p>토/일/공휴일 휴무</p>
+        </div>
       </div>
+    </div>
   </footer>
 
   <script src="hover-gif.js"></script>
-
   <script>
     const menuBtn = document.querySelector('.menu-btn');
     const navLinks = document.querySelector('.nav-links');
@@ -180,85 +189,73 @@
       menuBtn.classList.toggle('active');
       navLinks.classList.toggle('active');
     });
-  </script>
 
-  <script>
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', e=>{
+        const t=document.querySelector(a.getAttribute('href'));
+        if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); }
       });
     });
-  </script>
 
-  <script>
-    document.querySelectorAll('.nav-links a').forEach(link => {
-      link.addEventListener('click', () => {
+    document.querySelectorAll('.nav-links a').forEach(l=>{
+      l.addEventListener('click', ()=>{
         menuBtn.classList.remove('active');
         navLinks.classList.remove('active');
       });
     });
-  </script>
 
-  <script>
-    const scrollToTopBtn = document.getElementById('scrollToTop');
-    scrollToTopBtn.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('scrollToTop').addEventListener('click', ()=>{
+      window.scrollTo({ top:0, behavior:'smooth' });
     });
-  </script>
 
-  <!-- 금 시세 API 호출 -->
-  <script>
-    const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
+    // 금 시세 API
+    const API_URL = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
     const CACHE_KEY = 'gold_price_cache_v2';
-    const fmtNum    = n => Number(n).toLocaleString('ko-KR');
+    const fmt = n=>Number(n).toLocaleString('ko-KR');
 
-    function getCache(){
-      try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch(e){ return null; }
-    }
-    function setCache(d){
-      try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); } catch(e){}
-    }
+    function getCache(){ try{ return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch{ return null; } }
+    function setCache(d){ try{ localStorage.setItem(CACHE_KEY,JSON.stringify(d)); } catch{} }
 
-    function renderPrice(d, fromCache=false){
-      const priceEl  = document.getElementById('mainPrice');
-      const changeEl = document.getElementById('priceChange');
-
-      if(!d || !d.price){
-        priceEl.textContent  = '–';
-        changeEl.textContent = '';
-        changeEl.className = 'change-line';
+    function renderPrice(d){
+      const p = document.getElementById('mainPrice'),
+            c = document.getElementById('priceChange');
+      if(!d||!d.price){
+        p.textContent='–';
+        c.textContent='';
+        c.className='change-line';
         return;
       }
-
-      priceEl.textContent = fmtNum(d.price) + '원';
-
-      const arrow = d.trend === 'up' ? '▲' : d.trend === 'down' ? '▼' : '';
-      const pct   = d.percent ? d.percent : '';
-      const chg   = d.change  ? fmtNum(d.change) + '원' : '';
-
-      changeEl.textContent = `${arrow} ${pct} ${chg}`.trim();
-      changeEl.className   = 'change-line' + (d.trend==='up'?' up':d.trend==='down'?' down':'');
+      p.textContent=fmt(d.price)+'원';
+      const arr = d.trend==='up'?'▲':d.trend==='down'?'▼':'';
+      const pct = d.percent||'';
+      const chg = d.change?fmt(d.change)+'원':'';
+      c.textContent=`${arr} ${pct} ${chg}`.trim();
+      c.className='change-line'+(d.trend==='up'?' up':d.trend==='down'?' down':'');
     }
 
-    async function loadGoldPrice(){
-      const cache = getCache();
-      if(cache) renderPrice(cache, true);
-
+    async function loadGold(){
+      const cache=getCache(); if(cache) renderPrice(cache);
       try{
-        const data = await fetch(API_URL, { cache:'no-store' }).then(r=>r.json());
-        if(!data.price) throw new Error('no_price');
-        renderPrice(data, false);
-        setCache(data);
-      }catch(e){
-        if(!cache){ renderPrice(null, false); }
+        const d = await fetch(API_URL,{cache:'no-store'}).then(r=>r.json());
+        if(!d.price) throw 0;
+        renderPrice(d);
+        setCache(d);
+      }catch{
+        if(!cache) renderPrice(null);
       }
     }
+    document.addEventListener('DOMContentLoaded', loadGold);
 
-    document.addEventListener('DOMContentLoaded', loadGoldPrice);
+    // 스크롤 진행률
+    const bar=document.getElementById('scroll-progress');
+    function upd(){
+      const s=window.pageYOffset||document.documentElement.scrollTop;
+      const dh=document.documentElement.scrollHeight-window.innerHeight;
+      bar.style.width = dh? (s/dh*100)+'%':'0%';
+    }
+    window.addEventListener('scroll',upd);
+    window.addEventListener('resize',upd);
+    document.addEventListener('DOMContentLoaded',upd);
   </script>
 </body>
 </html>
