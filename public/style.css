@@ -306,32 +306,27 @@ body,.section,.section .content{background-color:#000000;}
     margin-bottom: 16px;
   }
 }
-/* ===== 반응형에서 골드바 이미지 숨기고 가격 박스만 가운데 정렬 ===== */
+/* ===== 태블릿 이하에서 골드바 이미지 숨기고 가격만 가운데 정렬 ===== */
 @media (max-width: 1024px) {
-  /* 이미지 래퍼 통째로 감추기 */
-  .price-image-wrap {
+  /* 이미지 래퍼와 이미지 둘 다 숨기기 */
+  .price-image-wrap,
+  .price-image {
     display: none !important;
   }
-  /* 가격 박스 전체를 가운데로 */
+  /* 가격 섹션 전체 가운데 정렬 */
   .price-section {
     justify-content: center !important;
   }
-  /* 박스들 사이 간격 조절 (선택) */
-  .price-box-wrap {
-    gap: 24px;
-  }
 }
 
+/* ===== 모바일 이하에서 동일하게 적용 ===== */
 @media (max-width: 768px) {
-  .price-image-wrap {
+  .price-image-wrap,
+  .price-image {
     display: none !important;
   }
   .price-section {
     justify-content: center !important;
-    flex-direction: column;  /* 세로 스택, 필요하면 제거하세요 */
-  }
-  .price-box-wrap {
-    gap: 16px;
+    flex-direction: column; /* 필요시 제거 가능 */
   }
 }
-
