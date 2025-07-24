@@ -15,7 +15,7 @@ body,.section,.section .content{background-color:#000000;}
 .nav-links a{color:#fff;text-decoration:none;font-size:24px;}
 
 /* 섹션 */
-.section{width:100%;display:flex;justify-content:center;height:1200px;}
+.section{width:100%;display:flex;justify-content:center;height:1000px;}
 .section .content{width:100%;max-width:1200px;height:900px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;position:relative;}
 .section h2{text-align:center;color:#FFD700;font-size:36px;margin-bottom:40px;}
 .section p{font-size:24px;line-height:1.6;margin:20px 0;color:#fff;}
@@ -205,7 +205,7 @@ body,.section,.section .content{background-color:#000000;}
 .hook::before{
   content:"";
   display:block;
-  height:6em; /* 두 줄 간격 */
+  height:4em; /* 두 줄 간격 */
 }
 
 /* 빛나는 금빛 가로줄 */
@@ -306,27 +306,137 @@ body,.section,.section .content{background-color:#000000;}
     margin-bottom: 16px;
   }
 }
-/* ===== 태블릿 이하에서 골드바 이미지 숨기고 가격만 가운데 정렬 ===== */
+/* tablet 이하에서 섹션1의 gold-bar 이미지 숨기기 */
 @media (max-width: 1024px) {
-  /* 이미지 래퍼와 이미지 둘 다 숨기기 */
-  .price-image-wrap,
-  .price-image {
+  #section1 .price-image-wrap {
     display: none !important;
   }
-  /* 가격 섹션 전체 가운데 정렬 */
-  .price-section {
+  /* 이미지 영역 통째로 없어지면 가격박스만 좌우 중앙 정렬 */
+  #section1 .price-section {
     justify-content: center !important;
   }
 }
 
-/* ===== 모바일 이하에서 동일하게 적용 ===== */
+/* mobile 이하에서도 동일하게 적용 */
 @media (max-width: 768px) {
-  .price-image-wrap,
-  .price-image {
+  #section1 .price-image-wrap {
     display: none !important;
   }
-  .price-section {
+  #section1 .price-section {
     justify-content: center !important;
-    flex-direction: column; /* 필요시 제거 가능 */
+    flex-direction: column; /* 필요하다면 세로 스택으로 */
   }
+}
+/* 네비게이션 링크 호버 이펙트 */
+.nav-links a {
+  position: relative;
+  font-weight: 500; /* 기본 굵기 */
+  transition: color 0.3s ease;
+}
+
+.nav-links a::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 0; height: 0;
+  background: radial-gradient(circle, rgba(255,215,0,0.4) 0%, rgba(255,215,0,0) 80%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.5s ease, width 0.5s ease, height 0.5s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.nav-links a:hover {
+  color: #FFD700;
+  font-weight: 700;
+}
+
+.nav-links a:hover::before {
+  width: 240%;    /* 폭 넉넉히 늘려서 빛이 퍼지도록 */
+  height: 240%;
+  transform: translate(-50%, -50%) scale(1);
+}
+/* 태블릿 이하에서 훅 앞 여백 제거 */
+@media (max-width: 1024px) {
+  .hook {
+    margin-top: 0;       /* 위쪽 마진 없애기 */
+  }
+  .hook::before {
+    height: 0;           /* before로 만든 빈 공간 없애기 */
+  }
+}
+
+/* 모바일 이하에서 훅 앞 여백 제거 */
+@media (max-width: 768px) {
+  .hook {
+    margin-top: 0;
+  }
+  .hook::before {
+    height: 0;
+  }
+}
+/* 공급 가격 박스 내 % 차이 & 레이아웃 */
+.supply-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.supply-diff {
+  font-size: 26px;
+  font-weight: 600;
+  text-align: left;
+  color: #4fc3f7; /* 파란 톤 */
+}
+.compare-note {
+  font-size: 12px;
+  color: #cccccc;
+  margin-top: 8px;
+}
+
+/* price-box 최대 너비 복원 */
+.price-box {
+  max-width: 680px;
+}
+
+/* 반응형: 섹션1 gold-bar 숨기기 */
+@media (max-width: 1024px) {
+  #section1 .price-image { display: none; }
+  #section1 .gold-content { justify-content: center; }
+}
+@media (max-width: 768px) {
+  #section1 .price-image { display: none; }
+  #section1 .gold-content { flex-direction: column; }
+}
+/* 공급 가격 하단 퍼센트 영역 */
+.supply-footer {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.supply-footer .change-line {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+.compare-note {
+  font-size: 14px;
+  color: #ccc;
+}
+/* 섹션2: 이미지 캐러셀 */
+#image-slider {
+  display: flex;
+  overflow: hidden;
+  padding: 20px 0;
+}
+.slide {
+  min-width: 300px;
+  margin-right: 30px;
+  flex-shrink: 0;
+}
+.slide p {
+  font-size: 14px;
 }

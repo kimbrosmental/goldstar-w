@@ -6,6 +6,65 @@
   <title>회사 홈페이지</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+  <style>
+    /* ---------------- Section2 레이아웃 조정 ---------------- */
+    #section2 .content {
+      padding-top: 20px;
+      padding-bottom: 20px;
+      height: auto;
+    }
+    #section2 .story-content h2 {
+      margin-bottom: 16px;
+    }
+    #section2 .story-grid {
+      margin-bottom: 24px;
+    }
+
+    /* ---------------- Carousel 스타일 ---------------- */
+    .carousel-wrapper {
+      overflow: hidden;
+      width: 100%;
+      margin-top: 16px;
+    }
+    .carousel-track {
+      display: flex;
+      gap: 20px;
+      animation: scroll 80s linear infinite;
+    }
+    .carousel-item {
+      flex: 0 0 auto;
+      width: 300px;
+      max-width: 300px;
+    }
+    .carousel-item img {
+      width: 100%;
+      height: auto;
+      max-height: 300px;
+      object-fit: contain;
+      display: block;
+    }
+    .carousel-item p {
+      text-align: center;
+      margin-top: 8px;
+      color: #fff;
+      font-size: 16px;
+    }
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ---- Section1 gold-bar 이미지 반응형 숨김 ---- */
+    @media (max-width:1024px) {
+      #section1 .price-image { display: none !important; }
+      #section1 .gold-content { justify-content: center; }
+    }
+    @media (max-width:768px) {
+      #section1 .price-image { display: none !important; }
+      #section1 .gold-content { justify-content: center; flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
   <nav id="navbar">
@@ -17,11 +76,11 @@
         <span></span><span></span><span></span>
       </div>
       <ul class="nav-links">
-        <li><a href="#section1">섹션 1</a></li>
-        <li><a href="#section2">섹션 2</a></li>
-        <li><a href="#section3">섹션 3</a></li>
-        <li><a href="#section4">섹션 4</a></li>
-        <li><a href="#section5">섹션 5</a></li>
+        <li><a href="#section1">소개</a></li>
+        <li><a href="#section2">진행</a></li>
+        <li><a href="#section3">영상</a></li>
+        <li><a href="#section4">이력</a></li>
+        <li><a href="#section5">문의</a></li>
       </ul>
     </div>
     <div id="scroll-progress"></div>
@@ -31,16 +90,16 @@
 
   <div class="fixed-social-icons">
     <a href="#" class="social-icon">
-      <img src="img/카카오톡 문의.png" alt="카카오톡 상담" class="kakao-static">
-      <img src="img/카카오톡 문의2.gif" alt="카카오톡 상담" class="kakao-hover">
+      <img src="img/카카오톡 문의.png" class="kakao-static" alt="카카오톡 상담">
+      <img src="img/카카오톡 문의2.gif" class="kakao-hover" alt="카카오톡 상담">
     </a>
   </div>
 
   <main>
+
+    <!-- Section1 -->
     <section id="section1" class="section">
       <div class="content">
-
-        <!-- 훅 문구 -->
         <h2 class="hook">
           <span class="line line1">“금은 결국 오른다.”</span>
           <span class="line line2">“다만, 합리적 금액에 살 수 있는 순간은 짧다.”</span>
@@ -49,12 +108,9 @@
           <span class="shine-bar" aria-hidden="true"></span>
         </h2>
 
-        <!-- 오늘의 금 시세 박스 -->
         <div class="price-box gold-box" id="priceBox">
           <div class="gold-content">
-            <!-- 좌측 이미지 -->
-            <img src="img/gold-bar.jpg" alt="골드바 이미지" class="price-image">
-            <!-- 우측 텍스트 -->
+            <img src="img/gold-bar.jpg" class="price-image" alt="골드바 이미지">
             <div class="gold-text">
               <h2 class="price-title">오늘의 금 시세 (3.75g)</h2>
               <div id="mainPrice" class="main-price">로딩중…</div>
@@ -63,16 +119,18 @@
           </div>
         </div>
 
-        <!-- 공급 가격 박스 -->
         <div class="price-box supply-box">
           <h2 class="price-title supply">공급 가격 (3.75g)</h2>
           <div class="main-price supply-price">520,000원</div>
+          <div class="supply-footer">
+            <span class="change-line">–</span>
+            <span class="compare-note">[현 시세 기준과 비교]</span>
+          </div>
         </div>
-
       </div>
     </section>
 
-    <!-- 이하 기존 섹션 동일 -->
+    <!-- Section2: 진행 -->
     <section id="section2" class="section">
       <div class="content">
         <div class="story-content">
@@ -92,9 +150,15 @@
             </div>
           </div>
         </div>
+
+        <!-- 연속 스크롤 사진 캐러셀 -->
+        <div class="carousel-wrapper">
+          <div class="carousel-track" id="carousel-track"></div>
+        </div>
       </div>
     </section>
 
+    <!-- Section3 -->
     <section id="section3" class="section">
       <div class="content">
         <div class="process-content">
@@ -117,6 +181,7 @@
       </div>
     </section>
 
+    <!-- Section4 -->
     <section id="section4" class="section">
       <div class="content">
         <div class="achievement-content">
@@ -142,6 +207,7 @@
       </div>
     </section>
 
+    <!-- Section5 -->
     <section id="section5" class="section">
       <div class="content center">
         <h2>지금 바로 문의하세요</h2>
@@ -152,6 +218,7 @@
         </div>
       </div>
     </section>
+
   </main>
 
   <footer class="company-info">
@@ -183,79 +250,134 @@
 
   <script src="hover-gif.js"></script>
   <script>
+    // 메뉴 토글
     const menuBtn = document.querySelector('.menu-btn');
     const navLinks = document.querySelector('.nav-links');
     menuBtn.addEventListener('click', () => {
       menuBtn.classList.toggle('active');
       navLinks.classList.toggle('active');
     });
-
-    document.querySelectorAll('a[href^="#"]').forEach(a=>{
-      a.addEventListener('click', e=>{
-        const t=document.querySelector(a.getAttribute('href'));
-        if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); }
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) {
+          e.preventDefault();
+          t.scrollIntoView({ behavior:'smooth', block:'start' });
+        }
       });
     });
-
-    document.querySelectorAll('.nav-links a').forEach(l=>{
-      l.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-links a').forEach(l => {
+      l.addEventListener('click', () => {
         menuBtn.classList.remove('active');
         navLinks.classList.remove('active');
       });
     });
 
-    document.getElementById('scrollToTop').addEventListener('click', ()=>{
+    // 스크롤탑
+    document.getElementById('scrollToTop').addEventListener('click', () => {
       window.scrollTo({ top:0, behavior:'smooth' });
     });
 
-    // 금 시세 API
-    const API_URL = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
-    const CACHE_KEY = 'gold_price_cache_v2';
-    const fmt = n=>Number(n).toLocaleString('ko-KR');
+    // 스크롤 진행률
+    const bar = document.getElementById('scroll-progress');
+    function updateBar() {
+      const s = window.pageYOffset||document.documentElement.scrollTop;
+      const dh = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = dh ? (s/dh*100)+'%' : '0%';
+    }
+    window.addEventListener('scroll', updateBar);
+    window.addEventListener('resize', updateBar);
+    document.addEventListener('DOMContentLoaded', updateBar);
 
-    function getCache(){ try{ return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch{ return null; } }
-    function setCache(d){ try{ localStorage.setItem(CACHE_KEY,JSON.stringify(d)); } catch{} }
+    // 금 시세 API & 렌더링
+    const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
+    const CACHE_KEY = 'gold_price_cache_v3';
+    const fmt = n => Number(n).toLocaleString('ko-KR');
 
-    function renderPrice(d){
-      const p = document.getElementById('mainPrice'),
-            c = document.getElementById('priceChange');
-      if(!d||!d.price){
-        p.textContent='–';
-        c.textContent='';
-        c.className='change-line';
-        return;
+    function getCache() {
+      try { return JSON.parse(localStorage.getItem(CACHE_KEY)); }
+      catch { return null; }
+    }
+    function setCache(d) {
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); }
+      catch {}
+    }
+    function renderPrice(data) {
+      const priceEl  = document.getElementById('mainPrice');
+      const changeEl = document.getElementById('priceChange');
+      const supplyEl = document.querySelector('.supply-price');
+      const supplyCh = document.querySelector('.supply-footer .change-line');
+
+      // 시장 시세
+      if (!data || !data.price) {
+        priceEl.textContent = '–';
+        changeEl.textContent = '';
+        changeEl.className = 'change-line';
+      } else {
+        priceEl.textContent = fmt(data.price) + '원';
+        const arrow = data.trend==='up' ? '▲' : data.trend==='down' ? '▼' : '';
+        const pct   = data.percent || '';
+        const chg   = data.change ? fmt(data.change)+'원' : '';
+        changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
+        changeEl.className = 'change-line' + (data.trend==='up'? ' up': data.trend==='down'? ' down':'');
       }
-      p.textContent=fmt(d.price)+'원';
-      const arr = d.trend==='up'?'▲':d.trend==='down'?'▼':'';
-      const pct = d.percent||'';
-      const chg = d.change?fmt(d.change)+'원':'';
-      c.textContent=`${arr} ${pct} ${chg}`.trim();
-      c.className='change-line'+(d.trend==='up'?' up':d.trend==='down'?' down':'');
+
+      // 공급 대비 절감률 계산
+      if (supplyEl && supplyCh && data && data.price) {
+        const supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g,''));
+        if (supplyVal>0) {
+          const rate   = (data.price - supplyVal)/data.price*100;
+          const sign   = rate>0? '▼': rate<0? '▲':'';
+          const absPct = Math.abs(rate).toFixed(2) + '%';
+          supplyCh.textContent = `${sign} ${absPct}`;
+          supplyCh.className = 'change-line down';
+        } else {
+          supplyCh.textContent = '–';
+          supplyCh.className = 'change-line';
+        }
+      }
     }
 
-    async function loadGold(){
-      const cache=getCache(); if(cache) renderPrice(cache);
-      try{
-        const d = await fetch(API_URL,{cache:'no-store'}).then(r=>r.json());
-        if(!d.price) throw 0;
+    async function loadGoldPrice() {
+      const cache = getCache();
+      if (cache) renderPrice(cache);
+      try {
+        const d = await fetch(API_URL, { cache:'no-store' }).then(r=>r.json());
+        if (!d.price) throw 0;
         renderPrice(d);
         setCache(d);
-      }catch{
-        if(!cache) renderPrice(null);
+      } catch {
+        if (!cache) renderPrice(null);
       }
     }
-    document.addEventListener('DOMContentLoaded', loadGold);
+    document.addEventListener('DOMContentLoaded', loadGoldPrice);
 
-    // 스크롤 진행률
-    const bar=document.getElementById('scroll-progress');
-    function upd(){
-      const s=window.pageYOffset||document.documentElement.scrollTop;
-      const dh=document.documentElement.scrollHeight-window.innerHeight;
-      bar.style.width = dh? (s/dh*100)+'%':'0%';
-    }
-    window.addEventListener('scroll',upd);
-    window.addEventListener('resize',upd);
-    document.addEventListener('DOMContentLoaded',upd);
+    // Section2 캐러셀 이미지 자동 생성 + 무한 루프 복제 with fallbacks
+    document.addEventListener('DOMContentLoaded', function(){
+      const track = document.getElementById('carousel-track');
+      for(let i=1; i<=20; i++){
+        const item = document.createElement('div');
+        item.className = 'carousel-item';
+        const img = document.createElement('img');
+        img.src = `img/section-${i}.jpg`;
+        img.onerror = () => {
+          img.onerror = null;
+          img.src = `img/section-${i}.png`;
+          img.onerror = () => {
+            img.onerror = null;
+            img.src = `img/section-${i}.avif`;
+          };
+        };
+        img.alt = `section-${i}`;
+        const cap = document.createElement('p');
+        cap.textContent = `설명 ${i}`;
+        item.append(img, cap);
+        track.append(item);
+      }
+      // 무한 루프를 위해 복제
+      track.innerHTML += track.innerHTML;
+    });
   </script>
+
 </body>
 </html>
