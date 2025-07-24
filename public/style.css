@@ -305,3 +305,16 @@ body,.section,.section .content{background-color:#000000;}
     margin-bottom: 16px;
   }
 }
+/* 태블릿 이하에서 골드바 이미지 숨기기 */
+@media (max-width: 1024px) {
+  .price-image-wrap {
+    display: none;
+  }
+}
+
+/* 모바일 이하에서 골드바 이미지 숨기기 */
+@media (max-width: 768px) {
+  .price-image-wrap {
+    display: none;
+  }
+}
