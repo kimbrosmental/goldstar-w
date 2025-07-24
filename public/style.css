@@ -99,7 +99,8 @@ body,.section,.section .content{background-color:#000000;}
 /* ===== 금 시세 / 공급 가격 박스 ===== */
 .price-box {
   width: 100%;
-  max-width: 800px;    /* 이전 크기로 복원 */
+  /* 기존 max-width: 300px; 에서 보다 넉넉하게 늘립니다 */
+  max-width: 800px;
   margin: 32px auto 0;
   padding: 26px 32px;
   border-radius: 12px;
@@ -305,16 +306,32 @@ body,.section,.section .content{background-color:#000000;}
     margin-bottom: 16px;
   }
 }
-/* 태블릿 이하에서 골드바 이미지 숨기기 */
+/* ===== 반응형에서 골드바 이미지 숨기고 가격 박스만 가운데 정렬 ===== */
 @media (max-width: 1024px) {
+  /* 이미지 래퍼 통째로 감추기 */
   .price-image-wrap {
-    display: none;
+    display: none !important;
+  }
+  /* 가격 박스 전체를 가운데로 */
+  .price-section {
+    justify-content: center !important;
+  }
+  /* 박스들 사이 간격 조절 (선택) */
+  .price-box-wrap {
+    gap: 24px;
   }
 }
 
-/* 모바일 이하에서 골드바 이미지 숨기기 */
 @media (max-width: 768px) {
   .price-image-wrap {
-    display: none;
+    display: none !important;
+  }
+  .price-section {
+    justify-content: center !important;
+    flex-direction: column;  /* 세로 스택, 필요하면 제거하세요 */
+  }
+  .price-box-wrap {
+    gap: 16px;
   }
 }
+
