@@ -433,10 +433,40 @@ body,.section,.section .content{background-color:#000000;}
   padding: 20px 0;
 }
 .slide {
-  min-width: 300px;
+  min-height: 500px;
+  min-width: 500px;
   margin-right: 30px;
   flex-shrink: 0;
 }
 .slide p {
   font-size: 14px;
+}
+
+/* Section5 텍스트 조절 */
+.section5-title {
+  font-family: 'Segoe UI', sans-serif;  /* 폰트 패밀리 */
+  font-size: 36px;                      /* 제목 크기 */
+  font-weight: 700;                     /* 제목 두께 */
+  margin-bottom: 16px;
+}
+.section5-text {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 18px;                      /* 본문 크기 */
+  font-weight: 400;                     /* 본문 두께 */
+  margin-bottom: 24px;
+}
+
+/* Footer 텍스트 조절 */
+.company-info .info-section h3 {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 16px;                      /* 섹션 제목 크기 */
+  font-weight: 600;                     /* 섹션 제목 두께 */
+  margin-bottom: 8px;
+}
+.company-info .info-section p {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;                      /* 섹션 본문 크기 */
+  font-weight: 400;                     /* 섹션 본문 두께 */
+  line-height: 1.5;
+  margin: 2px 0;
 }

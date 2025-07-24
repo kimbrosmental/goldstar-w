@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>회사 홈페이지</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
     /* ---------------- Section2 레이아웃 조정 ---------------- */
     #section2 .content {
@@ -30,17 +30,18 @@
     .carousel-track {
       display: flex;
       gap: 20px;
-      animation: scroll 80s linear infinite;
+      /* ↓ 속도 조절: 5s → 원하는 값으로 변경 */
+      animation: scroll 30s linear infinite;
     }
     .carousel-item {
       flex: 0 0 auto;
-      width: 300px;
-      max-width: 300px;
+      width: 500px;
+      max-width: 500px;
     }
     .carousel-item img {
       width: 100%;
       height: auto;
-      max-height: 300px;
+      max-height: 500px;
       object-fit: contain;
       display: block;
     }
@@ -51,8 +52,8 @@
       font-size: 16px;
     }
     @keyframes scroll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-4660px); } /* 500×9 + 20×8 */
     }
 
     /* ---- Section1 gold-bar 이미지 반응형 숨김 ---- */
@@ -67,6 +68,7 @@
   </style>
 </head>
 <body>
+
   <nav id="navbar">
     <div class="container">
       <div class="logo">
@@ -87,7 +89,6 @@
   </nav>
 
   <button id="scrollToTop"><i class="fas fa-arrow-up"></i></button>
-
   <div class="fixed-social-icons">
     <a href="#" class="social-icon">
       <img src="img/카카오톡 문의.png" class="kakao-static" alt="카카오톡 상담">
@@ -96,7 +97,6 @@
   </div>
 
   <main>
-
     <!-- Section1 -->
     <section id="section1" class="section">
       <div class="content">
@@ -107,7 +107,6 @@
           <span class="line line4"><strong>준비되셨나요?</strong></span>
           <span class="shine-bar" aria-hidden="true"></span>
         </h2>
-
         <div class="price-box gold-box" id="priceBox">
           <div class="gold-content">
             <img src="img/gold-bar.jpg" class="price-image" alt="골드바 이미지">
@@ -118,7 +117,6 @@
             </div>
           </div>
         </div>
-
         <div class="price-box supply-box">
           <h2 class="price-title supply">공급 가격 (3.75g)</h2>
           <div class="main-price supply-price">520,000원</div>
@@ -136,22 +134,11 @@
         <div class="story-content">
           <h2>검은 대륙의 금맥</h2>
           <div class="story-grid">
-            <div class="story-item">
-              <h3>3,200톤</h3>
-              <p>2023년 우간다 금 매장량 발견</p>
-            </div>
-            <div class="story-item">
-              <h3>글로벌 주목</h3>
-              <p>CNN, BBC 등 해외 언론 집중 보도</p>
-            </div>
-            <div class="story-item">
-              <h3>독점 계약</h3>
-              <p>중국 광산업체들과 채굴 독점 계약 체결</p>
-            </div>
+            <div class="story-item"><h3>3,200톤</h3><p>2023년 우간다 금 매장량 발견</p></div>
+            <div class="story-item"><h3>글로벌 주목</h3><p>CNN, BBC 등 해외 언론 집중 보도</p></div>
+            <div class="story-item"><h3>독점 계약</h3><p>중국 광산업체들과 채굴 독점 계약 체결</p></div>
           </div>
         </div>
-
-        <!-- 연속 스크롤 사진 캐러셀 -->
         <div class="carousel-wrapper">
           <div class="carousel-track" id="carousel-track"></div>
         </div>
@@ -164,18 +151,9 @@
         <div class="process-content">
           <h2>유통 구조의 혁신</h2>
           <div class="process-flow">
-            <div class="process-step">
-              <img src="img/mining.jpg" alt="채굴">
-              <p>우간다 금 매장지</p>
-            </div>
-            <div class="process-step">
-              <img src="img/transport.jpg" alt="운송">
-              <p>실시간 금 운송/수입</p>
-            </div>
-            <div class="process-step">
-              <img src="img/delivery.jpg" alt="공급">
-              <p>플랫폼 회원 공동 공급</p>
-            </div>
+            <div class="process-step"><img src="img/mining.jpg" alt="채굴"><p>우간다 금 매장지</p></div>
+            <div class="process-step"><img src="img/transport.jpg" alt="운송"><p>실시간 금 운송/수입</p></div>
+            <div class="process-step"><img src="img/delivery.jpg" alt="공급"><p>플랫폼 회원 공동 공급</p></div>
           </div>
         </div>
       </div>
@@ -187,22 +165,11 @@
         <div class="achievement-content">
           <h2>실제 공급 성과</h2>
           <div class="achievement-grid">
-            <div class="achievement-item">
-              <h3>192kg</h3>
-              <p>총 공급 완료량</p>
-            </div>
-            <div class="achievement-item">
-              <h3>13.4%</h3>
-              <p>시세 대비 평균 할인율</p>
-            </div>
-            <div class="achievement-item">
-              <h3>1,982명</h3>
-              <p>누적 참여 회원</p>
-            </div>
+            <div class="achievement-item"><h3>192kg</h3><p>총 공급 완료량</p></div>
+            <div class="achievement-item"><h3>13.4%</h3><p>시세 대비 평균 할인율</p></div>
+            <div class="achievement-item"><h3>1,982명</h3><p>누적 참여 회원</p></div>
           </div>
-          <div class="testimonials">
-            <img src="img/gold-delivery.jpg" alt="실제 금괴 배송">
-          </div>
+          <div class="testimonials"><img src="img/gold-delivery.jpg" alt="실제 금괴 배송"></div>
         </div>
       </div>
     </section>
@@ -218,7 +185,6 @@
         </div>
       </div>
     </section>
-
   </main>
 
   <footer class="company-info">
@@ -281,7 +247,7 @@
     // 스크롤 진행률
     const bar = document.getElementById('scroll-progress');
     function updateBar() {
-      const s = window.pageYOffset||document.documentElement.scrollTop;
+      const s = window.pageYOffset || document.documentElement.scrollTop;
       const dh = document.documentElement.scrollHeight - window.innerHeight;
       bar.style.width = dh ? (s/dh*100)+'%' : '0%';
     }
@@ -293,7 +259,6 @@
     const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
     const CACHE_KEY = 'gold_price_cache_v3';
     const fmt = n => Number(n).toLocaleString('ko-KR');
-
     function getCache() {
       try { return JSON.parse(localStorage.getItem(CACHE_KEY)); }
       catch { return null; }
@@ -307,8 +272,6 @@
       const changeEl = document.getElementById('priceChange');
       const supplyEl = document.querySelector('.supply-price');
       const supplyCh = document.querySelector('.supply-footer .change-line');
-
-      // 시장 시세
       if (!data || !data.price) {
         priceEl.textContent = '–';
         changeEl.textContent = '';
@@ -321,13 +284,11 @@
         changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
         changeEl.className = 'change-line' + (data.trend==='up'? ' up': data.trend==='down'? ' down':'');
       }
-
-      // 공급 대비 절감률 계산
       if (supplyEl && supplyCh && data && data.price) {
         const supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g,''));
         if (supplyVal>0) {
           const rate   = (data.price - supplyVal)/data.price*100;
-          const sign   = rate>0? '▼': rate<0? '▲':'';
+          const sign   = rate>0? '▼': '▲';
           const absPct = Math.abs(rate).toFixed(2) + '%';
           supplyCh.textContent = `${sign} ${absPct}`;
           supplyCh.className = 'change-line down';
@@ -337,7 +298,6 @@
         }
       }
     }
-
     async function loadGoldPrice() {
       const cache = getCache();
       if (cache) renderPrice(cache);
@@ -352,22 +312,15 @@
     }
     document.addEventListener('DOMContentLoaded', loadGoldPrice);
 
-    // Section2 캐러셀 이미지 자동 생성 + 무한 루프 복제 with fallbacks
-    document.addEventListener('DOMContentLoaded', function(){
+    // 섹션2 캐러셀 자동 생성
+    document.addEventListener('DOMContentLoaded', ()=>{
       const track = document.getElementById('carousel-track');
-      for(let i=1; i<=20; i++){
+      const totalImages = 9; // ← 실제 이미지 개수로 변경
+      for(let i=1; i<= totalImages; i++){
         const item = document.createElement('div');
         item.className = 'carousel-item';
         const img = document.createElement('img');
         img.src = `img/section-${i}.jpg`;
-        img.onerror = () => {
-          img.onerror = null;
-          img.src = `img/section-${i}.png`;
-          img.onerror = () => {
-            img.onerror = null;
-            img.src = `img/section-${i}.avif`;
-          };
-        };
         img.alt = `section-${i}`;
         const cap = document.createElement('p');
         cap.textContent = `설명 ${i}`;
@@ -378,6 +331,5 @@
       track.innerHTML += track.innerHTML;
     });
   </script>
-
 </body>
 </html>
