@@ -3,16 +3,21 @@
 body,.section,.section .content{background-color:#000000;}
 
 /* 네비게이션 */
-#navbar{height:80px;background-color:#003D33;position:fixed;width:100%;top:0;z-index:1000;}
-#navbar .container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;height:100%;padding:0 20px;}
+#navbar{height:80px;background-color:#003D33;position:fixed;width:100%;top:0;z-index:1000;transition:transform .55s ease, opacity .55s ease;}
+#navbar.nav-hidden{transform:translateY(-40px);opacity:0;pointer-events:none;}
+#navbar .container{max-width:1200px;margin:0 auto;display:flex;justify-content:flex-start;align-items:center;height:100%;padding:0 20px;gap:40px;}
 .logo{display:flex;align-items:center;font-size:36px;color:#fff;text-shadow:0 0 10px rgba(255,255,255,.6);animation:glowLuxury 2s ease-in-out infinite alternate;}
 .logo img{width:200px;height:75px;object-fit:contain;}
 @keyframes glowLuxury{
   from{text-shadow:0 0 5px rgba(255,255,255,.6),0 0 10px rgba(255,255,255,.4),0 0 15px rgba(255,255,255,.2);}
   to{text-shadow:0 0 10px rgba(255,255,255,.8),0 0 20px rgba(255,255,255,.6),0 0 30px rgba(255,255,255,.4);}
 }
-.nav-links{display:flex;gap:30px;list-style:none;}
+.nav-links{display:flex;gap:30px;list-style:none;margin-left:0;}
 .nav-links a{color:#fff;text-decoration:none;font-size:24px;}
+/* 우측 툴 (언어선택, 모바일 메뉴버튼) */
+.right-tools{margin-left:auto;display:flex;align-items:center;gap:16px;}
+.lang-select{background:#004D40;color:#fff;border:1px solid #00695C;padding:6px 10px;border-radius:6px;font-size:14px;cursor:pointer;}
+.lang-select:focus{outline:2px solid #FFD700;}
 
 /* 섹션 */
 .section{width:100%;display:flex;justify-content:center;height:1000px;}
@@ -93,6 +98,7 @@ body,.section,.section .content{background-color:#000000;}
   #scrollToTop{right:10px;bottom:20px;}
   html{scroll-padding-top:70px;}
   .logo img{width:140px;}
+  .right-tools{margin-left:auto;}
 }
 
 
@@ -470,4 +476,13 @@ body,.section,.section .content{background-color:#000000;}
   font-weight: 400;                     /* 섹션 본문 두께 */
   line-height: 1.5;
   margin: 2px 0;
+}
+/* 섹션1: 시세 변동(up/down)과 비교 노트를 인라인으로 붙여 배치 */
+.gold-text .change-line,
+.gold-text .compare-note {
+  display: inline-block;
+  vertical-align: middle;
+}
+.gold-text .compare-note {
+  margin-left: 8px; /* 시세변동 끝과 비교 노트 사이 간격 */
 }
