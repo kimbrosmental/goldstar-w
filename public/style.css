@@ -1,0 +1,581 @@
+/* ------------------ 기본 설정 ------------------ */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body,.section,.section .content{background-color:#000000;}
+
+/* 네비게이션 */
+#navbar{height:80px;background-color:#003D33;position:fixed;width:100%;top:0;z-index:1000;transition:transform .55s ease, opacity .55s ease;}
+#navbar.nav-hidden{transform:translateY(-40px);opacity:0;pointer-events:none;}
+#navbar .container{max-width:1200px;margin:0 auto;display:flex;align-items:center;height:100%;padding:0 20px;gap:20px;}
+.nav-center{flex:1;display:flex;justify-content:center;}
+.logo{display:flex;align-items:center;font-size:36px;color:#fff;text-shadow:0 0 10px rgba(255,255,255,.6);animation:glowLuxury 2s ease-in-out infinite alternate;}
+.logo img{width:200px;height:75px;object-fit:contain;}
+@keyframes glowLuxury{
+  from{text-shadow:0 0 5px rgba(255,255,255,.6),0 0 10px rgba(255,255,255,.4),0 0 15px rgba(255,255,255,.2);}
+  to{text-shadow:0 0 10px rgba(255,255,255,.8),0 0 20px rgba(255,255,255,.6),0 0 30px rgba(255,255,255,.4);}
+}
+.nav-links{display:flex;gap:30px;list-style:none;margin:0;}
+.nav-links a{color:#fff;text-decoration:none;font-size:24px;}
+/* 우측 툴 (언어선택, 모바일 메뉴버튼) */
+.nav-right{display:flex;align-items:center;gap:14px;}
+.lang-select{background:#004D40;color:#fff;border:1px solid #00695C;padding:6px 10px;border-radius:6px;font-size:14px;cursor:pointer;}
+.lang-select:focus{outline:2px solid #FFD700;}
+.user-area .user-link{color:#fff;font-size:16px;text-decoration:none;padding:4px 10px;border:1px solid transparent;border-radius:6px;transition:.3s;background:#004D40;}
+.user-area .user-link:hover{border-color:#FFD700;color:#FFD700;}
+
+/* 섹션 */
+.section{width:100%;display:flex;justify-content:center;height:1000px;}
+.section .content{width:100%;max-width:1200px;height:900px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;position:relative;}
+.section h2{text-align:center;color:#FFD700;font-size:30px;margin-bottom:34px;}
+.section p{font-size:24px;line-height:1.6;margin:20px 0;color:#fff;}
+
+/* Hero 이미지 제거 */
+.hero-image{display:none;}
+
+/* 그리드 */
+.story-grid,.achievement-grid,.process-flow{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;width:100%;max-width:1000px;margin:0 auto;}
+.story-item,.achievement-item{text-align:center;padding:30px;background:rgba(255,215,0,.1);border-radius:10px;}
+.story-item h3,.achievement-item h3{font-size:36px;color:#FFD700;margin-bottom:15px;}
+.process-step{text-align:center;}
+.process-step img{width:200px;height:200px;border-radius:50%;object-fit:cover;margin-bottom:20px;}
+
+/* 문의 버튼 */
+.contact-buttons{display:flex;gap:60px;justify-content:center;}
+.contact-buttons img{width:300px;height:200px;object-fit:contain;}
+
+/* 고정 아이콘 */
+.fixed-social-icons{position:fixed;left:calc((100% - 1200px)/2 + 20px);top:100px;z-index:999;}
+.social-icon{display:block;width:200px;height:75px;position:relative;}
+.kakao-static,.kakao-hover{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;}
+.kakao-static{opacity:1;}
+.kakao-hover{opacity:0;pointer-events:none;}
+.social-icon.playing .kakao-static{opacity:0;}
+.social-icon.playing .kakao-hover{opacity:1;animation:playFullGif 5.5s forwards;}
+@keyframes playFullGif{0%,100%{opacity:1;}}
+
+/* scroll top */
+#scrollToTop{position:fixed;right:calc((100% - 1200px)/2 + 20px);bottom:30px;width:50px;height:50px;background:#003D33;border:2px solid #003D33;border-radius:50%;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:999;transition:.3s;animation:glowButton 1.5s ease-in-out infinite alternate;}
+#scrollToTop:hover{background:#004D40;border-color:#004D40;}
+@keyframes glowButton{
+  from{box-shadow:0 0 5px #003D33,0 0 10px #003D33,0 0 15px #003D33;}
+  to{box-shadow:0 0 10px #004D40,0 0 20px #004D40,0 0 30px #004D40;}
+}
+
+/* footer */
+.company-info{width:100%;height:200px;background:#333;display:flex;align-items:center;justify-content:center;padding:0;margin:0;}
+.info-content{width:100%;max-width:1200px;margin:0 auto;padding:0 40px;}
+.company-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin:0 auto;}
+.info-section h3{font-size:12px;color:#fff;margin-bottom:8px;font-weight:600;}
+.info-section p{font-size:11px;line-height:1.3;color:#ccc;margin:3px 0;}
+
+/* 반응형 */
+@media screen and (max-width:1024px){
+  .nav-links{gap:20px;}
+  .nav-links a{font-size:18px;}
+  .logo img{width:160px;}
+  .logo{font-size:28px;}
+  .section,.section .content{height:auto;padding:60px 20px;}
+  .story-grid,.achievement-grid,.process-flow{grid-template-columns:1fr 1fr;gap:20px;}
+  .process-step img{width:160px;height:160px;}
+  #section5 .contact-buttons{flex-direction:column;gap:20px;align-items:center;}
+  #section5 .contact-buttons img{width:240px;}
+  .fixed-social-icons{left:10px;top:80px;}
+  .company-info-grid{grid-template-columns:1fr 1fr;}
+  #scrollToTop{right:20px;bottom:20px;}
+}
+
+@media screen and (max-width:768px){
+  #navbar{height:70px;}
+  .nav-links{position:fixed;top:70px;left:-100%;width:100%;height:calc(100vh - 70px);background:#333;flex-direction:column;align-items:center;padding:20px 0;transition:.3s;z-index:1000;}
+  .nav-links.active{left:0;}
+  .menu-btn{display:flex;flex-direction:column;cursor:pointer;padding:10px;gap:5px;}
+  .menu-btn span{display:block;width:25px;height:3px;background:#fff;}
+  .story-grid,.achievement-grid,.process-flow{grid-template-columns:1fr;}
+  .process-step img{width:120px;height:120px;}
+  .section p{font-size:16px;}
+  .contact-buttons img{width:200px;}
+  .company-info{height:auto;padding:30px 20px;}
+  .company-info-grid{grid-template-columns:1fr;text-align:center;}
+  .info-section h3{font-size:13px;}
+  .info-section p{font-size:12px;}
+  .fixed-social-icons{left:10px;top:auto;bottom:80px;}
+  #scrollToTop{right:10px;bottom:20px;}
+  html{scroll-padding-top:70px;}
+  .logo img{width:140px;}
+  .nav-center{justify-content:flex-start;}
+  .nav-right{margin-left:auto;}
+}
+
+
+/* ===== 금 시세 / 공급 가격 박스 ===== */
+.price-box {
+  width: 100%;
+  /* 기존 max-width: 300px; 에서 보다 넉넉하게 늘립니다 */
+  max-width: 800px;
+  margin: 24px auto 0;
+  padding: 22px 28px;
+  border-radius: 12px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* 오늘의 금 시세 박스에만 이미지 + 텍스트 flex 레이아웃 */
+.gold-box .gold-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.price-image {
+  width: 100px;        /* 적당한 크기로 조절 */
+  height: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.gold-text {
+  text-align: left;    /* 이미지 옆 텍스트는 좌측 정렬 */
+}
+
+/* 나머지 금 시세 / 공급 가격 스타일은 기존 그대로 */
+.price-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.main-price {
+  font-size: 52px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  color: #fff;
+}
+.change-line {
+  margin-top: 12px;
+  font-size: 26px;
+  font-weight: 600;
+  text-align: left;
+}
+.change-line.up { color: #ff5252; }
+.change-line.down { color: #4fc3f7; }
+
+/* 골드 톤 박스 */
+.gold-box {
+  border: 1px solid rgba(255,215,0,0.3);
+  background: rgba(255,215,0,0.05);
+  color: #fff;
+}
+.gold-box .price-title { color: #FFD700; }
+
+/* 공급 박스 */
+.supply-box {
+  border: 1px solid rgba(80,150,255,0.4);
+  background: rgba(80,150,255,0.08);
+  color: #fff;
+}
+.supply-box .price-title.supply { color: #4fc3f7; }
+.supply-price { color: #e0f7ff; }
+
+
+/* ===== 훅 문구 ===== */
+.hook{
+  margin:60px auto 0;
+  max-width:900px;
+  text-align:center;
+  line-height:1.4;
+  font-size:34px;
+  font-weight:700;
+  color:#ffffff;
+}
+.hook .line{
+  display:block;
+  position:relative;
+  margin:6px 0;
+  animation:fadeUp 1s ease both, shine 3s linear infinite;
+  background:linear-gradient(90deg,#FFD700 0%, #ffae00 40%, #ffffff 60%, #FFD700 100%);
+  background-size:200% 100%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  color:transparent;
+  text-shadow:0 0 6px rgba(255,215,0,.15);
+}
+.hook .line2{animation-delay:.3s;}
+.hook .line3{animation-delay:.6s;}
+/* 파란색 & 더 크게 */
+.hook .line4{
+  animation-delay:.9s;
+  background:none;
+  -webkit-background-clip:initial;
+  background-clip:initial;
+  -webkit-text-fill-color:#4fc3f7;
+  color:#4fc3f7;
+  text-shadow:0 0 8px rgba(79,195,247,.3);
+  font-size:44px;
+}
+.hook::before{
+  content:"";
+  display:block;
+  height:2em; /* 두 줄 간격 */
+}
+
+/* 빛나는 금빛 가로줄 */
+.shine-bar{
+  display:block;
+  width:80%;
+  max-width:600px;
+  height:4px;
+  margin:28px auto 0;
+  border-radius:2px;
+  background:linear-gradient(90deg,
+    rgba(255,215,0,.15) 0%,
+    rgba(255,215,0,.35) 20%,
+    rgba(255,255,255,.9) 50%,
+    rgba(255,215,0,.35) 80%,
+    rgba(255,215,0,.15) 100%);
+  background-size:200% 100%;
+  box-shadow:0 0 12px rgba(255,215,0,.6);
+  animation:shineBar 3s linear infinite;
+}
+@keyframes shineBar{
+  0%{background-position:0% 50%;}
+  100%{background-position:200% 50%;}
+}
+
+/* 애니메이션 */
+@keyframes fadeUp{
+  0%{opacity:0;transform:translateY(20px);}
+  100%{opacity:1;transform:translateY(0);}
+}
+@keyframes shine{
+  0%{background-position:0% 50%;}
+  100%{background-position:200% 50%;}
+}
+/* ===== 스크롤 진행률 바 ===== */
+#navbar{ position:fixed; top:0; left:0; width:100%; z-index:1000; /* 기존 그대로 */ }
+#navbar{ position:fixed; top:0; left:0; width:100%; z-index:1000; }
+
+#scroll-progress{
+  position:absolute;
+  left:0;
+  bottom:0;
+  height:4px;
+  width:0;
+  background:linear-gradient(90deg,#FFD700 0%, #ffae00 40%, #ffffff 60%, #FFD700 100%);
+  background-size:200% 100%;
+  box-shadow:0 0 6px rgba(255,215,0,.6);
+  pointer-events:none;
+  transition:width .2s linear;
+  animation:progressShine 3s linear infinite;
+}
+
+@keyframes progressShine{
+  0%{background-position:0% 50%;}
+  100%{background-position:200% 50%;}
+}
+/* ===== 가격 섹션 레이아웃 ===== */
+.price-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* 우측 정렬 */
+  gap: 24px;
+  margin-top: 40px;
+}
+
+/* 좌측 이미지 */
+.price-image-wrap {
+  flex-shrink: 0;
+}
+.price-image {
+  width: 180px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* 우측 박스 감싸기 */
+.price-box-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ——— 박스 너비 조정 (수정) ——— */
+.price-box {
+  max-width: 700px;    /* 기존 300px → 400px */
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* 반응형: 모바일에서는 세로로 쌓기 */
+@media (max-width: 768px) {
+  .price-section {
+    flex-direction: column;
+    align-items: center;
+  }
+  .price-image {
+    margin-bottom: 16px;
+  }
+}
+/* tablet 이하에서 섹션1의 gold-bar 이미지 숨기기 */
+@media (max-width: 1024px) {
+  #section1 .price-image-wrap {
+    display: none !important;
+  }
+  /* 이미지 영역 통째로 없어지면 가격박스만 좌우 중앙 정렬 */
+  #section1 .price-section {
+    justify-content: center !important;
+  }
+}
+
+/* mobile 이하에서도 동일하게 적용 */
+@media (max-width: 768px) {
+  #section1 .price-image-wrap {
+    display: none !important;
+  }
+  #section1 .price-section {
+    justify-content: center !important;
+    flex-direction: column; /* 필요하다면 세로 스택으로 */
+  }
+}
+/* 네비게이션 링크 호버 이펙트 */
+.nav-links a {
+  position: relative;
+  font-weight: 500; /* 기본 굵기 */
+  transition: color 0.3s ease;
+}
+
+.nav-links a::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 0; height: 0;
+  background: radial-gradient(circle, rgba(255,215,0,0.4) 0%, rgba(255,215,0,0) 80%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.5s ease, width 0.5s ease, height 0.5s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.nav-links a:hover {
+  color: #FFD700;
+  font-weight: 700;
+}
+
+.nav-links a:hover::before {
+  width: 240%;    /* 폭 넉넉히 늘려서 빛이 퍼지도록 */
+  height: 240%;
+  transform: translate(-50%, -50%) scale(1);
+}
+/* 태블릿 이하에서 훅 앞 여백 제거 */
+@media (max-width: 1024px) {
+  .hook {
+    margin-top: 0;       /* 위쪽 마진 없애기 */
+  }
+  .hook::before {
+    height: 0;           /* before로 만든 빈 공간 없애기 */
+  }
+}
+
+/* 모바일 이하에서 훅 앞 여백 제거 */
+@media (max-width: 768px) {
+  .hook {
+    margin-top: 0;
+  }
+  .hook::before {
+    height: 0;
+  }
+}
+/* 공급 가격 박스 내 % 차이 & 레이아웃 */
+.supply-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.supply-diff {
+  font-size: 26px;
+  font-weight: 600;
+  text-align: left;
+  color: #4fc3f7; /* 파란 톤 */
+}
+.compare-note {
+  font-size: 12px;
+  color: #cccccc;
+  margin-top: 8px;
+}
+
+/* price-box 최대 너비 복원 */
+.price-box {
+  max-width: 680px;
+}
+
+/* 반응형: 섹션1 gold-bar 숨기기 */
+@media (max-width: 1024px) {
+  #section1 .price-image { display: none; }
+  #section1 .gold-content { justify-content: center; }
+}
+@media (max-width: 768px) {
+  #section1 .price-image { display: none; }
+  #section1 .gold-content { flex-direction: column; }
+}
+/* 공급 가격 하단 퍼센트 영역 */
+.supply-footer {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.supply-footer .change-line {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+.compare-note {
+  font-size: 14px;
+  color: #ccc;
+}
+/* 섹션2: 이미지 캐러셀 */
+#image-slider {
+  display: flex;
+  overflow: hidden;
+  padding: 20px 0;
+}
+.slide {
+  min-height: 500px;
+  min-width: 500px;
+  margin-right: 30px;
+  flex-shrink: 0;
+}
+.slide p {
+  font-size: 14px;
+}
+
+
+/* Section5 텍스트 조절 */
+.section5-title {
+  font-family: 'Segoe UI', sans-serif;  /* 폰트 패밀리 */
+  font-size: 36px;                      /* 제목 크기 */
+  font-weight: 700;                     /* 제목 두께 */
+  margin-bottom: 16px;
+}
+.section5-text {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 18px;                      /* 본문 크기 */
+  font-weight: 400;                     /* 본문 두께 */
+  margin-bottom: 24px;
+}
+
+/* Footer 텍스트 조절 */
+.company-info .info-section h3 {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 16px;                      /* 섹션 제목 크기 */
+  font-weight: 600;                     /* 섹션 제목 두께 */
+  margin-bottom: 8px;
+}
+.company-info .info-section p {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;                      /* 섹션 본문 크기 */
+  font-weight: 400;                     /* 섹션 본문 두께 */
+  line-height: 1.5;
+  margin: 2px 0;
+}
+/* 섹션1: 시세 변동(up/down)과 비교 노트를 인라인으로 붙여 배치 */
+.gold-text .change-line,
+.gold-text .compare-note {
+  display: inline-block;
+  vertical-align: middle;
+}
+.gold-text .compare-note {
+  margin-left: 8px; /* 시세변동 끝과 비교 노트 사이 간격 */
+}
+
+/* ===== 공통 페이지(회원/관리/로그인 등) 반응형 보강 ===== */
+@media (max-width:1024px){
+  .profile-wrapper,.admin-wrap{padding:20px 24px;}
+}
+@media (max-width:768px){
+  .signup-wrapper,.login-wrap,.profile-wrapper,.admin-wrap,.wrap{max-width:100%;width:100%;padding-left:20px;padding-right:20px;}
+  .profile-header{flex-direction:column;align-items:flex-start;gap:16px;}
+  .profile-header .actions{flex-wrap:wrap;}
+  .admin-wrap .flex{flex-wrap:wrap;}
+  .admin-wrap table th,.admin-wrap table td,.orders-table th,.orders-table td{font-size:12px;padding:6px 8px;}
+  .orders-table{font-size:12px;}
+  .nav-links a{font-size:16px;}
+  .hook .line4{font-size:34px;}
+  .main-price{font-size:42px;}
+  .change-line{font-size:20px;}
+}
+@media (max-width:600px){
+  .nav-links a{font-size:15px;}
+  .logo img{width:120px;height:auto;}
+  .signup-wrapper,.login-wrap{padding:32px 18px;}
+  .signup-form input,.login-wrap input{font-size:14px;padding:11px 12px;}
+  .signup-form button,.login-wrap button{padding:13px 16px;font-size:16px;}
+  .username-row input#username{padding-right:100px;}
+  .username-row .btn-dup{width:92px;min-width:92px;font-size:12px;}
+  .profile-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));}
+  .profile-card h2{font-size:20px;}
+  .orders-table{display:block;overflow-x:auto;white-space:nowrap;}
+  .admin-wrap table{display:block;overflow-x:auto;white-space:nowrap;}
+  .admin-wrap h1{font-size:28px;}
+  .wrap h1{font-size:26px;}
+  .hook{font-size:26px;}
+  .hook .line4{font-size:32px;}
+  .main-price{font-size:38px;}
+  .change-line{font-size:18px;}
+  .price-title{font-size:20px;}
+  .contact-buttons{gap:24px;}
+  .contact-buttons img{width:180px;height:130px;}
+  .fixed-social-icons{left:10px;}
+}
+@media (max-width:480px){
+  .nav-right{gap:8px;}
+  .lang-select{padding:4px 8px;font-size:12px;}
+  .user-area .user-link{padding:4px 8px;font-size:12px;}
+  .signup-form button,.login-wrap button{font-size:15px;}
+  .username-row .btn-dup{font-size:11px;}
+  .profile-card{padding:22px 22px;}
+  .hook{font-size:22px;}
+  .hook .line4{font-size:28px;}
+  .main-price{font-size:34px;}
+  .change-line{font-size:16px;}
+  .price-title{font-size:18px;}
+  .company-info-grid{gap:24px;}
+  #scrollToTop{width:42px;height:42px;font-size:18px;}
+}
+
+/* ===== 플로팅 버튼(위로) ===== */
+#floatingButtons{position:fixed;right:calc((100% - 1200px)/2 + 20px);bottom:30px;display:flex;flex-direction:column;gap:10px;z-index:999}
+#floatingButtons button{width:50px;height:50px;background:#003D33;border:2px solid #003D33;border-radius:50%;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.3s;animation:glowButton 1.5s ease-in-out infinite alternate;}
+#floatingButtons button:hover{background:#004D40;border-color:#004D40;}
+#scrollToTop{width:50px;height:50px;}
+@media(max-width:1024px){#floatingButtons{right:20px;bottom:20px;}}
+@media(max-width:768px){#floatingButtons{right:10px;bottom:20px;}}
+
+/* ===== 섹션3: 영상 2행 프레임 ===== */
+.video-row{display:grid;grid-template-columns:1fr 600px;gap:24px;align-items:center;margin:24px 0;width:100%;max-width:1200px}
+.video-row.bottom{grid-template-columns:600px 1fr}
+.video-row .desc{color:#fff;font-size:18px;line-height:1.7}
+.video-row .video-wrap video{width:600px;max-width:100%;height:auto;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#000}
+@media(max-width:1024px){.video-row{grid-template-columns:1fr;}.video-row.bottom{grid-template-columns:1fr}}
+
+/* (테마 라이트 제거) */
+
+/* ===== 섹션3: 영상 2행 프레임 ===== */
+.video-row{display:grid;grid-template-columns:1fr 600px;gap:24px;align-items:center;margin:24px 0;width:100%;max-width:1200px}
+.video-row.bottom{grid-template-columns:600px 1fr}
+.video-row .desc{color:#fff;font-size:18px;line-height:1.7}
+.video-row .video-wrap video{width:600px;max-width:100%;height:auto;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#000}
+@media(max-width:1024px){.video-row{grid-template-columns:1fr;}.video-row.bottom{grid-template-columns:1fr}}
+
+/* ===== 플로팅 버튼(테마/위로) ===== */
+#floatingButtons{position:fixed;right:calc((100% - 1200px)/2 + 20px);bottom:30px;display:flex;flex-direction:column;gap:10px;z-index:999}
+#floatingButtons button{width:50px;height:50px;background:#003D33;border:2px solid #003D33;border-radius:50%;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.3s;animation:glowButton 1.5s ease-in-out infinite alternate;}
+#floatingButtons button:hover{background:#004D40;border-color:#004D40;}
+#scrollToTop{width:50px;height:50px;}
+@media(max-width:1024px){#floatingButtons{right:20px;bottom:20px;}}
+@media(max-width:768px){#floatingButtons{right:10px;bottom:20px;}}
+
+/* (테마 라이트 제거) */

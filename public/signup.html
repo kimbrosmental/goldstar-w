@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>회원가입</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body{padding-top:100px;}
+    .signup-wrapper{max-width:480px;margin:0 auto;background:#102522;padding:40px 36px;border-radius:16px;color:#fff;box-shadow:0 0 20px rgba(0,0,0,.4);}
+    .signup-wrapper h1{font-size:28px;margin-bottom:24px;color:#FFD700;text-align:center;}
+    .signup-form label{display:block;font-size:14px;margin:14px 0 6px;color:#ccc;}
+    .signup-form input{width:100%;padding:12px 14px;border:1px solid #1e4d47;background:#0b1917;color:#fff;border-radius:8px;font-size:15px;}
+    .signup-form input:focus{outline:2px solid #FFD700;}
+    .signup-form button{width:100%;padding:14px 18px;margin-top:26px;background:#00695C;border:none;color:#fff;font-size:17px;font-weight:600;border-radius:10px;cursor:pointer;transition:.3s;}
+    .signup-form button:hover{background:#00897B;}
+    .helper{text-align:center;margin-top:18px;font-size:14px;color:#aaa;}
+    .helper a{color:#4fc3f7;text-decoration:none;}
+    .msg{margin-top:12px;font-size:14px;color:#ff5252;min-height:18px;}
+  /* 아이디 입력칸 전체폭 + 중복검사 버튼 오버레이 */
+  .username-row{position:relative;margin:0;padding:0;}
+  .username-row input#username{width:100%;padding-right:118px;}
+  .username-row .btn-dup{position:absolute;top:2px;right:2px;height:calc(100% - 4px);width:110px;min-width:110px;background:#004d43;font-size:13px;margin:0;padding:0 8px;border-radius:8px;}
+  .username-row .btn-dup:hover{background:#00695C;}
+  </style>
+</head>
+<body>
+  <nav id="navbar">
+    <div class="container">
+  <div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="logo" /></div>
+      <div class="nav-center">
+        <ul class="nav-links">
+          <li><a href="index.html#section1" data-i18n="nav_intro">소개</a></li>
+          <li><a href="index.html#section2" data-i18n="nav_progress">진행</a></li>
+          <li><a href="index.html#section3" data-i18n="nav_video">영상</a></li>
+          <li><a href="index.html#section4" data-i18n="nav_history">이력</a></li>
+          <li><a href="index.html#section5" data-i18n="nav_contact">문의</a></li>
+        </ul>
+      </div>
+      <div class="nav-right">
+        <select id="langSelect" class="lang-select" aria-label="언어 선택">
+          <option value="ko">한국어</option>
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+        </select>
+  <div id="userArea" class="user-area"></div>
+  <a href="index.html" class="home-icon" aria-label="홈" style="display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;"><span style="font-size:30px;color:#FFD700;">🏠</span></a>
+  <div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴" role="button" tabindex="0"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </nav>
+  <main>
+    <div class="signup-wrapper">
+  <h1 data-i18n="page_signup_title">회원가입</h1>
+      <form class="signup-form" id="signupForm">
+        <label for="username" data-i18n="label_username">아이디</label>
+  <div class="username-row">
+          <input type="text" id="username" minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+" data-i18n-ph="placeholder_username" placeholder="영문/숫자/밑줄 3~20자" required style="flex:1;" />
+          <button type="button" id="dupCheckBtn" class="btn-dup" data-i18n="btn_check_duplicate">중복검사</button>
+        </div>
+  <div id="dupMsg" style="font-size:12px;margin-top:4px;min-height:16px;color:#ccc;"></div>
+  <label for="password" data-i18n="label_password">비밀번호</label>
+  <input type="password" id="password" minlength="6" placeholder="6자 이상" required />
+  <label for="password2" data-i18n="label_password_confirm">비밀번호 확인</label>
+  <input type="password" id="password2" minlength="6" placeholder="비밀번호 재입력" required />
+  <label for="name" data-i18n="label_name">이름</label>
+        <input type="text" id="name" required />
+        <label for="birth" data-i18n="label_birth">생년월일 (YYYY-MM-DD)</label>
+        <input type="date" id="birth" required />
+        <label for="phone" data-i18n="label_phone">연락처</label>
+        <input type="tel" id="phone" placeholder="010-1234-5678" pattern="[0-9\-]+" required />
+  <label for="email" data-i18n="label_email">이메일</label>
+  <input type="email" id="email" required />
+        <label for="bank" data-i18n="label_bank">은행</label>
+        <select id="bank" required>
+          <option value="">은행 선택</option>
+          <option>국민은행</option><option>신한은행</option><option>우리은행</option><option>하나은행</option>
+          <option>기업은행</option><option>농협은행</option><option>카카오뱅크</option><option>토스뱅크</option>
+          <option>SC제일은행</option><option>씨티은행</option><option>대구은행</option><option>부산은행</option>
+          <option>경남은행</option><option>광주은행</option><option>전북은행</option><option>제주은행</option>
+          <option>수협은행</option><option>산림조합</option><option>우체국</option><option>새마을금고</option>
+          <option>신협</option><option>케이뱅크</option><option>저축은행</option>
+        </select>
+  <label for="account" data-i18n="label_account">계좌번호</label>
+  <input type="text" id="account" data-i18n-ph="placeholder_account" placeholder="하이픈 없이 숫자" pattern="[0-9]+" required />
+        <div class="msg" id="msg"></div>
+  <button type="submit" data-i18n="btn_signup_submit">가입하기</button>
+      </form>
+  <!-- helper removed as per requirement -->
+    </div>
+  </main>
+  <script src="app.js"></script>
+  <script>
+    // 테마 스타일 적용을 위한 select 커스터마이즈
+    const style = document.createElement('style');
+    style.textContent = '.signup-form select{background:#0b1917;color:#fff;border:1px solid #1e4d47;padding:12px 14px;border-radius:8px;font-size:15px;} .signup-form select:focus{outline:2px solid #FFD700;}';
+    document.head.appendChild(style);
+
+    // 전화번호 하이픈 자동 삽입
+    const phoneInput = document.getElementById('phone');
+    phoneInput.addEventListener('input', ()=>{
+      let v = phoneInput.value.replace(/[^0-9]/g,'');
+      if(v.startsWith('02')){
+        if(v.length>2 && v.length<=5) v=v.replace(/(02)(\d{0,3})/, '$1-$2');
+        else if(v.length>5 && v.length<=9) v=v.replace(/(02)(\d{3,4})(\d{0,4})/,'$1-$2-$3');
+      } else {
+        if(v.length>3 && v.length<=7) v=v.replace(/(\d{3})(\d{0,4})/,'$1-$2');
+        else if(v.length>7) v=v.replace(/(\d{3})(\d{3,4})(\d{0,4})/,'$1-$2-$3');
+      }
+      phoneInput.value=v;
+    });
+
+    function validEmail(val){return /^[\w.!#$%&'*+/=?^`{|}~-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/.test(val);}
+
+    let usernameChecked=false; let lastUsernameValue='';
+    const dupBtn=document.getElementById('dupCheckBtn');
+    const dupMsg=document.getElementById('dupMsg');
+    dupBtn.addEventListener('click',()=>{
+      const val=document.getElementById('username').value.trim();
+      usernameChecked=false; lastUsernameValue='';
+      if(!val){dupMsg.style.color='#ff5252';dupMsg.textContent=GSApp.t('dup_enter_username');return;}
+      if(!/^[a-zA-Z0-9_]{3,20}$/.test(val)){dupMsg.style.color='#ff5252';dupMsg.textContent=GSApp.t('dup_invalid_format');return;}
+      if(window.GSApp.isUsernameTaken(val)){
+        dupMsg.style.color='#ff5252'; dupMsg.textContent=GSApp.t('dup_unavailable');
+      } else {
+        dupMsg.style.color='#4fc3f7'; dupMsg.textContent=GSApp.t('dup_available'); usernameChecked=true; lastUsernameValue=val;
+      }
+    });
+    document.getElementById('username').addEventListener('input',()=>{usernameChecked=false;dupMsg.style.color='#ccc';dupMsg.textContent='중복검사를 실행하세요.';});
+
+    document.getElementById('signupForm').addEventListener('submit', async e=>{
+      e.preventDefault();
+      const username=document.getElementById('username').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const birth = document.getElementById('birth').value;
+      const phone = document.getElementById('phone').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const bank = document.getElementById('bank').value;
+      const account = document.getElementById('account').value.trim();
+      const password = document.getElementById('password').value;
+      const password2 = document.getElementById('password2').value;
+      const msg = document.getElementById('msg');
+      msg.style.color='#ff5252';
+      if(!username || !name || !birth || !phone || !email || !bank || !account || !password || !password2){msg.textContent=GSApp.t('err_required_all');return;}
+      if(!usernameChecked || lastUsernameValue!==username){msg.textContent=GSApp.t('err_need_dup_check');return;}
+      if(password!==password2){msg.textContent=GSApp.t('err_password_mismatch');return;}
+      if(!validEmail(email)){msg.textContent=GSApp.t('err_email_format');return;}
+      try {
+        await window.GSApp.signupUser({username,name,birth,phone,email,bank,account,password});
+        msg.style.color='#4fc3f7';
+        msg.textContent=GSApp.t('signup_success_redirect');
+        setTimeout(()=>{ window.location.href='profile.html'; }, 900);
+      } catch(err){
+        msg.textContent = err.message || '가입 실패';
+      }
+    });
+    document.addEventListener('DOMContentLoaded',()=>{ if(window.GSApp) GSApp.applyLang(); });
+  </script>
+</body>
+</html>

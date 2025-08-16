@@ -1,0 +1,113 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>1:1 문의 관리</title><link rel="stylesheet" href="style.css"/>
+<style>
+  body{padding-top:100px;}
+  .admin-wrap{max-width:100%;margin:0 auto;color:#fff;padding:20px 30px 80px;}
+  h1{font-size:28px;margin-bottom:20px;color:#FFD700;}
+  .tabs{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 12px;}
+  .right-tools{display:flex;gap:8px;align-items:center;margin-left:auto;}
+  .headbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:6px 0 14px;}
+  .btn{background:#00695C;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-size:13px;cursor:pointer;}
+  .btn:hover{background:#00897B;}
+  .btn.active{background:#00897B;box-shadow:0 0 0 2px rgba(255,215,0,.3) inset;}
+  .danger{background:#b71c1c;}
+  .danger:hover{background:#d32f2f;}
+  .row{display:grid;grid-template-columns:320px 1fr;gap:16px;}
+  .panel{background:#0c1a18;border:1px solid #1e4d47;border-radius:12px;padding:12px;}
+  .list{max-height:560px;overflow:auto;}
+  .item{border:1px solid #1e4d47;padding:8px;border-radius:8px;margin-bottom:8px;cursor:pointer;}
+  .item.unread{border-color:#b71c1c;background:rgba(183,28,28,.15);}
+  .thread .bubble{border:1px solid #1e4d47;padding:10px;border-radius:10px;margin:6px 0;}
+  .thread .from-admin{background:#12372f;}
+  .badge{display:inline-block;border-radius:999px;padding:2px 8px;font-size:11px;background:#b71c1c;color:#fff;margin-left:6px;}
+  .controls{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .pill{display:inline-block;padding:2px 6px;border-radius:12px;background:#1e4d47;font-size:11px;margin-left:4px;}
+</style></head><body>
+<nav id="navbar"><div class="container"><div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="logo"/></div><div class="nav-center"><ul class="nav-links"><li><a href="index.html#section1" data-i18n="nav_intro">소개</a></li><li><a href="index.html#section2" data-i18n="nav_progress">진행</a></li><li><a href="index.html#section3" data-i18n="nav_video">영상</a></li><li><a href="index.html#section4" data-i18n="nav_history">이력</a></li><li><a href="index.html#section5" data-i18n="nav_contact">문의</a></li></ul></div><div class="nav-right"><select id="langSelect" class="lang-select" data-i18n-aria="aria_lang_select" aria-label="언어 선택"><option value="ko">한국어</option><option value="zh">中文</option><option value="en">English</option></select><div id="userArea" class="user-area"></div><div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴" role="button" tabindex="0"><span></span><span></span><span></span></div></div></div></nav>
+<main><div class="admin-wrap">
+  <h1>관리자 페이지</h1>
+  <div class="headbar">
+    <div class="tabs" role="tablist" aria-label="Admin Tabs">
+      <button class="btn" id="tabUsers" type="button" role="tab" aria-selected="false" style="min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+        <span>👤</span><span data-i18n="section_users">회원 관리</span>
+      </button>
+      <button class="btn" id="tabOrders" type="button" role="tab" aria-selected="false" style="min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+        <span>🧾</span><span data-i18n="section_orders_admin">주문 관리</span>
+      </button>
+      <button class="btn active" id="tabInquiries" type="button" role="tab" aria-selected="true" style="min-width:160px;display:inline-flex;align-items:center;justify-content:center;gap:8px;position:relative;">
+        <span>💬</span><span data-i18n="section_messages_admin">1:1 문의</span>
+        <span id="newBadge" class="pill" style="display:none;position:absolute;top:-8px;right:-8px;background:#b71c1c;color:#fff;">NEW</span>
+      </button>
+    </div>
+    <div class="right-tools">
+      <button class="btn" id="btnChangePw" data-i18n="btn_change_password">비밀번호 변경</button>
+      <button class="btn danger" id="btnLogout">로그아웃</button>
+      <span id="pwChangeMsg" class="hint"></span>
+    </div>
+  </div>
+  
+  <h2 style="margin:0 0 10px;">1:1 문의 관리</h2>
+  <div id="adminInfo" class="panel" style="margin:0 0 12px;"></div>
+  <div class="controls">
+    <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="onlyUnread"> 새 문의만</label>
+  <button id="btnInqRefresh" class="btn small" style="margin-left:8px;" data-i18n="btn_refresh">새로고침</button>
+    <span id="newCount" class="badge" style="display:none;">0</span>
+  </div>
+  <div class="row">
+    <div class="panel list" id="userList"></div>
+  <div class="panel detail">
+      <div id="thread" class="thread"></div>
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <input id="replyEmail" type="hidden" />
+        <input id="replyTo" type="hidden" />
+        <textarea id="replyContent" placeholder="답변 내용" style="flex:1;min-height:72px;background:#0b1917;color:#fff;border:1px solid #1e4d47;border-radius:8px;padding:8px;"></textarea>
+    <button id="markReadBtn" class="btn" style="min-width:120px;">읽음으로 표시</button>
+    <button id="sendReplyBtn" class="btn" data-i18n="btn_send_reply">답변</button>
+      </div>
+    </div>
+  </div>
+</div></main>
+<script src="app.js"></script><script>
+const menuBtn=document.querySelector('.menu-btn');menuBtn.addEventListener('click',()=>{menuBtn.classList.toggle('active');document.querySelector('.nav-links').classList.toggle('active');});
+function requireAdmin(){const u=GSApp.currentUser();if(!u||u.role!=='admin'){alert('관리자 권한 필요');location.href='login.html';return false;}return true;}
+// Tabs navigation between standalone pages
+document.getElementById('tabUsers').addEventListener('click',e=>{ e.preventDefault(); location.href='admin-users.html'; });
+document.getElementById('tabOrders').addEventListener('click',e=>{ e.preventDefault(); location.href='admin-orders.html'; });
+document.getElementById('tabInquiries').addEventListener('click',e=>{ e.preventDefault(); /* already here */ });
+// Header NEW badge (total unread)
+function updateNewBadge(){ try{ const db=GSApp.getDB(); let unread=0; Object.values(db.users).forEach(u=>{ (u.messages||[]).forEach(m=>{ if(!m.fromAdmin && !m.read) unread++; }); }); const b=document.getElementById('newBadge'); if(b){ b.style.display = unread>0 ? 'inline-block' : 'none'; b.textContent = unread>0? ('NEW '+unread):''; } }catch(_){}}
+function renderAdminInfo(){ const box=document.getElementById('adminInfo'); const a=GSApp.currentUser(); if(!a){ box.innerHTML=''; return;} const online=a.lastSeenAt&&(Date.now()-a.lastSeenAt<5*60*1000); box.innerHTML=`<div><strong>관리자:</strong> ${a.username||''} <span style='color:#9ec9c3'>${a.email}</span> ${online?'<span class="badge" style="background:#2e7d32;">ON</span>':'<span class="badge">OFF</span>'}</div>`; }
+function collect(){const db=GSApp.getDB(); const entries=[]; Object.values(db.users).forEach(u=>{ const msgs=(u.messages||[]).filter(m=>!m.fromAdmin); if(msgs.length) entries.push({email:u.email,username:u.username||'',messages:u.messages}); }); return entries;}
+function unreadCount(){let c=0; const db=GSApp.getDB(); Object.values(db.users).forEach(u=>{ (u.messages||[]).forEach(m=>{ if(!m.fromAdmin && !m.read) c++; }); }); return c;}
+function renderList(){ const only=document.getElementById('onlyUnread').checked; const data=collect(); const box=document.getElementById('userList'); const ucnt=unreadCount(); const badge=document.getElementById('newCount'); badge.style.display=ucnt>0? 'inline-block':'none'; badge.textContent=ucnt; box.innerHTML = data.map(d=>{ const uUnread=(d.messages||[]).some(m=>!m.fromAdmin && !m.read); if(only && !uUnread) return ''; const last=(d.messages||[]).filter(Boolean).slice(-1)[0]; return `<div class='item ${uUnread?'unread':''}' data-email='${d.email}'>
+  <div style='font-weight:600;'>${d.username||''} <span style='font-size:12px;color:#aaa;'>${d.email}</span> ${uUnread?'<span class="badge">NEW</span>':''}</div>
+  <div style='font-size:12px;color:#aaa;margin-top:4px;'>${last? last.content:''}</div>
+</div>`; }).join('');
+  box.querySelectorAll('.item').forEach(it=> it.addEventListener('click',()=>openThread(it.dataset.email)));
+}
+function openThread(email){ const db=GSApp.getDB(); const u=db.users[email]; if(!u) return; document.getElementById('replyEmail').value=email; const t=document.getElementById('thread'); const msgs=(u.messages||[]).slice().sort((a,b)=>a.ts-b.ts); t.innerHTML = msgs.map(m=>`<div class='bubble ${m.fromAdmin?'from-admin':''}'>${m.fromAdmin?'<strong>[관리자]</strong> ':''}${m.content}<div style='font-size:11px;color:#aaa;margin-top:4px;'>${new Date(m.ts).toLocaleString('ko-KR')}</div><div style='margin-top:6px;'><button class='btn small delMsg' data-id='${m.id}' data-email='${email}'>삭제</button></div></div>`).join(''); renderList(); }
+
+ document.getElementById('onlyUnread').addEventListener('change',renderList);
+document.getElementById('btnInqRefresh').addEventListener('click', async ()=>{ await GSApp.loadDB(); renderAdminInfo(); renderList(); });
+document.getElementById('markReadBtn')?.addEventListener('click', async ()=>{
+  const email=document.getElementById('replyEmail').value; if(!email) return; const db=GSApp.getDB(); const u=db.users[email]; if(!u) return;
+  let changed=false; (u.messages||[]).forEach(m=>{ if(!m.fromAdmin && !m.read){ m.read=true; changed=true; } }); if(changed){ await GSApp.saveDB(); await GSApp.loadDB(); }
+  openThread(email);
+});
+
+document.getElementById('sendReplyBtn').addEventListener('click', async ()=>{
+  if(!requireAdmin()) return; const email=document.getElementById('replyEmail').value; const content=document.getElementById('replyContent').value.trim(); if(!email||!content) return; await GSApp.addMessage(email,content,true); // 답변 시 자동 읽음 처리
+  const db=GSApp.getDB(); const u=db.users[email]; if(u){ let changed=false; (u.messages||[]).forEach(m=>{ if(!m.fromAdmin && !m.read){ m.read=true; changed=true; } }); if(changed) await GSApp.saveDB(); }
+  document.getElementById('replyContent').value=''; openThread(email);
+});
+
+function init(){ if(!requireAdmin()) return; updateNewBadge(); renderAdminInfo(); renderList(); GSApp.buildUserNav(); if(window.GSApp) GSApp.applyLang(); }
+
+// If embedded in iframe, hide own navbar and reduce padding
+if(window.top!==window.self){ document.addEventListener('DOMContentLoaded',()=>{ const nav=document.getElementById('navbar'); if(nav) nav.style.display='none'; document.body.style.paddingTop='12px'; }); }
+
+document.addEventListener('click', async (e)=>{
+  const btn=e.target.closest('.delMsg'); if(!btn) return; if(!confirm('삭제하시겠습니까?')) return; const db=GSApp.getDB(); const u=db.users[btn.dataset.email]; u.messages=(u.messages||[]).filter(m=>m.id!==btn.dataset.id); await GSApp.saveDB(); await GSApp.loadDB(); openThread(btn.dataset.email);
+});
+
+document.addEventListener('DOMContentLoaded', async ()=>{ await GSApp.loadDB(); init(); setTimeout(()=>{ try{ document.getElementById('btnInqRefresh').click(); }catch(_){ } },120); });
+</script></body></html>

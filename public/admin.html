@@ -1,0 +1,450 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>Admin</title><link rel="stylesheet" href="style.css"/>
+<style>
+	body{padding-top:100px;}
+	.admin-wrap{max-width:none;width:100%;margin:0 auto;color:#fff;padding:20px 30px 80px;}
+	h1{font-size:34px;margin-bottom:24px;color:#FFD700;}
+	.btn{background:#00695C;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-size:14px;cursor:pointer;}
+	.btn:hover{background:#00897B;}
+	.btn.active{background:#00897B;box-shadow:0 0 0 2px rgba(255,215,0,.3) inset;}
+	.tabs{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 12px;}
+	.right-tools{display:flex;gap:8px;align-items:center;margin-left:auto;}
+	.headbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:6px 0 14px;}
+	#adminContent{border:1px solid #1e4d47;border-radius:12px;overflow:auto;background:#0c1a18;max-height:75vh;padding:16px;}
+	.hint{color:#9ec9c3;font-size:12px;margin:8px 0 0;}
+	.pill{display:inline-block;padding:2px 6px;border-radius:12px;background:#1e4d47;font-size:11px;margin-left:4px;}
+	/* Inline panel shared styles (from subpages) */
+	.btn{background:#00695C;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-size:13px;cursor:pointer;}
+	.btn:hover{background:#00897B;}
+	.btn.small{font-size:12px;padding:6px 10px;}
+	.btn.danger{background:#b71c1c;}
+	.btn.danger:hover{background:#d32f2f;}
+	.detail-box{background:#0c1a18;border:1px solid #1e4d47;border-radius:10px;padding:14px;}
+	.detail-grid{display:grid;grid-template-columns:120px 1fr;gap:8px;}
+	.detail-grid input, .detail-grid textarea{background:#0b1917;color:#fff;border:1px solid #1e4d47;border-radius:6px;padding:8px 10px;font-size:13px;}
+	table{width:100%;border-collapse:collapse;}
+	th,td{border:1px solid #1e4d47;padding:10px 12px;font-size:13px;}
+	th{background:#004d40;color:#FFD700;}
+	/* 선택된 행 강조 (빨간 글씨) */
+	tr.selected td, .row-user.selected td{color:#ff5252;}
+	/* 긴 테이블 가로 스크롤 */
+	.hscroll{overflow-x:auto;}
+	#usersTable table{min-width:1400px;}
+	.muted{color:#aaa;}
+	.scroll{max-height:60vh;overflow:auto;padding-right:4px;}
+	.list-card{background:#0c1a18;border:1px solid #1e4d47;border-radius:10px;padding:10px;margin-bottom:10px;}
+	.nowrap{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+	.user-chip{display:inline-flex;align-items:center;gap:6px;background:#0b1917;border:1px solid #1e4d47;padding:6px 10px;border-radius:999px;}
+	.user-chip small{color:#9ec9c3;}
+	.grid2{display:grid;grid-template-columns:90px 1fr 90px 1fr;gap:8px;}
+	@media (max-width:700px){ .grid2{grid-template-columns:1fr 1fr;} }
+	/* Inquiries */
+	.inq-row{display:grid;grid-template-columns:320px 1fr;gap:16px;}
+	.panel{background:#0c1a18;border:1px solid #1e4d47;border-radius:12px;padding:12px;}
+	.list{max-height:560px;overflow:auto;}
+	.item{border:1px solid #1e4d47;padding:8px;border-radius:8px;margin-bottom:8px;cursor:pointer;}
+	.item.unread{border-color:#b71c1c;background:rgba(183,28,28,.15);}
+	.thread .bubble{border:1px solid #1e4d47;padding:10px;border-radius:10px;margin:6px 0;}
+	.thread .from-admin{background:#12372f;}
+</style></head><body>
+<nav id="navbar"><div class="container"><div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="logo"/></div><div class="nav-center"><ul class="nav-links"><li><a href="index.html#section1" data-i18n="nav_intro">소개</a></li><li><a href="index.html#section2" data-i18n="nav_progress">진행</a></li><li><a href="index.html#section3" data-i18n="nav_video">영상</a></li><li><a href="index.html#section4" data-i18n="nav_history">이력</a></li><li><a href="index.html#section5" data-i18n="nav_contact">문의</a></li></ul></div><div class="nav-right"><select id="langSelect" class="lang-select" data-i18n-aria="aria_lang_select" aria-label="언어 선택"><option value="ko">한국어</option><option value="zh">中文</option><option value="en">English</option></select><div id="userArea" class="user-area"></div><a href="index.html" class="home-icon" data-i18n-aria="nav_home" aria-label="홈" style="display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;"><span style="font-size:30px;color:#FFD700;">🏠</span></a><div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴" role="button" tabindex="0"><span></span><span></span><span></span></div></div></div></nav>
+
+<main>
+	<div class="admin-wrap">
+		<h1 data-i18n="page_admin_title">관리자 페이지</h1>
+		<div class="headbar">
+			<div class="tabs" role="tablist" aria-label="Admin Tabs">
+				<button class="btn" id="tabUsers" type="button" role="tab" aria-controls="panelUsers" aria-selected="false" style="min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+					<span>👤</span><span data-i18n="section_users">회원 관리</span>
+				</button>
+				<button class="btn" id="tabOrders" type="button" role="tab" aria-controls="panelOrders" aria-selected="false" style="min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+					<span>🧾</span><span data-i18n="section_orders_admin">주문 관리</span>
+				</button>
+				<button class="btn" id="tabInquiries" type="button" role="tab" aria-controls="panelInquiries" aria-selected="false" style="min-width:160px;display:inline-flex;align-items:center;justify-content:center;gap:8px;position:relative;">
+					<span>💬</span><span data-i18n="section_messages_admin">1:1 문의</span>
+					<span id="newBadge" class="pill" style="display:none;position:absolute;top:-8px;right:-8px;background:#b71c1c;color:#fff;">NEW</span>
+				</button>
+			</div>
+			<div class="right-tools">
+				<button class="btn" id="btnChangePw" data-i18n="btn_change_password">비밀번호 변경</button>
+				<button class="btn danger" id="btnLogout">로그아웃</button>
+				<span id="pwChangeMsg" class="hint"></span>
+			</div>
+		</div>
+				<div id="adminContent">
+					<!-- Users Panel -->
+					<section id="panelUsers" role="tabpanel" aria-labelledby="tabUsers">
+						<div id="adminInfoUsers" class="detail-box" style="margin-bottom:14px;"></div>
+						<!-- 상단: 상세/관리 영역 -->
+						<div>
+							<h2>상세/관리</h2>
+							<div id="userDetail" class="detail-box" style="min-height:280px;">
+								<div class="muted" style="font-size:13px;">왼쪽 목록에서 회원을 선택하세요.</div>
+							</div>
+							<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+								<button class="btn" id="btnUserAdd" data-i18n="btn_add_user">추가</button>
+								<button class="btn" id="btnUserEdit" data-i18n="btn_edit">수정</button>
+								<button class="btn" id="btnUserSave" style="display:none;" data-i18n="btn_save">저장</button>
+								<button class="btn danger" id="btnUserDelete" data-i18n="btn_delete">삭제</button>
+							</div>
+							<div class="muted" id="userMsg" style="font-size:12px;margin-top:6px;"></div>
+						</div>
+
+						<!-- 하단: 회원 목록 영역 (가로로 길게 표시) -->
+						<div style="margin-top:18px;">
+							<div style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+								<h2 data-i18n="section_users" style="margin:0;">회원 목록</h2>
+								<div style="display:flex;gap:8px;align-items:center;">
+									<button id="btnUsersExport" class="btn small">엑셀 다운로드</button>
+									<button id="btnUsersRefresh" class="btn small" data-i18n="btn_refresh">새로고침</button>
+								</div>
+							</div>
+							<div id="usersTable" class="hscroll"></div>
+						</div>
+					</section>
+					<!-- Orders Panel -->
+					<section id="panelOrders" role="tabpanel" aria-labelledby="tabOrders" hidden>
+						<div id="adminInfoOrders" class="detail-box" style="margin-bottom:14px;"></div>
+						<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;">
+							<div style="flex:1;min-width:420px;">
+								<div style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+									<h2 data-i18n="section_orders_admin" style="margin:0;">주문 관리</h2>
+									<button id="btnOrdersRefresh" class="btn small" data-i18n="btn_refresh">새로고침</button>
+								</div>
+								<div id="ordersList" class="scroll"></div>
+							</div>
+							<div style="flex:1;min-width:420px;">
+								<h2>상세/관리</h2>
+								<div id="orderDetail" class="detail-box" style="min-height:280px;">
+									<div class="muted" style="font-size:13px;">왼쪽에서 주문을 선택하거나, 회원별 추가 버튼을 누르세요.</div>
+								</div>
+								<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+									<button class="btn" id="btnOrderCreate" data-i18n="btn_add_order_admin">주문 추가</button>
+									<button class="btn" id="btnOrderEdit" data-i18n="btn_edit">수정</button>
+									<button class="btn" id="btnOrderSave" style="display:none;" data-i18n="btn_save">저장</button>
+									<button class="btn danger" id="btnOrderDelete" data-i18n="btn_delete">삭제</button>
+								</div>
+								<div class="muted" id="orderMsg" style="font-size:12px;margin-top:6px;"></div>
+							</div>
+						</div>
+					</section>
+					<!-- Inquiries Panel -->
+					<section id="panelInquiries" role="tabpanel" aria-labelledby="tabInquiries" hidden>
+						<div id="adminInfoInq" class="detail-box" style="margin-bottom:14px;"></div>
+						<div class="panel" style="margin-bottom:10px;display:flex;gap:8px;align-items:center;">
+							<label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="onlyUnread"> 새 문의만</label>
+							<button id="btnInqRefresh" class="btn small" data-i18n="btn_refresh">새로고침</button>
+							<span id="newCount" class="pill" style="display:none;background:#b71c1c;color:#fff;">0</span>
+						</div>
+						<div class="inq-row">
+							<div class="panel list" id="userList"></div>
+							<div class="panel detail">
+								<div id="thread" class="thread"></div>
+								<div style="margin-top:10px;display:flex;gap:8px;align-items:flex-start;">
+									<input id="replyEmail" type="hidden" />
+									<textarea id="replyContent" placeholder="답변 내용" style="flex:1;min-height:72px;"></textarea>
+									<button id="markReadBtn" class="btn" style="min-width:120px;">읽음으로 표시</button>
+									<button id="sendReplyBtn" class="btn" data-i18n="btn_send_reply">답변</button>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+		<p class="hint">원하는 관리 영역을 선택하세요.</p>
+	</div>
+	</main>
+	<script src="app.js"></script>
+	<script>
+		function forceNavigateIfHidden(tabId){
+			const map={tabUsers:'users',tabOrders:'orders',tabInquiries:'inquiries'};
+			const panelId = tabId==='tabUsers'?'panelUsers':tabId==='tabOrders'?'panelOrders':'panelInquiries';
+			setTimeout(()=>{
+				const panel=document.getElementById(panelId);
+				if(!panel || panel.hidden===true){
+					try{
+						location.href = 'admin.html?page='+(map[tabId]||'users');
+					}catch(_){ /* no-op */ }
+				}
+			}, 120);
+		}
+		const menuBtn=document.querySelector('.menu-btn');
+		menuBtn.addEventListener('click',()=>{menuBtn.classList.toggle('active');document.querySelector('.nav-links').classList.toggle('active');});
+
+		function requireAdmin(){const u=GSApp.currentUser();if(!u||u.role!=="admin"){alert('관리자 권한 필요');location.href='login.html';return false;}return true;}
+
+		function updateNewBadge(){
+			const db=GSApp.getDB(); let unread=0;
+			Object.values(db.users).forEach(u=>{ (u.messages||[]).forEach(m=>{ if(!m.fromAdmin && !m.read) unread++; }); });
+			const b=document.getElementById('newBadge');
+			if(b){ b.style.display = unread>0 ? 'inline-block' : 'none'; b.textContent = unread>0? ('NEW '+unread):''; }
+		}
+
+		document.getElementById('btnChangePw').addEventListener('click',async()=>{
+			if(!requireAdmin())return; const newPw=prompt('새 비밀번호 입력'); if(!newPw) return;
+			const admin=GSApp.currentUser();
+			try{ await GSApp.changePassword(admin.email,newPw); pwChangeMsg.style.color='#4fc3f7'; pwChangeMsg.textContent=GSApp.t('pw_change_success'); }
+			catch(e){ pwChangeMsg.style.color='#ff5252'; pwChangeMsg.textContent=GSApp.t('pw_change_fail'); }
+		});
+
+		document.getElementById('btnLogout').addEventListener('click',()=>{ GSApp.logout(); location.href='index.html'; });
+
+		async function activate(tabId){
+				// visual active + aria selected
+				document.querySelectorAll('.tabs .btn').forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+				const b=document.getElementById(tabId); if(b){ b.classList.add('active'); b.setAttribute('aria-selected','true'); }
+			document.getElementById('panelUsers').hidden = tabId!=='tabUsers';
+			document.getElementById('panelOrders').hidden = tabId!=='tabOrders';
+			document.getElementById('panelInquiries').hidden = tabId!=='tabInquiries';
+			// 탭 전환 시 각 패널 즉시 갱신
+			try{
+				await GSApp.loadDB();
+				if(tabId==='tabUsers'){
+					renderAdminInfoUsers(); renderUsers(); renderUserDetail();
+				}else if(tabId==='tabOrders'){
+					if(typeof renderOrdersAll==='function') renderOrdersAll(); else { renderAdminInfoOrders(); renderOrdersList(); renderOrderDetail(); }
+				}else if(tabId==='tabInquiries'){
+					if(typeof renderInquiriesAll==='function') renderInquiriesAll(); else { renderAdminInfoInq(); renderInqList(); }
+					updateNewBadge();
+				}
+				// URL 동기화 (딥링크 및 새로고침시 유지)
+				const page = tabId==='tabUsers' ? 'users' : tabId==='tabOrders' ? 'orders' : 'inquiries';
+				const url = new URL(location.href);
+				url.searchParams.set('page', page);
+				history.replaceState(null, '', url.toString());
+			}catch(_){/* no-op */}
+		}
+		function initTabs(){
+			const params=new URLSearchParams(location.search); const which=params.get('page')||'users';
+			const tabId = 'tab'+which.charAt(0).toUpperCase()+which.slice(1);
+			activate(tabId);
+			const contentEl = document.getElementById('adminContent');
+			document.getElementById('tabUsers').addEventListener('click',(e)=>{ e.preventDefault(); activate('tabUsers').then(()=>{ try{ contentEl?.scrollIntoView({behavior:'smooth',block:'start'});}catch(_){}; forceNavigateIfHidden('tabUsers'); }); });
+			document.getElementById('tabOrders').addEventListener('click',(e)=>{ e.preventDefault(); activate('tabOrders').then(()=>{ try{ contentEl?.scrollIntoView({behavior:'smooth',block:'start'});}catch(_){}; forceNavigateIfHidden('tabOrders'); }); });
+			document.getElementById('tabInquiries').addEventListener('click',(e)=>{ e.preventDefault(); activate('tabInquiries').then(()=>{ try{ contentEl?.scrollIntoView({behavior:'smooth',block:'start'});}catch(_){}; forceNavigateIfHidden('tabInquiries'); }); });
+			// Fallback: parent-level delegation
+			const tabsWrap = document.querySelector('.tabs');
+			if(tabsWrap){
+				tabsWrap.addEventListener('click', (e)=>{
+					const btn = e.target.closest('button.btn');
+					if(!btn) return;
+					e.preventDefault();
+					const id = btn.id;
+					if(id==='tabUsers') activate('tabUsers').then(()=>forceNavigateIfHidden('tabUsers'));
+					else if(id==='tabOrders') activate('tabOrders').then(()=>forceNavigateIfHidden('tabOrders'));
+					else if(id==='tabInquiries') activate('tabInquiries').then(()=>forceNavigateIfHidden('tabInquiries'));
+				});
+			}
+		}
+
+		document.addEventListener('DOMContentLoaded',async()=>{ if(window.GSApp){ GSApp.applyLang(); GSApp.buildUserNav(); if(requireAdmin()){ await GSApp.loadDB(); updateNewBadge(); initTabs(); initUsers(); initOrders(); initInquiries(); } } });
+
+		// ===== Users Inline Logic =====
+		let userSelectedEmail=null; let userEditMode=false; let userCreateMode=false;
+		function renderAdminInfoUsers(){ const box=document.getElementById('adminInfoUsers'); const a=GSApp.currentUser(); if(!a){ box.innerHTML=''; return;} const online=a.lastSeenAt&&(Date.now()-a.lastSeenAt<5*60*1000); box.innerHTML=`<h3 style='margin:0 0 8px;' data-i18n='section_admin_info'>관리자 정보</h3><div class='detail-grid'><div>아이디</div><div>${a.username||''}</div><div>이메일</div><div>${a.email}</div><div>접속상태</div><div>${online? '<span class="pill" style="background:#2e7d32;color:#fff;">온라인</span>':'<span class="pill">오프라인</span>'}</div><div>마지막 접속</div><div>${a.lastLoginAt? new Date(a.lastLoginAt).toLocaleString('ko-KR'):'-'}</div><div>최근 활동</div><div>${a.lastSeenAt? new Date(a.lastSeenAt).toLocaleString('ko-KR'):'-'}</div><div>접속 IP</div><div>${a.lastLoginIP||'-'}</div><div>브라우저</div><div class='nowrap'>${a.lastLoginUA||'-'}</div></div>`; }
+		function renderUsers(){
+			const db=GSApp.getDB();
+			const now = Date.now();
+			const rows=Object.values(db.users).map(u=>{
+				const online = u.lastSeenAt && (now - u.lastSeenAt < 5*60*1000);
+				return `<tr class='row-user ${userSelectedEmail===u.email?'selected':''}' data-email='${u.email}'>
+					<td>${u.username||''}</td>
+					<td>${u.email}${u.role==='admin'?'<span class=\"pill\">admin</span>':''}</td>
+					<td>${u.name||''}</td>
+					<td>${u.phone||''}</td>
+					<td>${u.birth||''}</td>
+					<td>${u.bank||''}</td>
+					<td>${u.account||''}</td>
+					<td>${u.role||''}</td>
+					<td>${online? '<span class=\"pill\" style=\"background:#2e7d32;color:#fff;\">온라인</span>' : '<span class=\"pill\">오프라인</span>'}</td>
+					<td>${u.lastSeenAt? new Date(u.lastSeenAt).toLocaleString('ko-KR'):''}</td>
+					<td>${u.lastLoginAt? new Date(u.lastLoginAt).toLocaleString('ko-KR'):''}</td>
+					<td>${u.lastLoginIP||''}</td>
+					<td>${(u.orders||[]).length}</td>
+					<td>${u.created? new Date(u.created).toLocaleString('ko-KR'):''}</td>
+				</tr>`;
+			}).join('');
+			document.getElementById('usersTable').innerHTML=
+				`<table><thead><tr>
+					<th>아이디</th><th>이메일</th><th>이름</th><th>연락처</th><th>생년월일</th><th>은행</th><th>계좌</th><th>권한</th><th>접속중</th><th>최근활동</th><th>마지막접속</th><th>접속IP</th><th>주문수</th><th>가입일</th>
+				</tr></thead><tbody>${rows}</tbody></table>`;
+			document.querySelectorAll('.row-user').forEach(tr=>tr.addEventListener('click',()=>{ userSelectedEmail=tr.dataset.email; userCreateMode=false; userEditMode=false; renderUserDetail(); renderUsers(); }));
+			if(window.GSApp) GSApp.applyLang();
+		}
+		function renderUserDetail(){
+			const box=document.getElementById('userDetail');
+			if(userCreateMode){
+				box.innerHTML=`<h3 style='margin:0 0 10px;'>신규 회원 추가</h3><div class='detail-grid'><label>아이디</label><input id='f_username' placeholder='아이디'/><label>이름</label><input id='f_name' placeholder='이름'/><label>이메일</label><input id='f_email' placeholder='이메일'/><label>연락처</label><input id='f_phone' placeholder='연락처'/><label>생년월일</label><input id='f_birth' type='date'/><label>은행</label><input id='f_bank' placeholder='은행'/><label>계좌</label><input id='f_account' placeholder='계좌번호'/><label>비밀번호</label><input id='f_password' type='password' placeholder='비밀번호'/></div>`;
+				document.getElementById('btnUserSave').style.display='inline-block';
+				return;
+			}
+			if(!userSelectedEmail){
+				box.innerHTML='<div class="muted" style="font-size:13px;">왼쪽 목록에서 회원을 선택하세요.</div>';
+				document.getElementById('btnUserSave').style.display='none';
+				return;
+			}
+			const u=GSApp.getDB().users[userSelectedEmail];
+			if(!u){ box.innerHTML='<div>회원 없음</div>'; document.getElementById('btnUserSave').style.display='none'; return; }
+			const online = u.lastSeenAt && (Date.now()-u.lastSeenAt < 5*60*1000);
+			// 어드민 삭제 버튼 숨김
+			document.getElementById('btnUserDelete').style.display = (u.role==='admin') ? 'none' : 'inline-block';
+			if(userEditMode){
+				box.innerHTML = `<h3 style='margin:0 0 10px;'>회원 수정</h3><div class='detail-grid'><label>아이디</label><input id='f_username' value='${u.username||''}' disabled/><label>이름</label><input id='f_name' value='${u.name||''}'/><label>이메일</label><input id='f_email' value='${u.email}' disabled/><label>연락처</label><input id='f_phone' value='${u.phone||''}'/><label>생년월일</label><input id='f_birth' type='date' value='${u.birth||''}'/><label>은행</label><input id='f_bank' value='${u.bank||''}'/><label>계좌</label><input id='f_account' value='${u.account||''}'/><label>새 비밀번호</label><input id='f_newpw' type='password' placeholder='변경 시에만 입력'/></div>`;
+				document.getElementById('btnUserSave').style.display='inline-block';
+			} else {
+				box.innerHTML = `<div class='detail-grid'><div>아이디</div><div>${u.username||''}</div><div>이름</div><div>${u.name||''}</div><div>이메일</div><div>${u.email}</div><div>연락처</div><div>${u.phone||''}</div><div>생년월일</div><div>${u.birth||''}</div><div>은행</div><div>${u.bank||''}</div><div>계좌</div><div>${u.account||''}</div><div>가입일</div><div>${u.created? new Date(u.created).toLocaleString('ko-KR'):''}</div><div>권한</div><div>${u.role}</div><div>접속상태</div><div>${online? '<span class=\"pill\" style=\"background:#2e7d32;color:#fff;\">온라인</span>':'<span class=\"pill\">오프라인</span>'}</div><div>마지막 접속</div><div>${u.lastLoginAt? new Date(u.lastLoginAt).toLocaleString('ko-KR'):'-'}</div><div>최근 활동</div><div>${u.lastSeenAt? new Date(u.lastSeenAt).toLocaleString('ko-KR'):'-'}</div><div>접속 IP</div><div>${u.lastLoginIP||'-'}</div><div>브라우저</div><div class='nowrap'>${u.lastLoginUA||'-'}</div></div>`;
+				document.getElementById('btnUserSave').style.display='none';
+			}
+		}
+		async function usersAdd(){
+			const username=prompt('아이디');
+			const name=prompt('이름');
+			const email=(prompt('이메일')||'').toLowerCase();
+			const phone=prompt('연락처')||'';
+			const birth=prompt('생년월일(YYYY-MM-DD)')||'';
+			const bank=prompt('은행')||'';
+			const account=prompt('계좌')||'';
+			const password=prompt('비밀번호')||'temp1234';
+			const msgEl = document.getElementById('userMsg');
+			if(!username||!name||!email){ msgEl.textContent='필수 항목'; return; }
+			try{
+				await GSApp.signupUser({username,name,birth,phone,email,bank,account,password});
+				msgEl.style.color='#4fc3f7';
+				msgEl.textContent='추가 완료';
+				await GSApp.loadDB();
+				renderUsers();
+				renderUserDetail();
+			}catch(e){
+				msgEl.style.color='#ff5252';
+				msgEl.textContent=e.message||'오류';
+			}
+		}
+		document.getElementById('btnUserAdd').addEventListener('click',()=>{ userCreateMode=true; userEditMode=false; userSelectedEmail=null; renderUserDetail(); });
+		document.getElementById('btnUserEdit').addEventListener('click',()=>{ if(!userSelectedEmail) return; userCreateMode=false; userEditMode=true; renderUserDetail(); });
+		document.getElementById('btnUserSave').addEventListener('click', async ()=>{
+			const msgEl = document.getElementById('userMsg');
+			if(userCreateMode){
+				if(!confirm('등록하시겠습니까?')) return;
+				const username=f_username.value.trim();
+				const name=f_name.value.trim();
+				const email=f_email.value.trim().toLowerCase();
+				const phone=f_phone.value.trim();
+				const birth=f_birth.value;
+				const bank=f_bank.value.trim();
+				const account=f_account.value.trim();
+				const password=f_password.value||'temp1234';
+				if(!username||!name||!email||!phone||!birth){ msgEl.textContent='필수 항목'; return; }
+				try{
+					await GSApp.signupUser({username,name,birth,phone,email,bank,account,password});
+					msgEl.style.color='#4fc3f7';
+					msgEl.textContent='추가 완료';
+					userCreateMode=false;
+					userSelectedEmail=email;
+					await GSApp.loadDB();
+					renderUsers();
+					renderUserDetail();
+				}catch(e){
+					msgEl.style.color='#ff5252';
+					msgEl.textContent=e.message||'오류';
+				}
+			} else if(userEditMode){
+				if(!confirm('수정하시겠습니까?')) return;
+				const name=f_name.value.trim();
+				const phone=f_phone.value.trim();
+				const birth=f_birth.value;
+				const bank=f_bank.value.trim();
+				const account=f_account.value.trim();
+				const newPw=(document.getElementById('f_newpw')?.value||'').trim();
+				try{
+					await GSApp.updateUser(userSelectedEmail,{name,phone,bank,account,birth});
+					if(newPw){ await GSApp.changePassword(userSelectedEmail,newPw); }
+					msgEl.style.color='#4fc3f7';
+					msgEl.textContent=GSApp.t('msg_update_success');
+					userEditMode=false;
+					await GSApp.loadDB();
+					renderUsers();
+					renderUserDetail();
+				}catch(e){
+					msgEl.style.color='#ff5252';
+					msgEl.textContent=GSApp.t('msg_update_fail');
+				}
+			}
+		});
+		document.getElementById('btnUserDelete').addEventListener('click',async()=>{
+			if(!userSelectedEmail) return;
+			const u=GSApp.getDB().users[userSelectedEmail];
+			if(u && u.role==='admin'){ alert('관리자 계정은 삭제할 수 없습니다.'); return; }
+			if(!confirm('삭제하시겠습니까?')) return; const db=GSApp.getDB();
+			delete db.users[userSelectedEmail]; await GSApp.saveDB(); userSelectedEmail=null; userCreateMode=false; userEditMode=false; await GSApp.loadDB(); renderUsers(); renderUserDetail();
+		});
+		document.getElementById('btnUsersRefresh').addEventListener('click', async ()=>{ await GSApp.loadDB(); renderAdminInfoUsers(); renderUsers(); renderUserDetail(); });
+		document.getElementById('btnUsersExport').addEventListener('click',()=>{
+			const db=GSApp.getDB();
+			const rows = Object.values(db.users).map(u=>({
+				아이디: u.username||'',
+				이름: u.name||'',
+				이메일: u.email||'',
+				연락처: u.phone||'',
+				생년월일: u.birth||'',
+				은행: u.bank||'',
+				계좌: u.account||'',
+				권한: u.role||'',
+				가입일: u.created||''
+			}));
+			const header = Object.keys(rows[0]||{아이디:'',이름:'',이메일:'',연락처:'',생년월일:'',은행:'',계좌:'',권한:'',가입일:''});
+			const csv = [header.join(','), ...rows.map(r=>header.map(k=>`"${String(r[k]??'').replace(/"/g,'""')}"`).join(','))].join('\r\n');
+			const blob = new Blob(["\uFEFF"+csv],{type:'text/csv;charset=utf-8;'});
+			const url=URL.createObjectURL(blob);
+			const a=document.createElement('a'); a.href=url; a.download='회원목록.csv'; a.click();
+			URL.revokeObjectURL(url);
+		});
+		function initUsers(){ renderAdminInfoUsers(); renderUsers(); renderUserDetail(); }
+
+		// ===== Orders Inline Logic =====
+		let orderSelected=null; // { email, id }
+		let orderEdit=false; let orderCreate=false;
+		function renderAdminInfoOrders(){ const box=document.getElementById('adminInfoOrders'); const a=GSApp.currentUser(); if(!a){ box.innerHTML=''; return;} const online=a.lastSeenAt&&(Date.now()-a.lastSeenAt<5*60*1000); box.innerHTML=`<h3 style='margin:0 0 8px;' data-i18n='section_admin_info'>관리자 정보</h3><div class='detail-grid'><div>아이디</div><div>${a.username||''}</div><div>이메일</div><div>${a.email}</div><div>접속상태</div><div>${online? '<span class=\"pill\" style=\"background:#2e7d32;color:#fff;\">온라인</span>':'<span class=\"pill\">오프라인</span>'}</div><div>마지막 접속</div><div>${a.lastLoginAt? new Date(a.lastLoginAt).toLocaleString('ko-KR'):'-'}</div><div>최근 활동</div><div>${a.lastSeenAt? new Date(a.lastSeenAt).toLocaleString('ko-KR'):'-'}</div><div>접속 IP</div><div>${a.lastLoginIP||'-'}</div><div>브라우저</div><div class='nowrap'>${a.lastLoginUA||'-'}</div></div>`; }
+		function formatKR(n){ try{ return Number(n).toLocaleString('ko-KR'); }catch(_){ return String(n); } }
+		function renderOrdersList(){ const db=GSApp.getDB(); let html=''; Object.values(db.users).forEach(u=>{ const head = `<div class=\"head\"><div class=\"user-chip\"><strong>${u.username||''}</strong><small>${u.email}</small></div><button class=\"btn small addForUser\" data-user=\"${u.email}\" data-username=\"${u.username||''}\">+ 추가</button></div>`; const rows = (u.orders||[]).map(o=>{ const sel = (orderSelected && orderSelected.email===u.email && orderSelected.id===o.id) ? ' selected' : ''; return `<div class=\"list-card row-order${sel}\" data-email=\"${u.email}\" data-id=\"${o.id}\"><div style=\"display:flex;justify-content:space-between;gap:8px;align-items:center;\"><div class=\"nowrap\"><strong>${o.item}</strong> <span class=\"pill\">${o.id}</span></div><div class=\"nowrap muted\">${new Date(o.ts).toLocaleString('ko-KR')}</div></div><div class=\"grid2\" style=\"margin-top:6px;\"><label>수량</label><div>${o.qty}</div><label>가격</label><div>${formatKR(o.price)}</div></div><div class=\"toolbar\" style=\"margin-top:8px;\"><button class=\"btn small editOrder\" data-email=\"${u.email}\" data-id=\"${o.id}\">수정</button><button class=\"btn small danger delOrder\" data-email=\"${u.email}\" data-id=\"${o.id}\">삭제</button></div></div>`; }).join(''); html += `<div class=\"user-block\">${head}${rows || '<div class=\"muted\" data-i18n=\"orders_empty_admin\">주문 없음</div>'}</div>`; }); const list=document.getElementById('ordersList'); list.innerHTML = html || '<div class="muted" data-i18n="orders_empty_admin">주문 없음</div>'; document.querySelectorAll('.row-order').forEach(el=>el.addEventListener('click',()=>{ orderSelected={email:el.dataset.email,id:el.dataset.id}; orderCreate=false; orderEdit=false; renderOrderDetail(); renderOrdersList(); })); document.querySelectorAll('.addForUser').forEach(btn=>btn.addEventListener('click',()=>{ orderSelected={email:btn.dataset.user,id:null}; orderCreate=true; orderEdit=false; renderOrderDetail(); })); document.querySelectorAll('.editOrder').forEach(btn=>btn.addEventListener('click',()=>{ orderSelected={email:btn.dataset.email,id:btn.dataset.id}; orderCreate=false; orderEdit=true; renderOrderDetail(); renderOrdersList(); })); document.querySelectorAll('.delOrder').forEach(btn=>btn.addEventListener('click',async()=>{ const email=btn.dataset.email; const id=btn.dataset.id; if(!confirm('삭제하시겠습니까?')) return; const db=GSApp.getDB(); const u=db.users[email]; u.orders=(u.orders||[]).filter(o=>o.id!==id); await GSApp.saveDB(); if(orderSelected && orderSelected.email===email && orderSelected.id===id){ orderSelected=null; } await GSApp.loadDB(); renderOrdersAll(); })); if(window.GSApp) GSApp.applyLang(); }
+		function renderOrderDetail(){ const box=document.getElementById('orderDetail'); const db=GSApp.getDB(); if(orderCreate){ box.innerHTML = `<h3 style='margin:0 0 10px;'>주문 추가</h3><div class='detail-grid'><div>회원</div><div>${orderSelected? (db.users[orderSelected.email]?.email||'') : ''}</div><label>상품</label><input id='f_item' placeholder='상품명'/><label>수량(g)</label><input id='f_qty' type='number' step='0.01' placeholder='수량'/><label>가격</label><input id='f_price' type='number' step='1' placeholder='가격'/></div>`; document.getElementById('btnOrderSave').style.display='inline-block'; return; } if(!orderSelected || !orderSelected.id){ box.innerHTML = '<div class="muted" style="font-size:13px;">주문을 선택하세요.</div>'; document.getElementById('btnOrderSave').style.display='none'; return; } const u=db.users[orderSelected.email]; const o=(u?.orders||[]).find(x=>x.id===orderSelected.id); if(!o){ box.innerHTML='<div class="muted">주문 없음</div>'; document.getElementById('btnOrderSave').style.display='none'; return; } if(orderEdit){ box.innerHTML = `<h3 style='margin:0 0 10px;'>주문 수정</h3><div class='detail-grid'><div>회원</div><div>${u.email}</div><div>주문ID</div><div>${o.id}</div><label>상품</label><input id='f_item' value='${o.item}'/><label>수량(g)</label><input id='f_qty' type='number' step='0.01' value='${o.qty}'/><label>가격</label><input id='f_price' type='number' step='1' value='${o.price}'/></div>`; document.getElementById('btnOrderSave').style.display='inline-block'; } else { box.innerHTML = `<div class='detail-grid'><div>회원</div><div>${u.email} <span class='pill' style='margin-left:6px;'>${u.username||''}</span></div><div>주문ID</div><div>${o.id}</div><div>상품</div><div>${o.item}</div><div>수량(g)</div><div>${o.qty}</div><div>가격</div><div>${formatKR(o.price)}</div><div>시간</div><div>${new Date(o.ts).toLocaleString('ko-KR')}</div></div>`; document.getElementById('btnOrderSave').style.display='none'; } }
+		document.getElementById('btnOrderCreate').addEventListener('click',()=>{ if(!orderSelected||!orderSelected.email){ alert('왼쪽에서 회원의 "+ 추가"를 눌러주세요.'); return; } orderCreate=true; orderEdit=false; renderOrderDetail(); });
+		document.getElementById('btnOrderEdit').addEventListener('click',()=>{ if(!orderSelected||!orderSelected.id) return; orderCreate=false; orderEdit=true; renderOrderDetail(); });
+		document.getElementById('btnOrderSave').addEventListener('click', async ()=>{ const msg=document.getElementById('orderMsg'); if(orderCreate){ if(!confirm('등록하시겠습니까?')) return; const item=f_item.value.trim(); const qty=parseFloat(f_qty.value||''); const price=parseInt(f_price.value||''); if(!item||isNaN(qty)||isNaN(price)){ msg.textContent='필수 항목'; return; } try{ await GSApp.addOrder(orderSelected.email,{item,qty,price}); msg.style.color='#4fc3f7'; msg.textContent='추가 완료'; orderCreate=false; await GSApp.loadDB(); renderOrdersAll(); } catch(e){ msg.style.color='#ff5252'; msg.textContent='오류'; } } else if(orderEdit){ if(!confirm('수정하시겠습니까?')) return; const item=f_item.value.trim(); const qty=parseFloat(f_qty.value||''); const price=parseInt(f_price.value||''); if(!item||isNaN(qty)||isNaN(price)){ msg.textContent='필수 항목'; return; } try{ await GSApp.updateOrder(orderSelected.email, orderSelected.id, {item,qty,price}); msg.style.color='#4fc3f7'; msg.textContent=GSApp.t('msg_update_success'); orderEdit=false; await GSApp.loadDB(); renderOrdersAll(); } catch(e){ msg.style.color='#ff5252'; msg.textContent=GSApp.t('msg_update_fail'); } } });
+		document.getElementById('btnOrderDelete').addEventListener('click', async ()=>{ if(!orderSelected||!orderSelected.id) return; if(!confirm('삭제하시겠습니까?')) return; const db=GSApp.getDB(); const u=db.users[orderSelected.email]; u.orders=(u.orders||[]).filter(o=>o.id!==orderSelected.id); await GSApp.saveDB(); orderSelected=null; await GSApp.loadDB(); renderOrdersAll(); });
+		document.getElementById('btnOrdersRefresh').addEventListener('click', async ()=>{ await GSApp.loadDB(); renderOrdersAll(); });
+		function renderOrdersAll(){ renderAdminInfoOrders(); renderOrdersList(); renderOrderDetail(); }
+		function initOrders(){ renderOrdersAll(); }
+
+		// ===== Inquiries Inline Logic =====
+		function renderAdminInfoInq(){ const box=document.getElementById('adminInfoInq'); const a=GSApp.currentUser(); if(!a){ box.innerHTML=''; return;} const online=a.lastSeenAt&&(Date.now()-a.lastSeenAt<5*60*1000); box.innerHTML=`<h3 style='margin:0 0 8px;' data-i18n='section_admin_info'>관리자 정보</h3><div class='detail-grid'><div>아이디</div><div>${a.username||''}</div><div>이메일</div><div>${a.email}</div><div>접속상태</div><div>${online? '<span class=\"pill\" style=\"background:#2e7d32;color:#fff;\">온라인</span>':'<span class=\"pill\">오프라인</span>'}</div><div>마지막 접속</div><div>${a.lastLoginAt? new Date(a.lastLoginAt).toLocaleString('ko-KR'):'-'}</div><div>최근 활동</div><div>${a.lastSeenAt? new Date(a.lastSeenAt).toLocaleString('ko-KR'):'-'}</div><div>접속 IP</div><div>${a.lastLoginIP||'-'}</div><div>브라우저</div><div class='nowrap'>${a.lastLoginUA||'-'}</div></div>`; }
+		function collectInq(){ const db=GSApp.getDB(); const entries=[]; Object.values(db.users).forEach(u=>{ const msgs=(u.messages||[]).filter(m=>!m.fromAdmin); if(msgs.length) entries.push({email:u.email,username:u.username||'',messages:u.messages}); }); return entries; }
+		function unreadCount(){ let c=0; const db=GSApp.getDB(); Object.values(db.users).forEach(u=>{ (u.messages||[]).forEach(m=>{ if(!m.fromAdmin && !m.read) c++; }); }); return c; }
+		function renderInqList(){
+			const only=document.getElementById('onlyUnread').checked;
+			const data=collectInq();
+			const box=document.getElementById('userList');
+			const ucnt=unreadCount();
+			const badge=document.getElementById('newCount');
+			badge.style.display=ucnt>0? 'inline-block':'none';
+			badge.textContent=ucnt;
+			const html = data.map(d=>{
+				const uUnread=(d.messages||[]).some(m=>!m.fromAdmin && !m.read);
+				if(only && !uUnread) return '';
+				const last=(d.messages||[]).filter(Boolean).slice(-1)[0];
+				return `<div class='item ${uUnread?'unread':''}' data-email='${d.email}'>
+					<div style='font-weight:600;'>${d.username||''} <span style='font-size:12px;color:#aaa;'>${d.email}</span> ${uUnread ? '<span class=\"pill\" style=\"background:#b71c1c;color:#fff;\">NEW</span>' : ''}</div>
+					<div style='font-size:12px;color:#aaa;margin-top:4px;'>${last? last.content:''}</div>
+				</div>`;
+			}).join('');
+			box.innerHTML = html || `<div class="muted" data-i18n="messages_empty_admin" style="padding:8px;">쪽지 없음</div>`;
+			box.querySelectorAll('.item').forEach(it=> it.addEventListener('click',()=>openThread(it.dataset.email)));
+			if(window.GSApp) GSApp.applyLang();
+		}
+		function openThread(email){ const db=GSApp.getDB(); const u=db.users[email]; if(!u) return; document.getElementById('replyEmail').value=email; const t=document.getElementById('thread'); const msgs=(u.messages||[]).slice().sort((a,b)=>a.ts-b.ts); t.innerHTML = msgs.map(m=>`<div class='bubble ${m.fromAdmin?'from-admin':''}'>${m.fromAdmin?'<strong>[관리자]</strong> ':''}${m.content}<div style='font-size:11px;color:#aaa;margin-top:4px;'>${new Date(m.ts).toLocaleString('ko-KR')}</div><div style='margin-top:6px;'><button class='btn small delMsg' data-id='${m.id}' data-email='${email}'>삭제</button></div></div>`).join(''); renderInqList(); }
+		document.getElementById('onlyUnread').addEventListener('change',renderInqList);
+		document.getElementById('btnInqRefresh').addEventListener('click', async ()=>{ await GSApp.loadDB(); renderInquiriesAll(); updateNewBadge(); });
+		document.addEventListener('click', async (e)=>{ const btn=e.target.closest('.delMsg'); if(!btn) return; if(!confirm('삭제하시겠습니까?')) return; const db=GSApp.getDB(); const u=db.users[btn.dataset.email]; u.messages=(u.messages||[]).filter(m=>m.id!==btn.dataset.id); await GSApp.saveDB(); await GSApp.loadDB(); openThread(btn.dataset.email); updateNewBadge(); });
+		document.getElementById('markReadBtn').addEventListener('click', async ()=>{ const email=document.getElementById('replyEmail').value; if(!email) return; const db=GSApp.getDB(); const u=db.users[email]; if(!u) return; let changed=false; (u.messages||[]).forEach(m=>{ if(!m.fromAdmin && !m.read){ m.read=true; changed=true; } }); if(changed){ await GSApp.saveDB(); await GSApp.loadDB(); } openThread(email); updateNewBadge(); });
+		document.getElementById('sendReplyBtn').addEventListener('click', async ()=>{ const email=document.getElementById('replyEmail').value; const content=document.getElementById('replyContent').value.trim(); if(!email||!content) return; await GSApp.addMessage(email,content,true); const db=GSApp.getDB(); const u=db.users[email]; if(u){ let changed=false; (u.messages||[]).forEach(m=>{ if(!m.fromAdmin && !m.read){ m.read=true; changed=true; } }); if(changed) await GSApp.saveDB(); } document.getElementById('replyContent').value=''; openThread(email); updateNewBadge(); });
+		function renderInquiriesAll(){ renderAdminInfoInq(); renderInqList(); }
+		function initInquiries(){ renderInquiriesAll(); }
+	</script>
+</body></html>

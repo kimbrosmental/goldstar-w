@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ko" id="top">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title data-i18n="site_title">회사 홈페이지</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    /* ---------------- Section2 레이아웃 조정 ---------------- */
+    #section2 .content {
+      padding-top: 20px;
+      padding-bottom: 20px;
+      height: auto;
+    }
+    #section2 .story-content h2 {
+      margin-bottom: 16px;
+    }
+    #section2 .story-grid {
+      margin-bottom: 24px;
+    }
+
+    /* ---------------- Carousel 스타일 ---------------- */
+    .carousel-wrapper {
+      overflow: hidden;
+      width: 100%;
+      margin-top: 16px;
+    }
+    .carousel-track {
+      display: flex;
+      gap: 20px;
+      /* ↓ 속도 조절: 5s → 원하는 값으로 변경 */
+      animation: scroll 40s linear infinite;
+    }
+    .carousel-item {
+      flex: 0 0 auto;
+      width: 400px;
+      max-width: 400px;
+    }
+    .carousel-item img {
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      object-fit: contain;
+      display: block;
+    }
+    .carousel-item p {
+      text-align: center;
+      margin-top: 8px;
+      color: #fff;
+      font-size: 16px;
+    }
+    @keyframes scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-6760px); } /* 500×13 + 20×13 */
+    }
+
+    /* ---- Section1 gold-bar 이미지 반응형 숨김 ---- */
+    @media (max-width:1024px) {
+      #section1 .price-image { display: none !important; }
+      #section1 .gold-content { justify-content: center; }
+    }
+    @media (max-width:768px) {
+      #section1 .price-image { display: none !important; }
+      #section1 .gold-content { justify-content: center; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav id="navbar">
+    <div class="container">
+  <div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="골드스타 로고"></div>
+  <div class="nav-center">
+        <ul class="nav-links">
+          <li><a href="#section1" data-i18n="nav_intro">소개</a></li>
+          <li><a href="#section2" data-i18n="nav_progress">진행</a></li>
+          <li><a href="#section3" data-i18n="nav_video">영상</a></li>
+          <li><a href="#section4" data-i18n="nav_history">이력</a></li>
+          <li><a href="#section5" data-i18n="nav_contact">문의</a></li>
+        </ul>
+      </div>
+      <div class="nav-right">
+        <select id="langSelect" class="lang-select" data-i18n-aria="aria_lang_select" aria-label="언어 선택">
+          <option value="ko">한국어</option>
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+        </select>
+        <div id="userArea" class="user-area"></div>
+  <div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴 열기" role="button" tabindex="0">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+    <div id="scroll-progress"></div>
+  </nav>
+
+  <div id="floatingButtons">
+    <button id="scrollToTop" title="맨 위로" aria-label="맨 위로"><i class="fas fa-arrow-up"></i></button>
+  </div>
+  <div class="fixed-social-icons">
+    <a href="#" class="social-icon">
+      <img src="img/텔레그램 문의.png" class="kakao-static" alt="카카오톡 상담">
+      <img src="img/텔레그램 문의2.gif" class="kakao-hover" alt="카카오톡 상담">
+    </a>
+  </div>
+
+  <main>
+    <!-- Section1 -->
+    <section id="section1" class="section">
+      <div class="content">
+        <h2 class="hook">
+          <span class="line line1" data-i18n="hook_line1">“금은 결국 오른다.”</span>
+          <span class="line line2" data-i18n="hook_line2">“다만, 합리적 금액에 살 수 있는 순간은 짧다.”</span>
+          <span class="line line3" data-i18n="hook_line3">지금이 바로 그 순간입니다,</span>
+          <span class="line line4"><strong data-i18n="hook_line4">준비되셨나요?</strong></span>
+          <span class="shine-bar" aria-hidden="true"></span>
+        </h2>
+        <div class="price-box gold-box" id="priceBox">
+          <div class="gold-content">
+            <img src="img/gold-bar.jpg" class="price-image" data-i18n-alt="alt_goldbar" alt="골드바 이미지">
+            <div class="gold-text">
+              <h2 class="price-title" data-i18n="price_today">오늘의 금 시세 (3.75g)</h2>
+              <div id="mainPrice" class="main-price">로딩중…</div>
+              <div id="priceChange" class="change-line"></div>
+              <span class="compare-note" data-i18n="note_prev_change">[전일 기준 시세변동폭]</span>
+            </div>
+          </div>
+        </div>
+        <div class="price-box supply-box">
+          <h2 class="price-title supply" data-i18n="supply_price">공급 가격 (3.75g)</h2>
+          <div class="main-price supply-price">520,000원</div>
+          <div class="supply-footer">
+            <span class="change-line">–</span>
+            <span class="compare-note" data-i18n="note_compare_now">[현 시세 기준과 비교]</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section2: 진행 -->
+    <section id="section2" class="section">
+      <div class="content">
+        <div class="story-content">
+          <h2 data-i18n="section2_title">검은 대륙의 금맥</h2>
+          <div class="story-grid">
+            <div class="story-item"><h3 data-i18n="section2_stat_1_title">3억2천만톤</h3><p data-i18n="section2_stat_1_desc">2023년 우간다 금 매장량 발견</p></div>
+            <div class="story-item"><h3 data-i18n="section2_stat_2_title">글로벌 주목</h3><p data-i18n="section2_stat_2_desc">12조원 가치평가, CNN, BBC 등 해외 언론 집중 보도</p></div>
+            <div class="story-item"><h3 data-i18n="section2_stat_3_title">독점 계약</h3><p data-i18n="section2_stat_3_desc">우간다 금맥, 중국 광산업체들과 채굴 독점 계약 체결 → 골드 스타, 중국 업체와 수입계약 체결</p></div>
+          </div>
+        </div>
+        <div class="carousel-wrapper">
+          <div class="carousel-track" id="carousel-track"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section3 -->
+    <section id="section3" class="section">
+      <div class="content">
+        <div class="process-content">
+          <h2 data-i18n="section3_title">유통 구조의 혁신</h2>
+          <!-- 상단 행: 좌측 설명, 우측 영상 -->
+          <div class="video-row top">
+            <div class="desc" data-i18n="video1_desc">상단 영상 설명을 여기에 입력하세요.</div>
+            <div class="video-wrap">
+              <video controls width="600">
+                <source src="img/movie-1.mp4" type="video/mp4" />
+                <span data-i18n="video_not_supported">브라우저가 동영상을 지원하지 않습니다.</span>
+              </video>
+            </div>
+          </div>
+          <!-- 하단 행: 좌측 영상, 우측 설명 -->
+          <div class="video-row bottom">
+            <div class="video-wrap">
+              <video controls width="600">
+                <source src="img/movie-2.mp4" type="video/mp4" />
+                <span data-i18n="video_not_supported">브라우저가 동영상을 지원하지 않습니다.</span>
+              </video>
+            </div>
+            <div class="desc" data-i18n="video2_desc">하단 영상 설명을 여기에 입력하세요.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section4 -->
+    <section id="section4" class="section">
+      <div class="content">
+        <div class="achievement-content">
+          <h2 data-i18n="section4_title">실제 공급 성과</h2>
+          <div class="achievement-grid">
+            <div class="achievement-item"><h3>192kg</h3><p data-i18n="section4_desc_total">총 공급 완료량</p></div>
+            <div class="achievement-item"><h3>13.4%</h3><p data-i18n="section4_desc_discount">시세 대비 평균 할인율</p></div>
+            <div class="achievement-item"><h3>1,982명</h3><p data-i18n="section4_desc_members">누적 참여 회원</p></div>
+          </div>
+          <div class="testimonials"><img src="img/gold-delivery.jpg" alt="실제 금괴 배송"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section5 -->
+    <section id="section5" class="section">
+      <div class="content center">
+  <h2 class="section5-title" data-i18n="section5_title">지금 바로 문의하세요</h2>
+  <p class="section5-text" data-i18n="section5_text">골드스타와 함께 새로운 투자의 기회를 시작하세요</p>
+        <div class="contact-buttons">
+          <a href="#"><img src="img/카카오톡 문의.gif" data-i18n-alt="alt_kakao" alt="카카오톡 문의"/></a>
+          <a href="#"><img src="img/텔레그램 문의.gif" data-i18n-alt="alt_telegram" alt="텔레그램 문의"/></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="company-info">
+      <div class="info-content">
+        <div class="company-info-grid">
+          <div class="info-section">
+            <h3 data-i18n="footer_company">회사 정보</h3>
+            <p data-i18n="footer_company_name">상호명: 골드스타</p>
+            <p data-i18n="footer_ceo">대표이사: 홍길동</p>
+            <p data-i18n="footer_biz">사업자등록번호: 123-45-67890</p>
+            <p data-i18n="footer_mailorder">통신판매업: 제2025-서울강남-0000호</p>
+          </div>
+          <div class="info-section">
+            <h3 data-i18n="footer_contact">연락처</h3>
+            <p data-i18n="footer_addr">주소: 서울특별시 강남구 테헤란로 123</p>
+            <p data-i18n="footer_tel">대표전화: 02-1234-5678</p>
+            <p data-i18n="footer_email">이메일: info@goldstar.com</p>
+            <p data-i18n="footer_fax">팩스: 02-1234-5679</p>
+          </div>
+          <div class="info-section">
+            <h3 data-i18n="footer_support">고객지원</h3>
+            <p data-i18n="footer_hours">운영시간: 평일 09:00 - 18:00</p>
+            <p data-i18n="footer_lunch">점심시간: 12:00 - 13:00</p>
+            <p data-i18n="footer_off">토/일/공휴일 휴무</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="hover-gif.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // ===== 네비게이션 스크롤 페이드 (아래 스크롤시 위로 디졸브 사라짐, 맨 위 복귀시 페이드 인) =====
+    (function(){
+      let lastY = window.scrollY;
+      const nav = document.getElementById('navbar');
+      const thresholdHide = 40; // 조금만 내려도 숨김 시작
+      let forcedShow = false;
+      function handleScroll(){
+        if(forcedShow){return;} // 마우스 최상단 강제 표시 상태
+        const y = window.scrollY;
+        if (y > thresholdHide) {
+          if (y > lastY) { // 아래로
+            nav.classList.add('nav-hidden');
+          } else { // 위로 올림
+            nav.classList.remove('nav-hidden');
+          }
+        } else {
+          nav.classList.remove('nav-hidden');
+        }
+        lastY = y;
+      }
+      window.addEventListener('scroll', handleScroll);
+      // 마우스가 화면 최상단(예: 24px) 영역에 들어오면 네비게이션 표시
+      window.addEventListener('mousemove', e => {
+        if (e.clientY <= 24) {
+          forcedShow = true;
+          nav.classList.remove('nav-hidden');
+          // 1.5초 후 스크롤 방향 다시 적용
+          clearTimeout(window.__navForceTimer);
+          window.__navForceTimer = setTimeout(()=>{ forcedShow=false; handleScroll(); },1500);
+        }
+      });
+    })();
+
+    // 메뉴 토글
+  const menuBtn = document.querySelector('.menu-btn');
+  const navLinks = document.querySelector('.nav-links');
+    menuBtn.addEventListener('click', () => {
+      menuBtn.classList.toggle('active');
+      navLinks.classList.toggle('active');
+    });
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) {
+          e.preventDefault();
+          t.scrollIntoView({ behavior:'smooth', block:'start' });
+        }
+      });
+    });
+    document.querySelectorAll('.nav-links a').forEach(l => {
+      l.addEventListener('click', () => {
+        menuBtn.classList.remove('active');
+        navLinks.classList.remove('active');
+      });
+    });
+
+  // 스크롤탑
+  document.getElementById('scrollToTop').addEventListener('click', () => {
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
+
+  // 테마 제거됨
+
+    // 스크롤 진행률
+    const bar = document.getElementById('scroll-progress');
+    function updateBar() {
+      const s = window.pageYOffset || document.documentElement.scrollTop;
+      const dh = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = dh ? (s/dh*100)+'%' : '0%';
+    }
+    window.addEventListener('scroll', updateBar);
+    window.addEventListener('resize', updateBar);
+    document.addEventListener('DOMContentLoaded', updateBar);
+
+    // 금 시세 API & 렌더링
+    const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
+    const CACHE_KEY = 'gold_price_cache_v3';
+    const fmt = n => Number(n).toLocaleString('ko-KR');
+    function getCache() {
+      try { return JSON.parse(localStorage.getItem(CACHE_KEY)); }
+      catch { return null; }
+    }
+    function setCache(d) {
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); }
+      catch {}
+    }
+    function renderPrice(data) {
+      const priceEl  = document.getElementById('mainPrice');
+      const changeEl = document.getElementById('priceChange');
+      const supplyEl = document.querySelector('.supply-price');
+      const supplyCh = document.querySelector('.supply-footer .change-line');
+      if (!data || !data.price) {
+        priceEl.textContent = '–';
+        changeEl.textContent = '';
+        changeEl.className = 'change-line';
+      } else {
+        priceEl.textContent = fmt(data.price) + '원';
+        const arrow = data.trend==='up' ? '▲' : data.trend==='down' ? '▼' : '';
+        const pct   = data.percent || '';
+        const chg   = data.change ? fmt(data.change)+'원' : '';
+        changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
+        changeEl.className = 'change-line' + (data.trend==='up'? ' up': data.trend==='down'? ' down':'');
+      }
+      if (supplyEl && supplyCh && data && data.price) {
+        const supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g,''));
+        if (supplyVal>0) {
+          const rate   = (data.price - supplyVal)/data.price*100;
+          const sign   = rate>0? '▼': '▲';
+          const absPct = Math.abs(rate).toFixed(2) + '%';
+          supplyCh.textContent = `${sign} ${absPct}`;
+          supplyCh.className = 'change-line down';
+        } else {
+          supplyCh.textContent = '–';
+          supplyCh.className = 'change-line';
+        }
+      }
+    }
+    async function loadGoldPrice() {
+      const cache = getCache();
+      if (cache) renderPrice(cache);
+      try {
+        const d = await fetch(API_URL, { cache:'no-store' }).then(r=>r.json());
+        if (!d.price) throw 0;
+        renderPrice(d);
+        setCache(d);
+      } catch {
+        if (!cache) renderPrice(null);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadGoldPrice);
+
+    // Section2: Carousel + 설명글 자동 생성
+    // — 최대 20개, VISIBLE_COUNT만큼만 표시
+    const MAX_ITEMS = 20;
+    const VISIBLE_COUNT = 13; // 1~MAX_ITEMS 사이의 값으로 조정하세요
+
+  document.addEventListener('DOMContentLoaded', () => {
+      const items = [
+    { img: 'section_1.jpg',  descKey: 'carousel_desc_1' },
+    { img: 'section_2.jpg',  descKey: 'carousel_desc_2' },
+    { img: 'section_3.jpg',  descKey: 'carousel_desc_3' },
+    { img: 'section_4.jpg',  descKey: 'carousel_desc_4' },
+    { img: 'section_5.jpg',  descKey: 'carousel_desc_5' },
+    { img: 'section_6.jpg',  descKey: 'carousel_desc_6' },
+    { img: 'section_7.jpg',  descKey: 'carousel_desc_7' },
+    { img: 'section_8.jpg',  descKey: 'carousel_desc_8' },
+    { img: 'section_9.jpg',  descKey: 'carousel_desc_9' },
+    { img: 'section_10.jpg', descKey: 'carousel_desc_10' },
+    { img: 'section_11.jpg', descKey: 'carousel_desc_11' },
+    { img: 'section_12.jpg', descKey: 'carousel_desc_12' },
+    { img: 'section_13.jpg', descKey: 'carousel_desc_13' },
+        { img: 'section-14.jpg', desc: '' },
+        { img: 'section-15.jpg', desc: '' },
+        { img: 'section-16.jpg', desc: '' },
+        { img: 'section-17.jpg', desc: '' },
+        { img: 'section-18.jpg', desc: '' },
+        { img: 'section-19.jpg', desc: '' },
+        { img: 'section-20.jpg', desc: '' }
+      ];
+
+      const track = document.getElementById('carousel-track');
+      const count = Math.min(VISIBLE_COUNT, MAX_ITEMS, items.length);
+
+      items.slice(0, count).forEach(item => {
+        // 이미지와 설명 모두 있을 때만 렌더링
+        if (item.img) {
+          const div = document.createElement('div');
+          div.className = 'carousel-item';
+          const imgEl = document.createElement('img');
+          imgEl.src = `img/${item.img}`;
+          const desc = (window.GSApp? GSApp.t(item.descKey): '') || '';
+          if(desc){ imgEl.alt = desc; }
+          const p = document.createElement('p');
+          p.setAttribute('data-i18n', item.descKey);
+          p.textContent = desc || '';
+          div.append(imgEl, p);
+          track.append(div);
+        }
+      });
+
+  // 무한 루프를 위해 복제
+  track.innerHTML += track.innerHTML;
+  if(window.GSApp) GSApp.applyLang();
+    });
+
+    // (i18n & user nav handled by app.js) — 보조 보장 로직
+    document.addEventListener('DOMContentLoaded', () => {
+      // app.js 비동기 초기화 후 사용자 버튼 강제 재구성 (지연 보장)
+      function safeBuild(){
+        if(window.GSApp && typeof window.GSApp.buildUserNav === 'function'){
+          window.GSApp.buildUserNav();
+        }
+      }
+      safeBuild();
+      setTimeout(safeBuild, 300);
+      setTimeout(safeBuild, 1000);
+  // 테마 기능 삭제됨
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>내 정보</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body{padding-top:100px;}
+    .profile-wrapper{max-width:860px;margin:0 auto;color:#fff;padding:10px 20px 60px;}
+    .profile-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;}
+    .profile-card{background:#102522;border:1px solid #1d4d46;padding:28px 30px;border-radius:18px;margin-bottom:40px;box-shadow:0 0 18px rgba(0,0,0,0.4);}
+    .profile-card h2{font-size:22px;margin-bottom:16px;color:#FFD700;}
+    .profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+    .field{background:#0c1a18;padding:14px 16px;border-radius:10px;}
+    .field label{display:block;font-size:12px;color:#90a4ae;letter-spacing:.5px;margin-bottom:4px;}
+    .field span{font-weight:600;font-size:15px;}
+    .orders-table{width:100%;border-collapse:collapse;margin-top:10px;}
+    .orders-table th,.orders-table td{border:1px solid #1e4d47;padding:10px 12px;font-size:14px;}
+    .orders-table th{background:#004d40;color:#FFD700;}
+    .orders-empty{color:#bbb;font-size:14px;margin-top:8px;}
+    .actions{display:flex;gap:10px;margin-top:14px;}
+    .btn{background:#00695C;color:#fff;padding:10px 16px;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:.3s;}
+    .btn:hover{background:#00897B;}
+    .danger{background:#b71c1c;}
+    .danger:hover{background:#d32f2f;}
+  </style>
+</head>
+<body>
+  <nav id="navbar">
+    <div class="container">
+  <div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="logo"/></div>
+      <div class="nav-center">
+        <ul class="nav-links">
+          <li><a href="index.html#section1" data-i18n="nav_intro">소개</a></li>
+          <li><a href="index.html#section2" data-i18n="nav_progress">진행</a></li>
+          <li><a href="index.html#section3" data-i18n="nav_video">영상</a></li>
+          <li><a href="index.html#section4" data-i18n="nav_history">이력</a></li>
+          <li><a href="index.html#section5" data-i18n="nav_contact">문의</a></li>
+        </ul>
+      </div>
+      <div class="nav-right">
+        <select id="langSelect" class="lang-select" aria-label="언어 선택">
+          <option value="ko">한국어</option>
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+        </select>
+        <div id="userArea" class="user-area"></div>
+  <a href="index.html" class="home-icon" aria-label="홈" style="display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;">
+          <span style="font-size:30px;color:#FFD700;">🏠</span>
+        </a>
+  <div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴" role="button" tabindex="0"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </nav>
+  <main>
+    <div class="profile-wrapper">
+      <div class="profile-header" id="summaryHeader" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <h1 style="font-size:30px;color:#4fc3f7;" data-i18n="page_profile_title">내 정보</h1>
+        <div id="summaryLine" style="font-size:15px;color:#eee;font-weight:500;line-height:1.4;"></div>
+        <div class="actions" style="margin-top:4px;">
+          <button class="btn" id="addOrderBtn" data-i18n="btn_order_add">주문 추가</button>
+          <button class="btn" id="mockOrderBtn" data-i18n="btn_mock_order_add" style="display:none;">모의 주문 추가</button>
+          <button class="btn danger" id="logoutBtn" data-i18n="btn_logout">로그아웃</button>
+        </div>
+      </div>
+      <div class="profile-card" id="profileCard" hidden>
+  <h2 data-i18n="section_member_info">회원 기본 정보</h2>
+        <div class="profile-grid" id="profileGrid"></div>
+      </div>
+      <div class="profile-card">
+        <h2 data-i18n="section_orders">주문 내역</h2>
+        <div id="ordersContainer"></div>
+      </div>
+      <div class="profile-card">
+        <h2 data-i18n="section_messages">1:1 문의</h2>
+        <div id="messagesWrap" style="margin-bottom:16px;"></div>
+        <div style="display:flex;gap:8px;align-items:flex-start;">
+          <textarea id="msgInput" data-i18n-ph="placeholder_message" placeholder="문의 내용을 입력하세요" style="flex:1;min-height:70px;background:#0c1a18;color:#fff;border:1px solid #1e4d47;border-radius:8px;padding:10px;font-size:14px;resize:vertical;"></textarea>
+          <button class="btn" id="sendMsgBtn" style="height:70px;min-width:90px;" data-i18n="btn_send">보내기</button>
+        </div>
+        <p style="margin-top:10px;font-size:12px;color:#888;" data-i18n="note_admin_only_reply">관리자만 답변을 남길 수 있습니다.</p>
+      </div>
+    </div>
+  </main>
+  <script src="app.js"></script>
+  <script>
+    document.querySelector('.menu-btn').addEventListener('click',()=>{document.querySelector('.menu-btn').classList.toggle('active');document.querySelector('.nav-links').classList.toggle('active');});
+  // 관리자 접근 차단: admin은 내 정보 페이지가 없음
+  (function(){ try{ const u=window.GSApp && GSApp.currentUser? GSApp.currentUser(): null; if(u && u.role==='admin'){ location.href='admin.html'; return; } }catch(_){} })();
+    function loadProfile(){
+      const user = window.GSApp.currentUser();
+      if(!user){ if(confirm('로그인 정보가 없습니다. 회원가입 하시겠습니까?')) window.location.href='signup.html'; return; }
+      const grid=document.getElementById('profileGrid');
+      const profileCard=document.getElementById('profileCard');
+      profileCard.hidden=false; grid.innerHTML='';
+    document.getElementById('summaryLine').innerHTML = `<strong>${user.username}</strong> | ${user.name} | ${user.phone} | ${user.email}`;
+  const fields=[['아이디',user.username],['이름',user.name],['생년월일',user.birth],['연락처',user.phone],['이메일',user.email],['은행',user.bank||'-'],['계좌번호',user.account||'-'],['가입일',new Date(user.created).toLocaleString('ko-KR')],['권한',user.role]];
+      fields.forEach(([l,v])=>{const div=document.createElement('div');div.className='field';div.innerHTML=`<label>${l}</label><span>${v||'-'}</span>`;grid.appendChild(div);});
+      renderOrders(user.orders||[]); renderMessages(user.messages||[]);
+    }
+    function renderOrders(list){
+      const container=document.getElementById('ordersContainer');
+  if(!list.length){container.innerHTML='<div class="orders-empty" data-i18n="orders_empty">없음</div>'; if(window.GSApp) GSApp.applyLang(); return;}
+      container.innerHTML='<table class="orders-table"><thead><tr><th>주문번호</th><th>상품</th><th>수량(g)</th><th>가격</th><th>일시</th></tr></thead><tbody>'+list.map(o=>`<tr><td>${o.id}</td><td>${o.item}</td><td style=text-align:right;>${o.qty}</td><td style=text-align:right;>${o.price.toLocaleString('ko-KR')}원</td><td>${new Date(o.ts).toLocaleString('ko-KR')}</td></tr>`).join('')+'</tbody></table>';
+    }
+    function renderMessages(list){
+      const wrap=document.getElementById('messagesWrap');
+      if(!wrap) return;
+      if(!list.length){wrap.innerHTML='<div class="orders-empty" data-i18n="messages_empty">문의가 없습니다.</div>'; if(window.GSApp) GSApp.applyLang(); return;}
+      wrap.innerHTML=list.slice().reverse().map(m=>{
+        const status = m.answered? GSApp.t('status_answered') : (m.read? GSApp.t('status_read'): GSApp.t('status_unread'));
+        return `<div class=\"msg-item\" data-id=\"${m.id}\" style=\"background:#0c1a18;padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:8px;position:relative;\">`
+        + `<div style=\"display:flex;justify-content:space-between;align-items:center;gap:8px;\">`
+        + `<div style=\"flex:1;\">${m.fromAdmin?'<strong style=\\"color:#FFD700;\\">[관리자]</strong> ':''}${m.content}</div>`
+        + `<span class=\"msg-status\" style=\"font-size:11px;padding:2px 6px;border-radius:10px;background:${m.answered?'#2e7d32':(m.read?'#455a64':'#b71c1c')};color:#fff;white-space:nowrap;\">${status}</span>`
+        + `</div>`
+        + `<div style=\"font-size:11px;color:#888;margin-top:4px;\">${new Date(m.ts).toLocaleString('ko-KR')}</div>`
+        + `</div>`;
+      }).join('');
+      const user=GSApp.currentUser(); if(user){ let changed=false; user.messages.forEach(m=>{ if(!m.read && !m.fromAdmin){ m.read=true; changed=true;} }); if(changed) GSApp.saveDB(); }
+      GSApp.applyLang();
+    }
+    document.getElementById('logoutBtn').addEventListener('click',()=>{ if(confirm('로그아웃 하시겠습니까?')) { window.GSApp.logout(); window.location.href='index.html'; } });
+  document.getElementById('addOrderBtn').addEventListener('click',async()=>{ const user=window.GSApp.currentUser(); if(!user) return; const item=prompt('상품명','골드바 3.75g'); if(!item) return; const qty=parseFloat(prompt('수량(g)','3.75')||''); if(!qty) return; const price=parseInt(prompt('가격','500000')||''); if(!price) return; await GSApp.addOrder(user.email,{item,qty,price}); loadProfile(); });
+  document.getElementById('mockOrderBtn').addEventListener('click',async()=>{ const user=window.GSApp.currentUser(); if(!user){alert('회원 정보 없음');return;} await window.GSApp.addOrder(user.email,{item:'골드바 3.75g',qty:3.75,price:Math.round(500000+Math.random()*50000)}); loadProfile(); });
+    document.getElementById('sendMsgBtn').addEventListener('click',async()=>{ const user=window.GSApp.currentUser(); if(!user) return; const txt=document.getElementById('msgInput').value.trim(); if(!txt) return; await window.GSApp.addMessage(user.email,txt,false); document.getElementById('msgInput').value=''; loadProfile(); });
+  loadProfile();
+  document.addEventListener('DOMContentLoaded',()=>{ if(window.GSApp){ GSApp.applyLang(); } });
+  </script>
+</body>
+</html>
