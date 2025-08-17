@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+	<title data-i18n="page_messages_title">쪽지 / 1:1 문의</title>
+	<link rel="stylesheet" href="style.css"/>
+	<style>
+		body{padding-top:100px;}
+		.wrap{max-width:780px;margin:0 auto;color:#fff;padding:20px 30px 60px;}
+		h1{font-size:30px;margin-bottom:24px;color:#4fc3f7;}
+		.msg-list .item{background:#0c1a18;border:1px solid #1e4d47;padding:12px 14px;border-radius:10px;margin-bottom:10px;}
+		.msg-list .item .meta{font-size:11px;color:#888;margin-top:6px;display:flex;gap:8px;align-items:center;}
+		.badge{display:inline-block;border-radius:999px;padding:2px 8px;font-size:11px;}
+		.badge.unread{background:#4527A0;color:#fff;}
+		.badge.read{background:#2E7D32;color:#fff;}
+		.badge.answered{background:#00695C;color:#fff;}
+		textarea{width:100%;min-height:90px;background:#0c1a18;color:#fff;border:1px solid #1e4d47;border-radius:8px;padding:10px;font-size:14px;resize:vertical;}
+		.btn{background:#00695C;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-size:14px;cursor:pointer;}
+		.btn:hover{background:#00897B;}
+		.item-actions{display:flex;gap:8px;margin-top:8px;justify-content:flex-end;}
+	</style>
+</head>
+<body>
+	<nav id="navbar">
+		<div class="container">
+			<div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="골드스타 로고"/></div>
+			<div class="nav-center">
+				<ul class="nav-links">
+					<li><a href="index.html#section1" data-i18n="nav_intro">소개</a></li>
+					<li><a href="index.html#section2" data-i18n="nav_progress">진행</a></li>
+					<li><a href="index.html#section3" data-i18n="nav_video">영상</a></li>
+					<li><a href="index.html#section4" data-i18n="nav_history">이력</a></li>
+					<li><a href="index.html#section5" data-i18n="nav_contact">문의</a></li>
+				</ul>
+			</div>
+			<div class="nav-right">
+				<select id="langSelect" class="lang-select" data-i18n-aria="aria_lang_select" aria-label="언어 선택">
+					<option value="ko">한국어</option>
+					<option value="zh">中文</option>
+					<option value="en">English</option>
+				</select>
+				<div id="userArea" class="user-area"></div>
+				<a href="index.html" class="user-link home-link" data-i18n="nav_home">홈</a>
+				<div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴" role="button" tabindex="0"><span></span><span></span><span></span></div>
+			</div>
+		</div>
+	</nav>
+	<main>
+		<div class="wrap">
+			<h1 data-i18n="page_messages_title">쪽지 / 1:1 문의</h1>
+			<div class="msg-list" id="msgList"></div>
+			<div style="margin-top:20px;">
+				<textarea id="newMsg" data-i18n-ph="placeholder_message" placeholder="문의 내용을 입력하세요"></textarea>
+				<div style="margin-top:10px;display:flex;justify-content:flex-end;gap:10px;">
+					<button class="btn" id="sendBtn" data-i18n="btn_send">보내기</button>
+				</div>
+			</div>
+		</div>
+	</main>
+	<script src="app.js"></script>
+	<script>
+		const menuBtn=document.querySelector('.menu-btn');
+		menuBtn.addEventListener('click',()=>{
+			menuBtn.classList.toggle('active');
+			document.querySelector('.nav-links').classList.toggle('active');
+		});
+
+		function badgeCls(m){
+			if(m.answered) return 'badge answered';
+			if(m.read) return 'badge read';
+			return 'badge unread';
+		}
+
+		function renderEmpty(){
+			document.getElementById('msgList').innerHTML=`<div class='orders-empty' data-i18n='messages_empty'>${GSApp.t('messages_empty')}</div>`;
+			GSApp.applyLang();
+		}
+
+		function render(list){
+			const box=document.getElementById('msgList');
+			box.innerHTML=list.slice().reverse().map(m=>{
+				const adminTag = m.fromAdmin ? `<strong style="color:#FFD700;" data-i18n="label_admin_tag">${GSApp.t('label_admin_tag')}</strong>` : '';
+				const status = m.answered ? GSApp.t('status_answered') : (m.read? GSApp.t('status_read'):GSApp.t('status_unread'));
+				const when = new Date(m.ts).toLocaleString();
+				return `
+				<div class='item' data-id='${m.id}'>
+					<div>${adminTag} ${m.content}</div>
+					<div class='meta'>
+						<span class="${badgeCls(m)}">${status}</span>
+						<span>${when}</span>
+					</div>
+					<div class='item-actions'>
+						<button class='btn btn-del' data-id='${m.id}' data-i18n='btn_delete'>삭제</button>
+					</div>
+				</div>`;
+			}).join('');
+			GSApp.applyLang();
+			// wire delete buttons
+			box.querySelectorAll('.btn-del').forEach(btn=>{
+				btn.addEventListener('click', async (e)=>{
+					const id=e.currentTarget.getAttribute('data-id');
+					if(!confirm(GSApp.t('messages_delete_confirm'))) return;
+					const user=GSApp.currentUser();
+					if(!user) return;
+					const idx=user.messages.findIndex(m=>m.id===id);
+					if(idx>-1){ user.messages.splice(idx,1); await GSApp.saveDB(); load(); }
+				})
+			});
+		}
+
+		function markReadAll(list){
+			let changed=false;
+			list.forEach(m=>{ if(!m.read && !m.fromAdmin){ m.read=true; changed=true; } });
+			if(changed) GSApp.saveDB();
+		}
+
+		function load(){
+			const user=GSApp.currentUser();
+			if(!user){ alert(GSApp.t('login_failed')); location.href='login.html'; return; }
+			const list=user.messages||[];
+			if(!list.length){ renderEmpty(); return; }
+			markReadAll(list);
+			render(list);
+		}
+
+		document.getElementById('sendBtn').addEventListener('click',async()=>{
+			const user=GSApp.currentUser();
+			if(!user) return;
+			const t=newMsg.value.trim();
+			if(!t) return;
+			await GSApp.addMessage(user.email,t,false);
+			newMsg.value='';
+			load();
+		});
+
+			document.addEventListener('DOMContentLoaded',()=>{
+				if(window.GSApp){ GSApp.applyLang(); GSApp.buildUserNav(); }
+			});
+
+		load();
+	</script>
+</body>
+</html>
