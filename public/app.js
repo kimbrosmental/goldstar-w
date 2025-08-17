@@ -27,11 +27,12 @@
   carousel_desc_1:'금 매장지 확인, 기초 전경',carousel_desc_2:'지하 매장지 채굴 현장 전경',carousel_desc_3:'우간다 금 매장지 현장 전경',carousel_desc_4:'금 매장지, 현지 작업자 선별 채굴 전경 1',carousel_desc_5:'금 매장지, 현지 작업자 선별 채굴 전경 2',carousel_desc_6:'현지 작업자들의 금 입자 수작업 분류',carousel_desc_7:'세척 후 금 입자 선별 장면',carousel_desc_8:'세척 후 금 입자 2차 선별 장면',carousel_desc_9:'주조용 용광로 온도 점검 및 선별 투입',carousel_desc_10:'금 함량 초기 검사',carousel_desc_11:'1차 가공 완료',carousel_desc_12:'금매장지 보안 경찰',carousel_desc_13:'채굴 계약 현장 전경',
       /* Signup */ page_signup_title:'회원가입',label_username:'아이디',btn_check_duplicate:'중복검사',dup_available:'사용 가능한 아이디입니다.',dup_unavailable:'이미 사용중인 아이디입니다.',dup_invalid_format:'형식 오류 (영문/숫자/_) 3~20자',dup_enter_username:'아이디를 입력하세요.',dup_need_check:'중복검사를 실행하세요.',label_name:'이름',label_birth:'생년월일 (YYYY-MM-DD)',label_phone:'연락처',label_email:'이메일',label_password:'비밀번호',label_password_confirm:'비밀번호 확인',label_bank:'은행',label_account:'계좌번호',btn_signup_submit:'가입하기',err_required_all:'모든 항목을 입력해주세요.',err_need_dup_check:'아이디 중복검사를 해주세요.',err_password_mismatch:'비밀번호가 일치하지 않습니다.',err_email_format:'이메일 형식에 맞게 입력해 주세요.',signup_success_redirect:'가입 완료! 잠시 후 내 정보 페이지로 이동합니다.',placeholder_username:'영문/숫자/밑줄 3~20자',placeholder_account:'하이픈 없이 숫자',
       /* Login */ page_login_title:'로그인',label_login_id:'아이디',btn_login_submit:'로그인',login_success:'로그인 성공',login_failed:'로그인 실패',
-  /* Profile */ page_profile_title:'내 정보',section_member_info:'회원 기본 정보',section_orders:'주문 내역',section_messages:'1:1 문의',btn_send:'보내기',note_admin_only_reply:'관리자만 답변을 남길 수 있습니다.',orders_empty:'없음',messages_empty:'문의가 없습니다.',btn_logout:'로그아웃',btn_mock_order_add:'모의 주문 추가',field_username:'아이디',field_name:'이름',field_birth:'생년월일',field_phone:'연락처',field_email:'이메일',field_bank:'은행',field_account:'계좌번호',field_joined:'가입일',field_role:'권한',status_unread:'미읽음',status_read:'읽음',status_answered:'답변 완료',btn_mark_read:'읽음 처리',btn_reply:'답변',btn_order_add:'주문 추가',btn_change_password:'비밀번호 변경',pw_change_success:'비밀번호가 변경되었습니다.',pw_change_fail:'비밀번호 변경 실패',
-  /* Admin */ page_admin_title:'관리자 페이지',section_users:'회원 목록',section_add_user:'신규 회원 추가',btn_add_user:'추가',msg_required_fields:'필수 항목',section_orders_admin:'주문 관리',orders_empty_admin:'주문 없음',section_messages_admin:'1:1 문의',messages_empty_admin:'쪽지 없음',section_admin_reply:'관리자 답변',label_reply_email:'회원 이메일',label_reply_content:'답변 내용',btn_send_reply:'답변 보내기',msg_add_success:'추가 완료',msg_reply_success:'전송 완료',action_delete:'삭제',btn_edit:'수정',btn_save:'저장',btn_cancel:'취소',btn_reset_pw:'PW 변경',btn_add_order_admin:'주문 추가',btn_edit_order:'수정',msg_update_success:'수정 완료',msg_update_fail:'수정 실패',msg_pw_reset_success:'비밀번호 변경 완료',msg_pw_reset_fail:'비밀번호 변경 실패',
+  /* Profile */ page_profile_title:'내 정보',section_member_info:'회원 기본 정보',section_orders:'주문 내역',section_messages:'1:1 문의',btn_send:'보내기',note_admin_only_reply:'관리자만 답변을 남길 수 있습니다.',orders_empty:'없음',messages_empty:'문의가 없습니다.',btn_logout:'로그아웃',btn_mock_order_add:'모의 주문 추가',field_username:'아이디',field_name:'이름',field_birth:'생년월일',field_phone:'연락처',field_email:'이메일',field_bank:'은행',field_account:'계좌번호',field_joined:'가입일',field_role:'권한',status_unread:'미읽음',status_read:'읽음',status_answered:'답변 완료',btn_mark_read:'읽음 처리',btn_reply:'답변',btn_order_add:'주문 추가',btn_change_password:'비밀번호 변경',btn_change_admin_password:'관리자 비밀번호 변경',pw_change_success:'비밀번호가 변경되었습니다.',pw_change_fail:'비밀번호 변경 실패',
+  /* Admin */ page_admin_title:'관리자 페이지',tab_users_admin:'회원 관리',section_users:'회원 목록',section_add_user:'신규 회원 추가',btn_add_user:'추가',msg_required_fields:'필수 항목',section_orders_admin:'주문 관리',orders_empty_admin:'주문 없음',section_messages_admin:'1:1 문의',messages_empty_admin:'쪽지 없음',section_admin_reply:'관리자 답변',label_reply_email:'회원 이메일',label_reply_content:'답변 내용',btn_send_reply:'답변 보내기',msg_add_success:'추가 완료',msg_reply_success:'전송 완료',action_delete:'삭제',btn_edit:'수정',btn_save:'저장',btn_cancel:'취소',btn_reset_pw:'PW 변경',btn_add_order_admin:'주문 추가',btn_edit_order:'수정',msg_update_success:'수정 완료',msg_update_fail:'수정 실패',msg_pw_reset_success:'비밀번호 변경 완료',msg_pw_reset_fail:'비밀번호 변경 실패',
   section_admin_info:'관리자 정보',btn_refresh:'새로고침',
   /* Messages */ page_messages_title:'쪽지 / 1:1 문의',placeholder_message:'문의 내용을 입력하세요',label_admin_tag:'[관리자]',messages_delete_confirm:'삭제하시겠습니까?',
-  /* General */ btn_delete:'삭제'
+  /* General */ btn_delete:'삭제',
+  btn_translate:'번역'
     },
     zh:{
   nav_home:'主页',nav_intro:'介绍',nav_progress:'进展',nav_video:'视频',nav_history:'履历',nav_contact:'咨询',nav_signup:'注册',nav_login:'登录',nav_profile:'我的信息',nav_admin:'管理',nav_messages:'消息',
@@ -54,10 +55,11 @@
   carousel_desc_1:'确认矿区，基础全景',carousel_desc_2:'地下矿区采掘现场',carousel_desc_3:'乌干达金矿现场',carousel_desc_4:'矿区，人工筛选采掘 1',carousel_desc_5:'矿区，人工筛选采掘 2',carousel_desc_6:'人工分拣金粒',carousel_desc_7:'清洗后金粒筛选',carousel_desc_8:'清洗后金粒二次筛选',carousel_desc_9:'熔炼炉温度检查与投料',carousel_desc_10:'金含量初检',carousel_desc_11:'一次加工完成',carousel_desc_12:'矿区武装警卫',carousel_desc_13:'采矿合约现场',
       page_signup_title:'注册',label_username:'账号',btn_check_duplicate:'重复检测',dup_available:'可用的账号。',dup_unavailable:'账号已被占用。',dup_invalid_format:'格式错误 (字母/数字/下划线 3~20)',dup_enter_username:'请输入账号。',dup_need_check:'请执行重复检测。',label_name:'姓名',label_birth:'出生日期 (YYYY-MM-DD)',label_phone:'联系方式',label_email:'邮箱',label_password:'密码',label_password_confirm:'确认密码',label_bank:'银行',label_account:'账号',btn_signup_submit:'注册',err_required_all:'请填写所有项目。',err_need_dup_check:'请进行账号重复检测。',err_password_mismatch:'两次密码不一致。',err_email_format:'请输入正确的邮箱格式。',signup_success_redirect:'注册完成! 即将跳转至我的信息页面。',placeholder_username:'字母/数字/下划线 3~20',placeholder_account:'不含连字符数字',
       page_login_title:'登录',label_login_id:'账号',btn_login_submit:'登录',login_success:'登录成功',login_failed:'登录失败',
-  page_profile_title:'我的信息',section_member_info:'会员基本信息',section_orders:'订单记录',section_messages:'1:1 咨询',btn_send:'发送',note_admin_only_reply:'只有管理员可以回复。',orders_empty:'无',messages_empty:'没有咨询。',btn_logout:'登出',btn_mock_order_add:'添加模拟订单',field_username:'账号',field_name:'姓名',field_birth:'出生日期',field_phone:'联系方式',field_email:'邮箱',field_bank:'银行',field_account:'账号',field_joined:'注册时间',field_role:'角色',status_unread:'未读',status_read:'已读',status_answered:'已回复',btn_mark_read:'标记已读',btn_reply:'回复',btn_order_add:'新增订单',btn_change_password:'修改密码',pw_change_success:'密码已修改。',pw_change_fail:'修改失败',
-  page_admin_title:'管理员页面',section_users:'会员列表',section_add_user:'新增会员',btn_add_user:'添加',msg_required_fields:'必填项目',section_orders_admin:'订单管理',orders_empty_admin:'无订单',section_messages_admin:'1:1 咨询',messages_empty_admin:'无消息',section_admin_reply:'管理员回复',label_reply_email:'会员邮箱',label_reply_content:'回复内容',btn_send_reply:'发送回复',msg_add_success:'添加完成',msg_reply_success:'发送完成',action_delete:'删除',btn_edit:'编辑',btn_save:'保存',btn_cancel:'取消',btn_reset_pw:'改密',btn_add_order_admin:'新增订单',btn_edit_order:'编辑',msg_update_success:'修改完成',msg_update_fail:'修改失败',msg_pw_reset_success:'密码已更改',msg_pw_reset_fail:'更改失败',
+  page_profile_title:'我的信息',section_member_info:'会员基本信息',section_orders:'订单记录',section_messages:'1:1 咨询',btn_send:'发送',note_admin_only_reply:'只有管理员可以回复。',orders_empty:'无',messages_empty:'没有咨询。',btn_logout:'登出',btn_mock_order_add:'添加模拟订单',field_username:'账号',field_name:'姓名',field_birth:'出生日期',field_phone:'联系方式',field_email:'邮箱',field_bank:'银行',field_account:'账号',field_joined:'注册时间',field_role:'角色',status_unread:'未读',status_read:'已读',status_answered:'已回复',btn_mark_read:'标记已读',btn_reply:'回复',btn_order_add:'新增订单',btn_change_password:'修改密码',btn_change_admin_password:'管理员密码修改',pw_change_success:'密码已修改。',pw_change_fail:'修改失败',
+  page_admin_title:'管理员页面',tab_users_admin:'会员管理',section_users:'会员列表',section_add_user:'新增会员',btn_add_user:'添加',msg_required_fields:'必填项目',section_orders_admin:'订单管理',orders_empty_admin:'无订单',section_messages_admin:'1:1 咨询',messages_empty_admin:'无消息',section_admin_reply:'管理员回复',label_reply_email:'会员邮箱',label_reply_content:'回复内容',btn_send_reply:'发送回复',msg_add_success:'添加完成',msg_reply_success:'发送完成',action_delete:'删除',btn_edit:'编辑',btn_save:'保存',btn_cancel:'取消',btn_reset_pw:'改密',btn_add_order_admin:'新增订单',btn_edit_order:'编辑',msg_update_success:'修改完成',msg_update_fail:'修改失败',msg_pw_reset_success:'密码已更改',msg_pw_reset_fail:'更改失败',
   section_admin_info:'管理员信息',btn_refresh:'刷新',
-  page_messages_title:'消息 / 1:1 咨询',placeholder_message:'请输入咨询内容',label_admin_tag:'[管理员]',messages_delete_confirm:'确定删除吗？',btn_delete:'删除'
+  page_messages_title:'消息 / 1:1 咨询',placeholder_message:'请输入咨询内容',label_admin_tag:'[管理员]',messages_delete_confirm:'确定删除吗？',btn_delete:'删除',
+  btn_translate:'翻译'
     },
     en:{
   nav_home:'Home',nav_intro:'Intro',nav_progress:'Process',nav_video:'Video',nav_history:'History',nav_contact:'Contact',nav_signup:'Sign Up',nav_login:'Login',nav_profile:'My Info',nav_admin:'Admin',nav_messages:'Messages',
@@ -80,10 +82,11 @@
   carousel_desc_1:'Verifying site, overview',carousel_desc_2:'Underground mining site view',carousel_desc_3:'Uganda gold site view',carousel_desc_4:'On-site manual selection 1',carousel_desc_5:'On-site manual selection 2',carousel_desc_6:'Manual sorting of gold particles',carousel_desc_7:'Post-wash gold particle sorting',carousel_desc_8:'Second sorting after wash',carousel_desc_9:'Furnace temp check & feed',carousel_desc_10:'Initial fineness test',carousel_desc_11:'Primary processing complete',carousel_desc_12:'Mine security police',carousel_desc_13:'Mining contract scene',
       page_signup_title:'Sign Up',label_username:'Username',btn_check_duplicate:'Check',dup_available:'Username is available.',dup_unavailable:'Username already taken.',dup_invalid_format:'Invalid format (letters/numbers/_ 3-20)',dup_enter_username:'Enter a username.',dup_need_check:'Run duplicate check.',label_name:'Name',label_birth:'Birth (YYYY-MM-DD)',label_phone:'Phone',label_email:'Email',label_password:'Password',label_password_confirm:'Confirm Password',label_bank:'Bank',label_account:'Account Number',btn_signup_submit:'Register',err_required_all:'Please fill all fields.',err_need_dup_check:'Please run username duplicate check.',err_password_mismatch:'Passwords do not match.',err_email_format:'Enter a valid email.',signup_success_redirect:'Sign up complete! Redirecting...',placeholder_username:'Letters/Numbers/_ 3-20',placeholder_account:'Digits only',
       page_login_title:'Login',label_login_id:'Username',btn_login_submit:'Login',login_success:'Login success',login_failed:'Login failed',
-  page_profile_title:'My Info',section_member_info:'Member Basic Info',section_orders:'Orders',section_messages:'1:1 Inquiry',btn_send:'Send',note_admin_only_reply:'Only admin can reply.',orders_empty:'None',messages_empty:'No inquiries.',btn_logout:'Logout',btn_mock_order_add:'Add Mock Order',field_username:'Username',field_name:'Name',field_birth:'Birth',field_phone:'Phone',field_email:'Email',field_bank:'Bank',field_account:'Account',field_joined:'Joined',field_role:'Role',status_unread:'Unread',status_read:'Read',status_answered:'Answered',btn_mark_read:'Mark Read',btn_reply:'Reply',btn_order_add:'Add Order',btn_change_password:'Change Password',pw_change_success:'Password updated.',pw_change_fail:'Password update failed',
-  page_admin_title:'Admin Page',section_users:'Users',section_add_user:'Add User',btn_add_user:'Add',msg_required_fields:'Required fields missing',section_orders_admin:'Order Management',orders_empty_admin:'No orders',section_messages_admin:'1:1 Inquiry',messages_empty_admin:'No messages',section_admin_reply:'Admin Reply',label_reply_email:'User Email',label_reply_content:'Reply Content',btn_send_reply:'Send Reply',msg_add_success:'Added',msg_reply_success:'Sent',action_delete:'Delete',btn_edit:'Edit',btn_save:'Save',btn_cancel:'Cancel',btn_reset_pw:'Change PW',btn_add_order_admin:'Add Order',btn_edit_order:'Edit',msg_update_success:'Update complete',msg_update_fail:'Update failed',msg_pw_reset_success:'Password updated',msg_pw_reset_fail:'Password update failed',
+  page_profile_title:'My Info',section_member_info:'Member Basic Info',section_orders:'Orders',section_messages:'1:1 Inquiry',btn_send:'Send',note_admin_only_reply:'Only admin can reply.',orders_empty:'None',messages_empty:'No inquiries.',btn_logout:'Logout',btn_mock_order_add:'Add Mock Order',field_username:'Username',field_name:'Name',field_birth:'Birth',field_phone:'Phone',field_email:'Email',field_bank:'Bank',field_account:'Account',field_joined:'Joined',field_role:'Role',status_unread:'Unread',status_read:'Read',status_answered:'Answered',btn_mark_read:'Mark Read',btn_reply:'Reply',btn_order_add:'Add Order',btn_change_password:'Change Password',btn_change_admin_password:'Change Admin Password',pw_change_success:'Password updated.',pw_change_fail:'Password update failed',
+  page_admin_title:'Admin Page',tab_users_admin:'User Management',section_users:'Users',section_add_user:'Add User',btn_add_user:'Add',msg_required_fields:'Required fields missing',section_orders_admin:'Order Management',orders_empty_admin:'No orders',section_messages_admin:'1:1 Inquiry',messages_empty_admin:'No messages',section_admin_reply:'Admin Reply',label_reply_email:'User Email',label_reply_content:'Reply Content',btn_send_reply:'Send Reply',msg_add_success:'Added',msg_reply_success:'Sent',action_delete:'Delete',btn_edit:'Edit',btn_save:'Save',btn_cancel:'Cancel',btn_reset_pw:'Change PW',btn_add_order_admin:'Add Order',btn_edit_order:'Edit',msg_update_success:'Update complete',msg_update_fail:'Update failed',msg_pw_reset_success:'Password updated',msg_pw_reset_fail:'Password update failed',
   section_admin_info:'Admin Info',btn_refresh:'Refresh',
-  page_messages_title:'Messages / 1:1 Inquiry',placeholder_message:'Enter your inquiry',label_admin_tag:'[Admin]',messages_delete_confirm:'Delete this message?',btn_delete:'Delete'
+  page_messages_title:'Messages / 1:1 Inquiry',placeholder_message:'Enter your inquiry',label_admin_tag:'[Admin]',messages_delete_confirm:'Delete this message?',btn_delete:'Delete',
+  btn_translate:'Translate'
     }
   };
 
@@ -266,14 +269,77 @@
     try{ const cu = currentUser(); if(cu){ cu.lastSeenAt = Date.now(); saveDB(db); } }catch(_){ }
     const langSel=document.getElementById('langSelect');
     if(langSel){ langSel.value=currentLang(); langSel.addEventListener('change',e=>{ localStorage.setItem('lang_pref',e.target.value); applyLang(); }); }
-    // Auto-trigger refresh buttons on page load (if present)
-    setTimeout(()=>{
+    // Translate button: apply selected language on demand
+    document.addEventListener('click', (ev)=>{
+      const tBtn = ev.target.closest('#translateBtn');
+      if(tBtn){
+        ev.preventDefault();
+        try{
+          const sel=document.getElementById('langSelect');
+          const lang = sel?.value || currentLang();
+          localStorage.setItem('lang_pref', lang);
+          applyLang();
+          buildUserNav();
+        }catch(e){ 
+          console.log('Translation error:', e);
+        }
+      }
+      // Global fallback for logout button if page misses handler
+      const logoutBtn = ev.target.closest('#btnLogout');
+      if(logoutBtn){ 
+        ev.preventDefault(); 
+        try{ logout(); }catch(_){ } 
+        location.href='index.html'; 
+      }
+    }, { capture:true });
+    // Security and privacy meta (best-effort for static hosting)
+    try{
+      const head=document.head;
+      if(!document.querySelector('meta[name="robots"]')){
+        const m=document.createElement('meta'); m.name='robots'; m.content='noindex, nofollow, noarchive, nosnippet'; head.appendChild(m);
+      }
+      if(!document.querySelector('meta[http-equiv="Referrer-Policy"]')){
+        const m=document.createElement('meta'); m.setAttribute('http-equiv','Referrer-Policy'); m.setAttribute('content','no-referrer'); head.appendChild(m);
+      }
+      if(!document.querySelector('meta[http-equiv="Content-Security-Policy"]')){
+        const m=document.createElement('meta'); m.setAttribute('http-equiv','Content-Security-Policy'); m.setAttribute('content',"default-src 'self'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"); head.appendChild(m);
+      }
+    }catch(_){ }
+    // Client-side actions to deter copying/downloading
+    document.addEventListener('contextmenu', e=> e.preventDefault());
+    document.addEventListener('dragstart', e=> e.preventDefault());
+    document.addEventListener('copy', e=> { try{ e.clipboardData?.setData('text/plain',''); }catch(_){} e.preventDefault(); });
+    document.addEventListener('keydown', e=>{
+      const block = (e.ctrlKey||e.metaKey) && ['s','p','u','c'].includes((e.key||'').toLowerCase());
+      const dev = e.key==='F12' || (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key));
+      if(block||dev) e.preventDefault();
+    });
+    document.querySelectorAll('img,video').forEach(el=>{ el.setAttribute('draggable','false'); el.setAttribute('oncontextmenu','return false'); });
+
+    // Auto-trigger refresh buttons on page load and when page becomes visible
+    const triggerRefresh = ()=>{
+      // Prefer direct functions if present
+      try{
+        if(typeof window.renderAll==='function') window.renderAll();
+        if(typeof window.renderOrdersAll==='function') window.renderOrdersAll();
+        if(typeof window.renderInquiriesAll==='function') window.renderInquiriesAll();
+      }catch(_){ }
+      // Also click refresh buttons as a fallback
       ['btnUsersRefresh','btnOrdersRefresh','btnInqRefresh'].forEach(id=>{
         const el = document.getElementById(id);
         if(el && typeof el.click === 'function'){
           try{ el.click(); }catch(_){ }
         }
       });
-    }, 200);
+      // Clear any session-based auto-refresh flag
+      try{ sessionStorage.removeItem('admin_auto_refresh'); }catch(_){ }
+    };
+    // try immediately, then short fallback
+  // If coming from a tab navigation, honor auto-refresh flag
+  try{ if(sessionStorage.getItem('admin_auto_refresh')==='1') { triggerRefresh(); } }catch(_){ }
+  triggerRefresh();
+  setTimeout(triggerRefresh, 150);
+    document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') triggerRefresh(); });
+    window.addEventListener('pageshow', triggerRefresh);
   });
 })();

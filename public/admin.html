@@ -54,7 +54,7 @@
 		<div class="headbar">
 			<div class="tabs" role="tablist" aria-label="Admin Tabs">
 				<button class="btn" id="tabUsers" type="button" role="tab" aria-controls="panelUsers" aria-selected="false" style="min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
-					<span>👤</span><span data-i18n="section_users">회원 관리</span>
+					<span>👤</span><span data-i18n="tab_users_admin">회원 관리</span>
 				</button>
 				<button class="btn" id="tabOrders" type="button" role="tab" aria-controls="panelOrders" aria-selected="false" style="min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
 					<span>🧾</span><span data-i18n="section_orders_admin">주문 관리</span>
@@ -65,8 +65,8 @@
 				</button>
 			</div>
 			<div class="right-tools">
-				<button class="btn" id="btnChangePw" data-i18n="btn_change_password">비밀번호 변경</button>
-				<button class="btn danger" id="btnLogout">로그아웃</button>
+				<button class="btn" id="btnChangePw" data-i18n="btn_change_admin_password">관리자 비밀번호 변경</button>
+				<button class="btn danger" id="btnLogout" type="button">로그아웃</button>
 				<span id="pwChangeMsg" class="hint"></span>
 			</div>
 		</div>
@@ -167,7 +167,7 @@
 			}, 120);
 		}
 		const menuBtn=document.querySelector('.menu-btn');
-		menuBtn.addEventListener('click',()=>{menuBtn.classList.toggle('active');document.querySelector('.nav-links').classList.toggle('active');});
+		menuBtn?.addEventListener('click',()=>{menuBtn.classList.toggle('active');document.querySelector('.nav-links')?.classList.toggle('active');});
 
 		function requireAdmin(){const u=GSApp.currentUser();if(!u||u.role!=="admin"){alert('관리자 권한 필요');location.href='login.html';return false;}return true;}
 
@@ -185,7 +185,7 @@
 			catch(e){ pwChangeMsg.style.color='#ff5252'; pwChangeMsg.textContent=GSApp.t('pw_change_fail'); }
 		});
 
-		document.getElementById('btnLogout').addEventListener('click',()=>{ GSApp.logout(); location.href='index.html'; });
+		document.getElementById('btnLogout').addEventListener('click',(e)=>{ e.preventDefault(); GSApp.logout(); location.href='index.html'; });
 
 		async function activate(tabId){
 				// visual active + aria selected
@@ -210,6 +210,10 @@
 				const url = new URL(location.href);
 				url.searchParams.set('page', page);
 				history.replaceState(null, '', url.toString());
+					// 탭 활성화 즉시, 해당 패널의 새로고침 버튼 클릭과 동일한 효과 실행
+					const refreshMap = { tabUsers:'btnUsersRefresh', tabOrders:'btnOrdersRefresh', tabInquiries:'btnInqRefresh' };
+					const refreshBtnId = refreshMap[tabId];
+					if(refreshBtnId){ const rb = document.getElementById(refreshBtnId); if(rb && typeof rb.click==='function'){ try{ rb.click(); }catch(_){} } }
 			}catch(_){/* no-op */}
 		}
 		function initTabs(){

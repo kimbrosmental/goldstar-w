@@ -3,11 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title data-i18n="site_title">회사 홈페이지</title>
+  <title>회사 홈페이지</title>
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta http-equiv="Referrer-Policy" content="no-referrer">
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
+    /* Intro Fullscreen */
+    #introOverlay{position:fixed;inset:0;z-index:99999;background:#000;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity .5s ease;}
+    #introOverlay.hidden{opacity:0;pointer-events:none;}
+    #introOverlay img{
+      width:100vw;
+      height:100vh;
+      object-fit:cover;
+      /* GPU 가속 및 부드러운 애니메이션을 위한 속성 */
+      will-change:transform;
+      transform:translateZ(0);
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      /* 브라우저별 부드러운 렌더링 */
+      image-rendering:-webkit-optimize-contrast;
+      image-rendering:-moz-crisp-edges;
+      image-rendering:crisp-edges;
+      /* 안티에일리어싱 */
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
     /* ---------------- Section2 레이아웃 조정 ---------------- */
     #section2 .content {
       padding-top: 20px;
@@ -65,28 +87,78 @@
       #section1 .price-image { display: none !important; }
       #section1 .gold-content { justify-content: center; flex-direction: column; }
     }
+
+    /* 버튼 스타일 추가 */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #d4af37;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color 0.3s, transform 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-icon {
+      margin-right: 8px;
+      font-size: 18px;
+    }
+    .btn:before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 300%;
+      height: 300%;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transition: transform 0.3s;
+      z-index: 0;
+      transform: translate(-50%, -50%) scale(0);
+    }
+    .btn:hover:before {
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .btn:hover {
+      background-color: #b5942b;
+      transform: translateY(-2px);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
 
+  <!-- Intro overlay (plays once per session, now MP4 for smooth playback) -->
+  <div id="introOverlay" aria-hidden="true" role="dialog">
+    <video id="introVideo" autoplay muted playsinline preload="auto" style="width:100vw;height:100vh;object-fit:cover;" poster="img/logo.png">
+      <source src="https://www.dropbox.com/scl/fi/uxylpdl0eyj9ebivrr1db/gold-intro.mp4?rlkey=tfs5khgzwo6xsyxkh83u7pj71&raw=1" type="video/mp4" />
+      브라우저가 인트로 영상을 지원하지 않습니다.
+    </video>
+  </div>
+
   <nav id="navbar">
     <div class="container">
-  <div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="골드스타 로고"></div>
+  <div class="logo"><img src="img/logo.png" alt="골드스타 로고"></div>
   <div class="nav-center">
         <ul class="nav-links">
-          <li><a href="#section1" data-i18n="nav_intro">소개</a></li>
-          <li><a href="#section2" data-i18n="nav_progress">진행</a></li>
-          <li><a href="#section3" data-i18n="nav_video">영상</a></li>
-          <li><a href="#section4" data-i18n="nav_history">이력</a></li>
-          <li><a href="#section5" data-i18n="nav_contact">문의</a></li>
+          <li><a href="#section1">소개</a></li>
+          <li><a href="#section2">진행</a></li>
+          <li><a href="#section3">영상</a></li>
+          <li><a href="#section4">이력</a></li>
+          <li><a href="#section5">문의</a></li>
         </ul>
       </div>
       <div class="nav-right">
-        <select id="langSelect" class="lang-select" data-i18n-aria="aria_lang_select" aria-label="언어 선택">
-          <option value="ko">한국어</option>
-          <option value="zh">中文</option>
-          <option value="en">English</option>
-        </select>
+  <!-- 번역/언어 선택 제거 -->
         <div id="userArea" class="user-area"></div>
   <div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴 열기" role="button" tabindex="0">
           <span></span><span></span><span></span>
@@ -119,21 +191,21 @@
         </h2>
         <div class="price-box gold-box" id="priceBox">
           <div class="gold-content">
-            <img src="img/gold-bar.jpg" class="price-image" data-i18n-alt="alt_goldbar" alt="골드바 이미지">
+            <img src="img/gold-bar.jpg" class="price-image" alt="골드바 이미지">
             <div class="gold-text">
-              <h2 class="price-title" data-i18n="price_today">오늘의 금 시세 (3.75g)</h2>
+              <h2 class="price-title">오늘의 금 시세 (3.75g)</h2>
               <div id="mainPrice" class="main-price">로딩중…</div>
               <div id="priceChange" class="change-line"></div>
-              <span class="compare-note" data-i18n="note_prev_change">[전일 기준 시세변동폭]</span>
+              <span class="compare-note">[전일 기준 시세변동폭]</span>
             </div>
           </div>
         </div>
         <div class="price-box supply-box">
-          <h2 class="price-title supply" data-i18n="supply_price">공급 가격 (3.75g)</h2>
+          <h2 class="price-title supply">공급 가격 (3.75g)</h2>
           <div class="main-price supply-price">520,000원</div>
           <div class="supply-footer">
             <span class="change-line">–</span>
-            <span class="compare-note" data-i18n="note_compare_now">[현 시세 기준과 비교]</span>
+            <span class="compare-note">[현 시세 기준과 비교]</span>
           </div>
         </div>
       </div>
@@ -143,11 +215,11 @@
     <section id="section2" class="section">
       <div class="content">
         <div class="story-content">
-          <h2 data-i18n="section2_title">검은 대륙의 금맥</h2>
+          <h2>검은 대륙의 금맥</h2>
           <div class="story-grid">
-            <div class="story-item"><h3 data-i18n="section2_stat_1_title">3억2천만톤</h3><p data-i18n="section2_stat_1_desc">2023년 우간다 금 매장량 발견</p></div>
-            <div class="story-item"><h3 data-i18n="section2_stat_2_title">글로벌 주목</h3><p data-i18n="section2_stat_2_desc">12조원 가치평가, CNN, BBC 등 해외 언론 집중 보도</p></div>
-            <div class="story-item"><h3 data-i18n="section2_stat_3_title">독점 계약</h3><p data-i18n="section2_stat_3_desc">우간다 금맥, 중국 광산업체들과 채굴 독점 계약 체결 → 골드 스타, 중국 업체와 수입계약 체결</p></div>
+            <div class="story-item"><h3>3억2천만톤</h3><p>2023년 우간다 금 매장량 발견</p></div>
+            <div class="story-item"><h3>글로벌 주목</h3><p>12조원 가치평가, CNN, BBC 등 해외 언론 집중 보도</p></div>
+            <div class="story-item"><h3>독점 계약</h3><p>우간다 금맥, 중국 광산업체들과 채굴 독점 계약 체결 → 골드 스타, 중국 업체와 수입계약 체결</p></div>
           </div>
         </div>
         <div class="carousel-wrapper">
@@ -160,26 +232,26 @@
     <section id="section3" class="section">
       <div class="content">
         <div class="process-content">
-          <h2 data-i18n="section3_title">유통 구조의 혁신</h2>
+          <h2>유통 구조의 혁신</h2>
           <!-- 상단 행: 좌측 설명, 우측 영상 -->
           <div class="video-row top">
-            <div class="desc" data-i18n="video1_desc">상단 영상 설명을 여기에 입력하세요.</div>
+            <div class="desc">상단 영상 설명을 여기에 입력하세요.</div>
             <div class="video-wrap">
-              <video controls width="600">
-                <source src="img/movie-1.mp4" type="video/mp4" />
-                <span data-i18n="video_not_supported">브라우저가 동영상을 지원하지 않습니다.</span>
+              <video controls width="600" playsinline preload="metadata" autoplay muted loop disablepictureinpicture controlsList="nodownload noplaybackrate">
+                <source src="https://www.dropbox.com/scl/fi/efoo333ngirzngmdrurd4/movie-1.mp4?rlkey=v24nt37cux82nn9aazn261rhv&raw=1" type="video/mp4" />
+                <span>브라우저가 동영상을 지원하지 않습니다.</span>
               </video>
             </div>
           </div>
           <!-- 하단 행: 좌측 영상, 우측 설명 -->
           <div class="video-row bottom">
             <div class="video-wrap">
-              <video controls width="600">
-                <source src="img/movie-2.mp4" type="video/mp4" />
+              <video controls width="600" playsinline preload="metadata" autoplay muted loop disablepictureinpicture controlsList="nodownload noplaybackrate">
+                <source src="https://www.dropbox.com/scl/fi/71q6v1ntaebtudq2ttpwq/movie-2.mp4?rlkey=7xw94d6yho2bcf3b6l4wsarse&raw=1" type="video/mp4" />
                 <span data-i18n="video_not_supported">브라우저가 동영상을 지원하지 않습니다.</span>
               </video>
             </div>
-            <div class="desc" data-i18n="video2_desc">하단 영상 설명을 여기에 입력하세요.</div>
+            <div class="desc">하단 영상 설명을 여기에 입력하세요.</div>
           </div>
         </div>
       </div>
@@ -189,13 +261,53 @@
     <section id="section4" class="section">
       <div class="content">
         <div class="achievement-content">
-          <h2 data-i18n="section4_title">실제 공급 성과</h2>
+          <h2>실제 공급 성과</h2>
           <div class="achievement-grid">
-            <div class="achievement-item"><h3>192kg</h3><p data-i18n="section4_desc_total">총 공급 완료량</p></div>
-            <div class="achievement-item"><h3>13.4%</h3><p data-i18n="section4_desc_discount">시세 대비 평균 할인율</p></div>
-            <div class="achievement-item"><h3>1,982명</h3><p data-i18n="section4_desc_members">누적 참여 회원</p></div>
+            <div class="achievement-item"><h3>55kg</h3><p>총 공급 완료량</p></div>
+            <div class="achievement-item"><h3>18.4%</h3><p>시세 대비 평균 할인율</p></div>
+            <div class="achievement-item"><h3>1,581명</h3><p>누적 참여 회원</p></div>
           </div>
-          <div class="testimonials"><img src="img/gold-delivery.jpg" alt="실제 금괴 배송"></div>
+          <div class="trade-history-box">
+            <h3 class="trade-history-title">주요 이력</h3>
+            <div class="trade-grid">
+              <div class="achievement-item trade-card">
+                <div class="trade-card-header">
+                  <span class="trade-card-icon">📝</span>
+                  <span class="trade-card-title">2020년 3월 15일 · 우간다</span>
+                </div>
+                <div class="trade-card-body">
+                  <div class="trade-card-row"><b>참여 인원:</b> 7명 (구매팀 3, 품질검수 2, 물류/보험 2)</div>
+                  <div class="trade-card-row"><b>수입 물량:</b> 18kg 금괴 (약 $580,000)</div>
+                  <div class="trade-card-row"><b>총 수입:</b> 4,800돈</div>
+                  <div class="trade-card-row"><b>거래 내용:</b> 우간다 서부 Mubende 지역 원광 정제 후 수출, 공식 계약 및 허가, 인천공항 도착 후 통관.</div>
+                  <div class="trade-card-row"><b>특징:</b> 첫 아프리카 직도입, 일부는 투자형 골드바 제작.</div>
+                </div>
+                <div class="trade-card-summary">
+                  <span><b>국제 시세:</b> $1,530/oz (1g ≈ $49.2)</span>
+                  <span><b>환율:</b> 1USD ≈ 1,220원</span>
+                  <span><b>총 금액:</b> $885,600 / 약 10.8억원</span>
+                </div>
+              </div>
+              <div class="achievement-item trade-card">
+                <div class="trade-card-header">
+                  <span class="trade-card-icon">📝</span>
+                  <span class="trade-card-title">2023년 11월 8일 · 우간다</span>
+                </div>
+                <div class="trade-card-body">
+                  <div class="trade-card-row"><b>참여 인원:</b> 12명 (구매팀 4, 감정 2, 물류 4, 보험 2)</div>
+                  <div class="trade-card-row"><b>수입 물량:</b> 32kg 금괴 + 5kg 금선</div>
+                  <div class="trade-card-row"><b>총 수입:</b> 9,867돈</div>
+                  <div class="trade-card-row"><b>거래 내용:</b> 우간다 금광 → 정제소 → 두바이 경유 → 한국, 순도 인증서 확보, 서울 보세창고 보관.</div>
+                  <div class="trade-card-row"><b>특징:</b> 연간 수입량 25% 규모, 주얼리 제작 활용.</div>
+                </div>
+                <div class="trade-card-summary">
+                  <span><b>국제 시세:</b> $1,950/oz (1g ≈ $62.7)</span>
+                  <span><b>환율:</b> 1USD ≈ 1,300원</span>
+                  <span><b>총 금액:</b> $2,319,900 / 약 30.1억원</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -203,38 +315,48 @@
     <!-- Section5 -->
     <section id="section5" class="section">
       <div class="content center">
-  <h2 class="section5-title" data-i18n="section5_title">지금 바로 문의하세요</h2>
-  <p class="section5-text" data-i18n="section5_text">골드스타와 함께 새로운 투자의 기회를 시작하세요</p>
+  <h2 class="section5-title">지금 바로 문의하세요</h2>
+  <p class="section5-text">골드스타와 함께 새로운 투자의 기회를 시작하세요</p>
         <div class="contact-buttons">
-          <a href="#"><img src="img/카카오톡 문의.gif" data-i18n-alt="alt_kakao" alt="카카오톡 문의"/></a>
-          <a href="#"><img src="img/텔레그램 문의.gif" data-i18n-alt="alt_telegram" alt="텔레그램 문의"/></a>
+          <a href="#"><img src="img/카카오톡 문의.gif" alt="카카오톡 문의"/></a>
+          <a href="#"><img src="img/텔레그램 문의.gif" alt="텔레그램 문의"/></a>
         </div>
       </div>
     </section>
+
+    <!-- 메인 액션 버튼 영역 (예시 위치) -->
+    <div class="main-action-buttons" style="display:flex;justify-content:center;gap:32px;margin:40px 0 0 0;">
+      <a href="/signup" class="btn gold-btn" aria-label="회원가입">
+        <span class="btn-icon">📝</span> 회원가입
+      </a>
+      <a href="/login" class="btn gold-btn" aria-label="로그인">
+        <span class="btn-icon">🔑</span> 로그인
+      </a>
+    </div>
 
     <!-- Footer -->
     <footer class="company-info">
       <div class="info-content">
         <div class="company-info-grid">
           <div class="info-section">
-            <h3 data-i18n="footer_company">회사 정보</h3>
-            <p data-i18n="footer_company_name">상호명: 골드스타</p>
-            <p data-i18n="footer_ceo">대표이사: 홍길동</p>
-            <p data-i18n="footer_biz">사업자등록번호: 123-45-67890</p>
-            <p data-i18n="footer_mailorder">통신판매업: 제2025-서울강남-0000호</p>
+            <h3>회사 정보</h3>
+            <p>상호명: 골드스타</p>
+            <p>대표이사: 홍길동</p>
+            <p>사업자등록번호: 123-45-67890</p>
+            <p>통신판매업: 제2025-서울강남-0000호</p>
           </div>
           <div class="info-section">
-            <h3 data-i18n="footer_contact">연락처</h3>
-            <p data-i18n="footer_addr">주소: 서울특별시 강남구 테헤란로 123</p>
-            <p data-i18n="footer_tel">대표전화: 02-1234-5678</p>
-            <p data-i18n="footer_email">이메일: info@goldstar.com</p>
-            <p data-i18n="footer_fax">팩스: 02-1234-5679</p>
+            <h3>연락처</h3>
+            <p>주소: 서울특별시 강남구 테헤란로 123</p>
+            <p>대표전화: 02-1234-5678</p>
+            <p>이메일: info@goldstar.com</p>
+            <p>팩스: 02-1234-5679</p>
           </div>
           <div class="info-section">
-            <h3 data-i18n="footer_support">고객지원</h3>
-            <p data-i18n="footer_hours">운영시간: 평일 09:00 - 18:00</p>
-            <p data-i18n="footer_lunch">점심시간: 12:00 - 13:00</p>
-            <p data-i18n="footer_off">토/일/공휴일 휴무</p>
+            <h3>고객지원</h3>
+            <p>운영시간: 평일 09:00 - 18:00</p>
+            <p>점심시간: 12:00 - 13:00</p>
+            <p>토/일/공휴일 휴무</p>
           </div>
         </div>
       </div>
@@ -244,6 +366,51 @@
   <script src="hover-gif.js"></script>
   <script src="app.js"></script>
   <script>
+
+    // Intro overlay: MP4 비디오로 1회만 재생, 디졸브 효과로 사라짐
+    (function(){
+      const overlay=document.getElementById('introOverlay');
+      const video=document.getElementById('introVideo');
+      if(!overlay||!video) return;
+      const played=sessionStorage.getItem('intro_played_v2');
+      if(played){ overlay.style.display='none'; return; }
+      function hide(){
+        overlay.classList.add('hidden');
+        setTimeout(()=>{
+          overlay.style.display='none';
+          document.body.style.overflow='';
+          document.documentElement.style.overflow='';
+        }, 550);
+        sessionStorage.setItem('intro_played_v2','1');
+      }
+      document.documentElement.style.overflow='hidden';
+      document.body.style.overflow='hidden';
+      let autoHideTimer;
+      const skipIntro = () => {
+        if (autoHideTimer) clearTimeout(autoHideTimer);
+        hide();
+      };
+      video.onended = hide;
+      video.onerror = hide;
+      // 만약 비디오가 너무 길거나 오류시 20초 후 자동 skip
+      autoHideTimer = setTimeout(hide, 20000);
+      overlay.addEventListener('click', skipIntro);
+      overlay.addEventListener('touchstart', skipIntro);
+      document.addEventListener('keydown', skipIntro);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && autoHideTimer) clearTimeout(autoHideTimer);
+      });
+    })();
+
+    // Extra best-effort content protection for this page
+    document.addEventListener('contextmenu', e=> e.preventDefault());
+    document.addEventListener('dragstart', e=> e.preventDefault());
+    document.addEventListener('copy', e=> { e.clipboardData?.setData('text/plain',''); e.preventDefault(); });
+    document.addEventListener('keydown', e=>{
+      if((e.ctrlKey||e.metaKey) && ['s','p','u','c'].includes(e.key.toLowerCase())) e.preventDefault();
+      if(e.key==='F12' || (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key))) e.preventDefault();
+    });
+    document.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('img,video').forEach(el=>{ el.setAttribute('draggable','false'); el.setAttribute('oncontextmenu','return false'); }); });
     // ===== 네비게이션 스크롤 페이드 (아래 스크롤시 위로 디졸브 사라짐, 맨 위 복귀시 페이드 인) =====
     (function(){
       let lastY = window.scrollY;
@@ -395,13 +562,13 @@
     { img: 'section_11.jpg', descKey: 'carousel_desc_11' },
     { img: 'section_12.jpg', descKey: 'carousel_desc_12' },
     { img: 'section_13.jpg', descKey: 'carousel_desc_13' },
-        { img: 'section-14.jpg', desc: '' },
-        { img: 'section-15.jpg', desc: '' },
-        { img: 'section-16.jpg', desc: '' },
-        { img: 'section-17.jpg', desc: '' },
-        { img: 'section-18.jpg', desc: '' },
-        { img: 'section-19.jpg', desc: '' },
-        { img: 'section-20.jpg', desc: '' }
+        { img: 'section_14.jpg', desc: '' },
+        { img: 'section_15.jpg', desc: '' },
+        { img: 'section_16.jpg', desc: '' },
+        { img: 'section_17.jpg', desc: '' },
+        { img: 'section_18.jpg', desc: '' },
+        { img: 'section_19.jpg', desc: '' },
+        { img: 'section_20.jpg', desc: '' }
       ];
 
       const track = document.getElementById('carousel-track');
@@ -427,6 +594,87 @@
   // 무한 루프를 위해 복제
   track.innerHTML += track.innerHTML;
   if(window.GSApp) GSApp.applyLang();
+    });
+
+    // 비디오 자동재생을 위한 Intersection Observer
+    document.addEventListener('DOMContentLoaded', () => {
+      const videos = document.querySelectorAll('video');
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const video = entry.target;
+          if (entry.isIntersecting) {
+            video.play().catch(e => console.log('Video autoplay blocked:', e));
+          } else {
+            video.pause();
+          }
+        });
+      }, { threshold: 0.5 });
+
+      videos.forEach(video => {
+        observer.observe(video);
+        
+        // 비디오 로딩 개선 및 상태 모니터링
+        video.addEventListener('loadstart', () => {
+          console.log('Video loading started:', video.src);
+        });
+        video.addEventListener('canplay', () => {
+          console.log('Video can play:', video.src);
+          // canplay 이벤트 시 자동 재생 시도
+          if (!video.paused) return;
+          video.play().catch(e => {
+            console.log('Autoplay blocked, will retry on user interaction:', e);
+          });
+        });
+        video.addEventListener('error', (e) => {
+          console.error('Video error:', e, video.src);
+          // 에러 발생 시 재시도
+          setTimeout(() => {
+            video.load();
+          }, 2000);
+        });
+        
+        // 즉시 로드 시작
+        video.load();
+        
+        // 클릭 시 음소거 해제/다시 음소거 토글
+        video.addEventListener('click', (e) => {
+          e.preventDefault();
+          // 모든 비디오를 음소거 상태로 만들기
+          videos.forEach(v => v.muted = true);
+          // 클릭된 비디오만 음소거 해제
+          video.muted = !video.muted;
+          // 클릭 시 재생 보장
+          video.play().catch(() => {});
+        });
+      });
+    });
+
+    // iOS 및 브라우저 호환성을 위한 비디오 재생 재시도 (강화된 버전)
+    const vids = document.querySelectorAll("video");
+    function tryPlayAll(){
+      vids.forEach(v=>{
+        if (v.paused) {
+          const p = v.play();
+          if(p && p.catch){ 
+            p.catch((error) => {
+              console.log('Video play failed, will retry on next interaction:', error);
+            }); 
+          }
+        }
+      });
+    }
+    
+    // 다양한 이벤트에서 재생 시도
+    window.addEventListener("load", tryPlayAll);
+    window.addEventListener("pointerdown", tryPlayAll, {once:true});
+    window.addEventListener("touchstart", tryPlayAll, {once:true});
+    window.addEventListener("click", tryPlayAll, {once:true});
+    
+    // 페이지가 보여질 때마다 재생 시도
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        setTimeout(tryPlayAll, 100);
+      }
     });
 
     // (i18n & user nav handled by app.js) — 보조 보장 로직

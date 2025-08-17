@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8" />
+<head        <select id="langSelect" class="lang-select" aria-label="언어 선택">
+          <option value="ko">한국어</option>
+          <option value="zh">中文</option>
+          <option value="en">English</option>
+    </select><!-- 번역/언어 선택 제거 -->
+    <!-- 번역 버튼 제거 -->
+        <div id="userArea" class="user-area"></div>eta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>회원가입</title>
   <link rel="stylesheet" href="style.css" />
@@ -38,11 +43,12 @@
         </ul>
       </div>
       <div class="nav-right">
-        <select id="langSelect" class="lang-select" aria-label="언어 선택">
+  <select id="langSelect" class="lang-select" aria-label="언어 선택">
           <option value="ko">한국어</option>
           <option value="zh">中文</option>
           <option value="en">English</option>
-        </select>
+    </select><!-- 번역/언어 선택 제거 -->
+    <!-- 번역 버튼 제거 -->
   <div id="userArea" class="user-area"></div>
   <a href="index.html" class="home-icon" aria-label="홈" style="display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;"><span style="font-size:30px;color:#FFD700;">🏠</span></a>
   <div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴" role="button" tabindex="0"><span></span><span></span><span></span></div>
@@ -84,7 +90,7 @@
   <label for="account" data-i18n="label_account">계좌번호</label>
   <input type="text" id="account" data-i18n-ph="placeholder_account" placeholder="하이픈 없이 숫자" pattern="[0-9]+" required />
         <div class="msg" id="msg"></div>
-  <button type="submit" data-i18n="btn_signup_submit">가입하기</button>
+  <button type="submit" data-i18n="btn_signup_submit">가입요청하기</button>
       </form>
   <!-- helper removed as per requirement -->
     </div>

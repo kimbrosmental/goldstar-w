@@ -22,13 +22,13 @@
   .controls{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
   .pill{display:inline-block;padding:2px 6px;border-radius:12px;background:#1e4d47;font-size:11px;margin-left:4px;}
 </style></head><body>
-<nav id="navbar"><div class="container"><div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="logo"/></div><div class="nav-center"><ul class="nav-links"><li><a href="index.html#section1" data-i18n="nav_intro">소개</a></li><li><a href="index.html#section2" data-i18n="nav_progress">진행</a></li><li><a href="index.html#section3" data-i18n="nav_video">영상</a></li><li><a href="index.html#section4" data-i18n="nav_history">이력</a></li><li><a href="index.html#section5" data-i18n="nav_contact">문의</a></li></ul></div><div class="nav-right"><select id="langSelect" class="lang-select" data-i18n-aria="aria_lang_select" aria-label="언어 선택"><option value="ko">한국어</option><option value="zh">中文</option><option value="en">English</option></select><div id="userArea" class="user-area"></div><div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴" role="button" tabindex="0"><span></span><span></span><span></span></div></div></div></nav>
+<nav id="navbar"><div class="container"><div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="logo"/></div><div class="nav-center"><ul class="nav-links"><li><a href="index.html#section1" data-i18n="nav_intro">소개</a></li><li><a href="index.html#section2" data-i18n="nav_progress">진행</a></li><li><a href="index.html#section3" data-i18n="nav_video">영상</a></li><li><a href="index.html#section4" data-i18n="nav_history">이력</a></li><li><a href="index.html#section5" data-i18n="nav_contact">문의</a></li></ul></div><div class="nav-right"><div id="userArea" class="user-area"></div><a href="index.html" class="home-icon" data-i18n-aria="nav_home" aria-label="홈" style="display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;"><span style="font-size:30px;color:#FFD700;">🏠</span></a><div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴" role="button" tabindex="0"><span></span><span></span><span></span></div></div></div></nav>
 <main><div class="admin-wrap">
   <h1>관리자 페이지</h1>
   <div class="headbar">
     <div class="tabs" role="tablist" aria-label="Admin Tabs">
       <button class="btn" id="tabUsers" type="button" role="tab" aria-selected="false" style="min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
-        <span>👤</span><span data-i18n="section_users">회원 관리</span>
+        <span>👤</span><span data-i18n="tab_users_admin">회원 관리</span>
       </button>
       <button class="btn" id="tabOrders" type="button" role="tab" aria-selected="false" style="min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
         <span>🧾</span><span data-i18n="section_orders_admin">주문 관리</span>
@@ -39,8 +39,8 @@
       </button>
     </div>
     <div class="right-tools">
-      <button class="btn" id="btnChangePw" data-i18n="btn_change_password">비밀번호 변경</button>
-      <button class="btn danger" id="btnLogout">로그아웃</button>
+      <button class="btn" id="btnChangePw" data-i18n="btn_change_admin_password">관리자 비밀번호 변경</button>
+  <button class="btn danger" id="btnLogout" type="button">로그아웃</button>
       <span id="pwChangeMsg" class="hint"></span>
     </div>
   </div>
@@ -67,12 +67,12 @@
   </div>
 </div></main>
 <script src="app.js"></script><script>
-const menuBtn=document.querySelector('.menu-btn');menuBtn.addEventListener('click',()=>{menuBtn.classList.toggle('active');document.querySelector('.nav-links').classList.toggle('active');});
+const menuBtn=document.querySelector('.menu-btn');menuBtn?.addEventListener('click',()=>{menuBtn.classList.toggle('active');document.querySelector('.nav-links')?.classList.toggle('active');});
 function requireAdmin(){const u=GSApp.currentUser();if(!u||u.role!=='admin'){alert('관리자 권한 필요');location.href='login.html';return false;}return true;}
 // Tabs navigation between standalone pages
-document.getElementById('tabUsers').addEventListener('click',e=>{ e.preventDefault(); location.href='admin-users.html'; });
-document.getElementById('tabOrders').addEventListener('click',e=>{ e.preventDefault(); location.href='admin-orders.html'; });
-document.getElementById('tabInquiries').addEventListener('click',e=>{ e.preventDefault(); /* already here */ });
+document.getElementById('tabUsers').addEventListener('click',e=>{ e.preventDefault(); try{ sessionStorage.setItem('admin_auto_refresh','1'); }catch(_){ } location.href='admin-users.html'; });
+document.getElementById('tabOrders').addEventListener('click',e=>{ e.preventDefault(); try{ sessionStorage.setItem('admin_auto_refresh','1'); }catch(_){ } location.href='admin-orders.html'; });
+document.getElementById('tabInquiries').addEventListener('click',e=>{ e.preventDefault(); location.reload(); });
 // Header NEW badge (total unread)
 function updateNewBadge(){ try{ const db=GSApp.getDB(); let unread=0; Object.values(db.users).forEach(u=>{ (u.messages||[]).forEach(m=>{ if(!m.fromAdmin && !m.read) unread++; }); }); const b=document.getElementById('newBadge'); if(b){ b.style.display = unread>0 ? 'inline-block' : 'none'; b.textContent = unread>0? ('NEW '+unread):''; } }catch(_){}}
 function renderAdminInfo(){ const box=document.getElementById('adminInfo'); const a=GSApp.currentUser(); if(!a){ box.innerHTML=''; return;} const online=a.lastSeenAt&&(Date.now()-a.lastSeenAt<5*60*1000); box.innerHTML=`<div><strong>관리자:</strong> ${a.username||''} <span style='color:#9ec9c3'>${a.email}</span> ${online?'<span class="badge" style="background:#2e7d32;">ON</span>':'<span class="badge">OFF</span>'}</div>`; }
@@ -91,13 +91,13 @@ document.getElementById('btnInqRefresh').addEventListener('click', async ()=>{ a
 document.getElementById('markReadBtn')?.addEventListener('click', async ()=>{
   const email=document.getElementById('replyEmail').value; if(!email) return; const db=GSApp.getDB(); const u=db.users[email]; if(!u) return;
   let changed=false; (u.messages||[]).forEach(m=>{ if(!m.fromAdmin && !m.read){ m.read=true; changed=true; } }); if(changed){ await GSApp.saveDB(); await GSApp.loadDB(); }
-  openThread(email);
+  openThread(email); setTimeout(()=>{ try{ document.getElementById('btnInqRefresh').click(); }catch(_){ } }, 80);
 });
 
 document.getElementById('sendReplyBtn').addEventListener('click', async ()=>{
   if(!requireAdmin()) return; const email=document.getElementById('replyEmail').value; const content=document.getElementById('replyContent').value.trim(); if(!email||!content) return; await GSApp.addMessage(email,content,true); // 답변 시 자동 읽음 처리
   const db=GSApp.getDB(); const u=db.users[email]; if(u){ let changed=false; (u.messages||[]).forEach(m=>{ if(!m.fromAdmin && !m.read){ m.read=true; changed=true; } }); if(changed) await GSApp.saveDB(); }
-  document.getElementById('replyContent').value=''; openThread(email);
+  document.getElementById('replyContent').value=''; openThread(email); setTimeout(()=>{ try{ document.getElementById('btnInqRefresh').click(); }catch(_){ } }, 80);
 });
 
 function init(){ if(!requireAdmin()) return; updateNewBadge(); renderAdminInfo(); renderList(); GSApp.buildUserNav(); if(window.GSApp) GSApp.applyLang(); }
@@ -107,7 +107,11 @@ if(window.top!==window.self){ document.addEventListener('DOMContentLoaded',()=>{
 
 document.addEventListener('click', async (e)=>{
   const btn=e.target.closest('.delMsg'); if(!btn) return; if(!confirm('삭제하시겠습니까?')) return; const db=GSApp.getDB(); const u=db.users[btn.dataset.email]; u.messages=(u.messages||[]).filter(m=>m.id!==btn.dataset.id); await GSApp.saveDB(); await GSApp.loadDB(); openThread(btn.dataset.email);
+  setTimeout(()=>{ try{ document.getElementById('btnInqRefresh').click(); }catch(_){ } }, 80);
 });
 
-document.addEventListener('DOMContentLoaded', async ()=>{ await GSApp.loadDB(); init(); setTimeout(()=>{ try{ document.getElementById('btnInqRefresh').click(); }catch(_){ } },120); });
+document.addEventListener('DOMContentLoaded', async ()=>{ await GSApp.loadDB(); init(); await GSApp.loadDB(); renderAdminInfo(); renderList(); });
+window.addEventListener('pageshow', async ()=>{ try{ await GSApp.loadDB(); renderAdminInfo(); renderList(); }catch(_){} });
+// Logout handler (admin)
+document.getElementById('btnLogout').addEventListener('click',(e)=>{ e.preventDefault(); GSApp.logout(); location.href='index.html'; });
 </script></body></html>

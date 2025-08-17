@@ -1,12 +1,12 @@
 <!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>회원 관리</title><link rel="stylesheet" href="style.css"/><style>body{padding-top:100px;} .admin-wrap{max-width:100%;margin:0 auto;color:#fff;padding:20px 30px 80px;} h1{font-size:28px;margin-bottom:20px;color:#FFD700;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #1e4d47;padding:10px 12px;font-size:13px;} th{background:#004d40;color:#FFD700;} .flex{display:flex;gap:16px;flex-wrap:wrap;} .btn{background:#00695C;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-size:13px;cursor:pointer;} .btn:hover{background:#00897B;} .btn.active{background:#00897B;box-shadow:0 0 0 2px rgba(255,215,0,.3) inset;} .danger{background:#b71c1c;} .danger:hover{background:#d32f2f;} .small{font-size:12px;} .pill{display:inline-block;padding:2px 6px;border-radius:12px;background:#1e4d47;font-size:11px;margin-left:4px;} .row-user.selected{background:rgba(255,255,255,.06);} .row-user.selected td{color:#ff5252;font-weight:600;} .detail-grid{display:grid;grid-template-columns:120px 1fr;gap:8px;} .detail-grid input{background:#0b1917;color:#fff;border:1px solid #1e4d47;border-radius:6px;padding:8px 10px;font-size:13px;} .detail-box{background:#0c1a18;border:1px solid #1e4d47;border-radius:10px;padding:14px;} .tabs{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 12px;} .right-tools{display:flex;gap:8px;align-items:center;margin-left:auto;} .headbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:6px 0 14px;}</style></head><body>
-<nav id="navbar"><div class="container"><div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="logo"/></div><div class="nav-center"><ul class="nav-links"><li><a href="index.html#section1" data-i18n="nav_intro">소개</a></li><li><a href="index.html#section2" data-i18n="nav_progress">진행</a></li><li><a href="index.html#section3" data-i18n="nav_video">영상</a></li><li><a href="index.html#section4" data-i18n="nav_history">이력</a></li><li><a href="index.html#section5" data-i18n="nav_contact">문의</a></li></ul></div><div class="nav-right"><select id="langSelect" class="lang-select" data-i18n-aria="aria_lang_select" aria-label="언어 선택"><option value="ko">한국어</option><option value="zh">中文</option><option value="en">English</option></select><div id="userArea" class="user-area"></div><div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴" role="button" tabindex="0"><span></span><span></span><span></span></div></div></div></nav>
+<nav id="navbar"><div class="container"><div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="logo"/></div><div class="nav-center"><ul class="nav-links"><li><a href="index.html#section1" data-i18n="nav_intro">소개</a></li><li><a href="index.html#section2" data-i18n="nav_progress">진행</a></li><li><a href="index.html#section3" data-i18n="nav_video">영상</a></li><li><a href="index.html#section4" data-i18n="nav_history">이력</a></li><li><a href="index.html#section5" data-i18n="nav_contact">문의</a></li></ul></div><div class="nav-right"><div id="userArea" class="user-area"></div><a href="index.html" class="home-icon" data-i18n-aria="nav_home" aria-label="홈" style="display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;"><span style="font-size:30px;color:#FFD700;">🏠</span></a><div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴" role="button" tabindex="0"><span></span><span></span><span></span></div></div></div></nav>
 <main>
   <div class="admin-wrap">
     <h1>관리자 페이지</h1>
     <div class="headbar">
       <div class="tabs" role="tablist" aria-label="Admin Tabs">
         <button class="btn active" id="tabUsers" type="button" role="tab" aria-selected="true" style="min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
-          <span>👤</span><span data-i18n="section_users">회원 관리</span>
+          <span>👤</span><span data-i18n="tab_users_admin">회원 관리</span>
         </button>
         <button class="btn" id="tabOrders" type="button" role="tab" aria-selected="false" style="min-width:140px;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
           <span>🧾</span><span data-i18n="section_orders_admin">주문 관리</span>
@@ -17,8 +17,8 @@
         </button>
       </div>
       <div class="right-tools">
-        <button class="btn" id="btnChangePw" data-i18n="btn_change_password">비밀번호 변경</button>
-        <button class="btn danger" id="btnLogout">로그아웃</button>
+        <button class="btn" id="btnChangePw" data-i18n="btn_change_admin_password">관리자 비밀번호 변경</button>
+  <button class="btn danger" id="btnLogout" type="button">로그아웃</button>
         <span id="pwChangeMsg" class="hint"></span>
       </div>
     </div>
@@ -43,11 +43,10 @@
         <div id="detail" class="detail-box" style="min-height:280px;">
           <div style="color:#aaa;font-size:13px;">왼쪽 목록에서 회원을 선택하세요.</div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+  <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
           <button class="btn" id="btnAdd" data-i18n="btn_add_user">추가</button>
           <button class="btn" id="btnEdit" data-i18n="btn_edit">수정</button>
           <button class="btn" id="btnSave" style="display:none;">수정확인</button>
-          <button class="btn" id="btnResetUserPw" data-i18n="btn_reset_pw">PW 변경</button>
           <button class="btn danger" id="btnDelete" data-i18n="btn_delete">삭제</button>
         </div>
         <div class="msg" id="userMsg" style="font-size:12px;margin-top:6px;"></div>
@@ -59,12 +58,12 @@
 <script src="app.js"></script><script>
 // If embedded in iframe, hide own navbar and reduce padding
 if(window.top!==window.self){ document.addEventListener('DOMContentLoaded',()=>{ const nav=document.getElementById('navbar'); if(nav) nav.style.display='none'; document.body.style.paddingTop='12px'; }); }
-const menuBtn=document.querySelector('.menu-btn');menuBtn.addEventListener('click',()=>{menuBtn.classList.toggle('active');document.querySelector('.nav-links').classList.toggle('active');});
+const menuBtn=document.querySelector('.menu-btn');menuBtn?.addEventListener('click',()=>{menuBtn.classList.toggle('active');document.querySelector('.nav-links')?.classList.toggle('active');});
 function requireAdmin(){const u=GSApp.currentUser();if(!u||u.role!=='admin'){alert('관리자 권한 필요');location.href='login.html';return false;}return true;}
 // Tabs navigation (multi-page)
-document.getElementById('tabUsers').addEventListener('click',e=>{ e.preventDefault(); /* already here */ });
-document.getElementById('tabOrders').addEventListener('click',e=>{ e.preventDefault(); location.href='admin-orders.html'; });
-document.getElementById('tabInquiries').addEventListener('click',e=>{ e.preventDefault(); location.href='admin-inquiries.html'; });
+document.getElementById('tabUsers').addEventListener('click',e=>{ e.preventDefault(); try{ sessionStorage.setItem('admin_auto_refresh','1'); location.reload(); }catch(_){} });
+document.getElementById('tabOrders').addEventListener('click',e=>{ e.preventDefault(); try{ sessionStorage.setItem('admin_auto_refresh','1'); }catch(_){ } location.href='admin-orders.html'; });
+document.getElementById('tabInquiries').addEventListener('click',e=>{ e.preventDefault(); try{ sessionStorage.setItem('admin_auto_refresh','1'); }catch(_){ } location.href='admin-inquiries.html'; });
 // Header NEW badge
 function updateNewBadge(){ try{ const db=GSApp.getDB(); let unread=0; Object.values(db.users).forEach(u=>{ (u.messages||[]).forEach(m=>{ if(!m.fromAdmin && !m.read) unread++; }); }); const b=document.getElementById('newBadge'); if(b){ b.style.display = unread>0 ? 'inline-block' : 'none'; b.textContent = unread>0? ('NEW '+unread):''; } }catch(_){}}
 let selectedEmail=null; let editMode=false; let createMode=false;
@@ -131,6 +130,7 @@ function renderDetail(){
         <label>생년월일</label><input id='f_birth' type='date' value='${u.birth||''}'/>
         <label>은행</label><input id='f_bank' value='${u.bank||''}'/>
         <label>계좌</label><input id='f_account' value='${u.account||''}'/>
+        <label>새 비밀번호</label><input id='f_newpw' type='password' placeholder='변경 시에만 입력'/>
       </div>
     `;
     document.getElementById('btnSave').style.display='inline-block';
@@ -175,7 +175,8 @@ document.getElementById('btnSave').addEventListener('click', async ()=>{
   } else if(editMode){
     if(!confirm('수정하시겠습니까?')) return;
     const name=f_name.value.trim(), phone=f_phone.value.trim(), birth=f_birth.value, bank=f_bank.value.trim(), account=f_account.value.trim();
-  try{ await GSApp.updateUser(selectedEmail,{name,phone,bank,account,birth}); userMsg.style.color='#4fc3f7'; userMsg.textContent=GSApp.t('msg_update_success'); editMode=false; await GSApp.loadDB(); renderAll(); setTimeout(()=>{ try{ document.getElementById('btnUsersRefresh').click(); }catch(_){ } }, 80); }
+    const newPw=(document.getElementById('f_newpw')?.value||'').trim();
+  try{ await GSApp.updateUser(selectedEmail,{name,phone,bank,account,birth}); if(newPw){ await GSApp.changePassword(selectedEmail,newPw); } userMsg.style.color='#4fc3f7'; userMsg.textContent=GSApp.t('msg_update_success'); editMode=false; await GSApp.loadDB(); renderAll(); setTimeout(()=>{ try{ document.getElementById('btnUsersRefresh').click(); }catch(_){ } }, 80); }
     catch(e){ userMsg.style.color='#ff5252'; userMsg.textContent=GSApp.t('msg_update_fail'); }
   }
 });
@@ -196,14 +197,13 @@ window.addEventListener('storage', (e)=>{ if(e.key==='member_db_secure_v1'){ ren
 
 // Change password / Logout
 document.getElementById('btnChangePw').addEventListener('click',async()=>{ if(!requireAdmin())return; const newPw=prompt('새 비밀번호 입력'); if(!newPw) return; const admin=GSApp.currentUser(); try{ await GSApp.changePassword(admin.email,newPw); pwChangeMsg.style.color='#4fc3f7'; pwChangeMsg.textContent=GSApp.t('pw_change_success'); } catch(e){ pwChangeMsg.style.color='#ff5252'; pwChangeMsg.textContent=GSApp.t('pw_change_fail'); }});
-document.getElementById('btnLogout').addEventListener('click',()=>{ GSApp.logout(); location.href='index.html'; });
+document.getElementById('btnLogout').addEventListener('click',(e)=>{ e.preventDefault(); GSApp.logout(); location.href='index.html'; });
 
 // Prevent deleting admin; toggle delete button visibility
 function updateDeleteVisibility(){ const btn=document.getElementById('btnDelete'); if(!btn) return; const db=GSApp.getDB(); const u=selectedEmail? db.users[selectedEmail]:null; if(u && u.role==='admin'){ btn.style.display='none'; } else { btn.style.display='inline-block'; } }
 
-document.getElementById('btnResetUserPw').addEventListener('click', async ()=>{
-  if(!selectedEmail) return; const db=GSApp.getDB(); const u=db.users[selectedEmail]; if(!u) return; const np=prompt('새 비밀번호 입력'); if(!np) return; try{ await GSApp.changePassword(u.email,np); userMsg.style.color='#4fc3f7'; userMsg.textContent=GSApp.t('msg_pw_reset_success'); } catch(e){ userMsg.style.color='#ff5252'; userMsg.textContent=GSApp.t('msg_pw_reset_fail'); }
-});
+// 사용자 개별 PW 변경 버튼 제거 (요청에 따라 기능은 수정 화면에서 처리)
 
-document.addEventListener('DOMContentLoaded', async ()=>{ if(!requireAdmin()) return; await GSApp.loadDB(); updateNewBadge(); GSApp.buildUserNav(); if(window.GSApp) GSApp.applyLang(); updateDeleteVisibility(); setTimeout(()=>{ try{ document.getElementById('btnUsersRefresh').click(); }catch(_){ } }, 120); });
+document.addEventListener('DOMContentLoaded', async ()=>{ if(!requireAdmin()) return; await GSApp.loadDB(); updateNewBadge(); GSApp.buildUserNav(); if(window.GSApp) GSApp.applyLang(); updateDeleteVisibility(); await GSApp.loadDB(); renderAll(); });
+window.addEventListener('pageshow', async ()=>{ try{ if(requireAdmin()){ await GSApp.loadDB(); renderAll(); } }catch(_){} });
 </script></body></html>
