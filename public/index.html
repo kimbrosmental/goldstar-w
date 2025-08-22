@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ko" id="top">
+<head>
+  <script src="/api-rewrite.js"></script>
+  <script src="/config.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Gold-Star World</title>
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta http-equiv="Referrer-Policy" content="no-referrer">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+  /* 페이드인 디졸브 효과 */
+  .fadein {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1.2s cubic-bezier(.4,0,.2,1), transform 1.2s cubic-bezier(.4,0,.2,1);
+    will-change: opacity, transform;
+  }
+  .fadein.visible {
+    opacity: 1;
+    transform: none;
+  }
+    /* Intro Fullscreen */
+    #introOverlay{position:fixed;inset:0;z-index:99999;background:#000;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity .5s ease;}
+    #introOverlay.hidden{opacity:0;pointer-events:none;}
+    #introOverlay img{
+      width:100vw;
+      height:auto;
+      max-width:100vw;
+      max-height:100vh;
+      object-fit:contain;
+      display:block;
+      margin:0 auto;
+      will-change:transform;
+      transform:translateZ(0);
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      image-rendering:-webkit-optimize-contrast;
+      image-rendering:-moz-crisp-edges;
+      image-rendering:crisp-edges;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    @media (max-width: 900px) {
+      #introOverlay img {
+        width:100vw;
+        max-width:100vw;
+        max-height:60vh;
+        height:auto;
+      }
+    }
+    @media (max-width: 600px) {
+      #introOverlay img {
+        width:100vw;
+        max-width:100vw;
+        max-height:40vh;
+        height:auto;
+      }
+    }
+    /* 반응형 하단 회사정보 바 */
+    .footer-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: center;
+      align-items: flex-start;
+      background: #222;
+      color: #fff;
+      padding: 32px 16px;
+      font-size: 16px;
+    }
+    @media (max-width: 700px) {
+      .footer-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        font-size: 15px;
+      }
+      .footer-bar > div {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+    }
+    /* ---------------- Section2 레이아웃 조정 ---------------- */
+    #section2 .content {
+      padding-top: 20px;
+      padding-bottom: 20px;
+      height: auto;
+    }
+    #section2 .story-content h2 {
+      margin-bottom: 16px;
+    }
+    #section2 .story-grid {
+      margin-bottom: 24px;
+    }
+
+    /* ---------------- Carousel 스타일 ---------------- */
+    .carousel-wrapper {
+      overflow: hidden;
+      width: 100%;
+      margin-top: 16px;
+    }
+    .carousel-track {
+      display: flex;
+      gap: 20px;
+      /* ↓ 속도 조절: 5s → 원하는 값으로 변경 */
+      animation: scroll 40s linear infinite;
+    }
+    .carousel-item {
+      flex: 0 0 auto;
+      width: 400px;
+      max-width: 400px;
+    }
+    .carousel-item img {
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      object-fit: contain;
+      display: block;
+    }
+    .carousel-item p {
+      text-align: center;
+      margin-top: 8px;
+      color: #fff;
+      font-size: 16px;
+    }
+    @keyframes scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-6760px); } /* 500×13 + 20×13 */
+    }
+
+    /* ---- Section1 gold-bar 이미지 반응형 숨김 ---- */
+    @media (max-width:1024px) {
+      #section1 .price-image { display: none !important; }
+      #section1 .gold-content { justify-content: center; }
+    }
+    @media (max-width:768px) {
+      #section1 .price-image { display: none !important; }
+      #section1 .gold-content { justify-content: center; flex-direction: column; }
+    }
+
+    /* 버튼 스타일 추가 */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #d4af37;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color 0.3s, transform 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-icon {
+      margin-right: 8px;
+      font-size: 18px;
+    }
+    .btn:before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 300%;
+      height: 300%;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transition: transform 0.3s;
+      z-index: 0;
+      transform: translate(-50%, -50%) scale(0);
+    }
+    .btn:hover:before {
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .btn:hover {
+      background-color: #b5942b;
+      transform: translateY(-2px);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    /* Intro overlay (5초 1회만 보여주고, 페이드아웃 디졸브) */
+    #introOverlay {
+      position: fixed; left:0; top:0; width:100vw; height:100vh; z-index:9999; background:#000;
+      display:flex; align-items:center; justify-content:center;
+      transition: opacity 1s;
+    }
+    #introOverlay.hidden {
+      opacity:0;
+      pointer-events:none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Intro overlay (5초 1회만 보여주고, 페이드아웃 디졸브) -->
+  <div id="introOverlay" aria-hidden="true" role="dialog">
+  <img id="introGif" src="img/gold-intro.webp" alt="Intro" style="width:100vw;height:100vh;object-fit:cover;" />
+  </div>
+
+  <nav id="navbar">
+    <div class="container">
+  <div class="logo"><a href="index.html" id="homeLogo"><img src="img/logo.png" alt="골드스타 로고"></a></div>
+  <div class="nav-center">
+        <ul class="nav-links">
+          <li><a href="#section1">소개</a></li>
+          <li><a href="#section2">진행</a></li>
+          <li><a href="#section3">영상</a></li>
+          <li><a href="#section4">이력</a></li>
+          <li><a href="#section5">문의</a></li>
+        </ul>
+      </div>
+      <div class="nav-right">
+        <div class="user-area">
+  <a href="signup.html" class="btn user-link" id="signupBtn">회원가입</a>
+  <a href="login.html" class="btn user-link" id="loginBtn">로그인</a>
+  <button id="adminReturnBtn" class="btn" style="display:none;margin-left:8px;"><i class="fas fa-cog"></i></button>
+</div>
+        <div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴 열기" role="button" tabindex="0">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+    <div id="scroll-progress"></div>
+  </nav>
+
+  <div id="floatingButtons">
+    <button id="scrollToTop" title="맨 위로" aria-label="맨 위로"><i class="fas fa-arrow-up"></i></button>
+  </div>
+  <div class="fixed-social-icons">
+    <a href="https://t.me/Goldstar_Korea" class="social-icon" target="_blank" rel="noopener">
+      <img src="img/텔레그램 문의.png" class="kakao-static" alt="텔레그램 상담">
+      <img src="img/텔레그램 문의2.gif" class="kakao-hover" alt="텔레그램 상담">
+    </a>
+  </div>
+
+  <main class="fadein" id="mainFadein">
+    <!-- Section1 -->
+    <section id="section1" class="section">
+  <div class="content fadein">
+        <h2 class="hook">
+          <span class="line line1" data-i18n="hook_line1">“금은 결국 오른다.”</span>
+          <span class="line line2" data-i18n="hook_line2">“다만, 합리적 금액에 살 수 있는 순간은 짧다.”</span>
+          <span class="line line3" data-i18n="hook_line3">지금이 바로 그 순간입니다,</span>
+          <span class="line line4"><strong data-i18n="hook_line4">준비되셨나요?</strong></span>
+          <span class="shine-bar" aria-hidden="true"></span>
+        </h2>
+        <div class="price-box gold-box" id="priceBox">
+          <div class="gold-content">
+            <img src="img/gold-bar.jpg" class="price-image" alt="골드바 이미지">
+            <div class="gold-text">
+              <h2 class="price-title">오늘의 금 시세 (3.75g)</h2>
+              <div id="mainPrice" class="main-price">648,000원</div>
+              <div id="priceChange" class="change-line"></div>
+              <span class="compare-note">[전일 기준 시세변동폭]</span>
+            </div>
+          </div>
+        </div>
+        <div class="price-box supply-box">
+          <h2 class="price-title supply">공급 가격 (3.75g)</h2>
+          <div class="main-price supply-price">520,000원</div>
+          <div class="supply-footer">
+            <span class="change-line">–</span>
+            <span class="compare-note">[현 시세 기준과 비교]</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section2: 진행 (이전 상태로 복원) -->
+    <section id="section2" class="section">
+  <div class="content fadein">
+        <div class="story-content">
+          <h2>주요 이슈</h2>
+          <div class="story-grid">
+            <div class="story-item"><h3>3억2천만톤</h3><p>2022년 7월우간다 금 매장량 발견</p></div>
+            <div class="story-item"><h3>글로벌 주목</h3><p>12조원 가치평가, CNN, BBC 등 해외 언론 집중 보도</p></div>
+            <div class="story-item"><h3>독점 계약</h3><p>우간다 금맥, 중국 광산업체들과 채굴 독점 계약 체결 → 골드 스타, 중국 업체와 수입계약 체결</p></div>
+          </div>
+        </div>
+        <div class="carousel-wrapper">
+          <div class="carousel-track" id="carousel-track"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section3 -->
+    <section id="section3" class="section">
+  <div class="content fadein">
+        <div class="process-content">
+          <h2></h2>
+          <!-- 상단 행: 좌측 설명, 우측 영상 -->
+          <div class="video-row top">
+            <div class="desc">우간다 황금 금맥,<br>그 속에 담긴 이야기를 담다.</div>
+            <div class="video-wrap">
+              <!-- 섹션3 영상: 600x350 고정, poster로 첫 프레임 이미지 지정 -->
+              <video controls width="600" height="350" playsinline preload="metadata" poster="img/poster-1.png" controlsList="nodownload noplaybackrate" disablePictureInPicture>
+                <source src="https://www.dropbox.com/scl/fi/efoo333ngirzngmdrurd4/movie-1.mp4?rlkey=v24nt37cux82nn9aazn261rhv&raw=1" type="video/mp4" />
+                <span>브라우저가 동영상을 지원하지 않습니다.</span>
+              </video>
+            </div>
+          </div>
+          <!-- 하단 행: 좌측 영상, 우측 설명 -->
+          <div class="video-row bottom">
+            <div class="video-wrap">
+              <!-- 섹션3 영상: poster 속성으로 첫 프레임 썸네일 이미지 지정 -->
+              <video controls width="600" height="350" playsinline preload="metadata" poster="img/poster-2.png" controlsList="nodownload noplaybackrate" disablePictureInPicture>
+                <source src="https://www.dropbox.com/scl/fi/71q6v1ntaebtudq2ttpwq/movie-2.mp4?rlkey=7xw94d6yho2bcf3b6l4wsarse&raw=1" type="video/mp4" />
+                <span data-i18n="video_not_supported">브라우저가 동영상을 지원하지 않습니다.</span>
+              </video>
+            </div>
+            <div class="desc">우간다 아프리카의 희망,<br>세계가 주목하다.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section4 -->
+    <section id="section4" class="section">
+  <div class="content fadein">
+        <div class="achievement-content">
+          <h2>실제 공급 성과</h2>
+          <div class="achievement-grid">
+            <div class="achievement-item"><h3>55kg</h3><p>총 공급 완료량</p></div>
+            <div class="achievement-item"><h3>18.4%</h3><p>시세 대비 평균 할인율</p></div>
+            <div class="achievement-item"><h3>1,581명</h3><p>누적 참여 회원</p></div>
+          </div>
+          <div class="trade-history-box">
+            <h3 class="trade-history-title">주요 이력</h3>
+            <div class="trade-grid">
+              <div class="achievement-item trade-card">
+                <div class="trade-card-header">
+                  <span class="trade-card-icon">📝</span>
+                  <span class="trade-card-title">2023년 6월 15일 · 우간다</span>
+                </div>
+                <div class="trade-card-body">
+                  <div class="trade-card-row"><b>참여 인원:</b> 7명 (구매팀 3, 품질검수 2, 물류/보험 2)</div>
+                  <div class="trade-card-row"><b>수입 물량:</b> 18kg 금괴 (약 $580,000)</div>
+                  <div class="trade-card-row"><b>총 수입:</b> 4,800돈</div>
+                  <div class="trade-card-row"><b>거래 내용:</b> 우간다 서부 Mubende 지역 원광 정제 후 수출, 공식 계약 및 허가, 인천공항 도착 후 통관.</div>
+                  <div class="trade-card-row"><b>특징:</b> 첫 아프리카 직도입, 일부는 투자형 골드바 제작.</div>
+                </div>
+                <div class="trade-card-summary">
+                  <span><b>국제 시세:</b> $1,956.81/oz (1g ≈ $62.92)</span>
+                  <span><b>환율:</b> 1USD ≈ 1,273.28원</span>
+                  <span><b>총 금액:</b> $1,132,600 / 약 14.4억원</span>
+                </div>
+              </div>
+              <div class="achievement-item trade-card">
+                <div class="trade-card-header">
+                  <span class="trade-card-icon">📝</span>
+                  <span class="trade-card-title">2024년 8월 8일 · 우간다</span>
+                </div>
+                <div class="trade-card-body">
+                  <div class="trade-card-row"><b>참여 인원:</b> 12명 (구매팀 4, 감정 2, 물류 4, 보험 2)</div>
+                  <div class="trade-card-row"><b>수입 물량:</b> 32kg 금괴 + 5kg 금선</div>
+                  <div class="trade-card-row"><b>총 수입:</b> 9,867돈</div>
+                  <div class="trade-card-row"><b>거래 내용:</b> 우간다 금광 → 정제소 → 두바이 경유 → 한국, 순도 인증서 확보, 서울 보세창고 보관.</div>
+                  <div class="trade-card-row"><b>특징:</b> 연간 수입량 25% 규모, 주얼리 제작 활용.</div>
+                </div>
+                <div class="trade-card-summary">
+                  <span><b>국제 시세:</b> $2,418.76/oz (1g ≈ $77.81)</span>
+                  <span><b>환율:</b> 1USD ≈ 1,377.27원</span>
+                  <span><b>총 금액:</b> $2,881,400 / 약 39.7억원</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section5 -->
+    <section id="section5" class="section">
+  <div class="content center fadein">
+  <h2 class="section5-title">지금 바로 문의하세요</h2>
+  <h2 class="section5-title">현재 회원가입은 텔레그램 문의로 진행됩니다.<br><br> 텔레그램으로 문의 주세요.</h2>
+  <p class="section5-text">골드스타와 함께 새로운 투자의 기회를 시작하세요</p>
+        <div class="contact-buttons">
+          <a href="#" class="kakao-link"><img src="img/카카오톡 문의.gif" alt="카카오톡 문의"/></a>
+          <a href="https://t.me/Goldstar_Korea" target="_blank" rel="noopener"><img src="img/텔레그램 문의.gif" alt="텔레그램 문의"/></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="company-info">
+      <div class="info-content">
+        <div class="company-info-grid">
+          <div class="info-section">
+            <h3>회사 정보</h3>
+            <p>상호명: 골드스타</p>
+            <p>대표이사: 이희철</p>
+            <p>사업자등록번호: 530-36-00757</p>
+            <p>주소: 서울특별시 강남대로 584 성일빌딩</p>
+          </div>
+          <div class="info-section">
+            <h3>고객지원</h3>
+            <p>운영시간: 평일 09:00 - 18:00</p>
+            <p>점심시간: 12:00 - 13:00</p>
+            <p>토/일/공휴일 휴무</p>
+            <p><카카오톡, 텔레그램 문의는 휴무 관계없이 문의 가능합니다.></p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="hover-gif.js"></script>
+  <script src="app.js"></script>
+  <script>
+  // 카카오톡 문의 클릭 시 "준비중입니다." 알림
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.kakao-link').forEach(el => {
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('준비중입니다.');
+      });
+    });
+  });
+// 모든 fadein 요소에 Intersection Observer로 디졸브 효과 적용
+document.addEventListener('DOMContentLoaded', function(){
+  const fadeEls = document.querySelectorAll('.fadein');
+  const mainFade = document.getElementById('mainFadein');
+  if(mainFade) {
+    setTimeout(()=>mainFade.classList.add('visible'), 400); // 인트로 오버레이 이후 페이드인
+  }
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.3 });
+  fadeEls.forEach(el=>{
+    observer.observe(el);
+  });
+});
+    // 로그인 상태에 따라 네비게이션 바 버튼 제어
+    function updateNavForAdmin() {
+      var isAdmin = !!localStorage.getItem('admin_session_v1');
+      var signupBtn = document.getElementById('signupBtn');
+      var loginBtn = document.getElementById('loginBtn');
+      var adminBtn = document.getElementById('adminReturnBtn');
+      if (isAdmin) {
+        if (signupBtn) signupBtn.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (adminBtn) adminBtn.style.display = 'inline-flex';
+      } else {
+        if (signupBtn) signupBtn.style.display = '';
+        if (loginBtn) loginBtn.style.display = '';
+        if (adminBtn) adminBtn.style.display = 'none';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      updateNavForAdmin();
+      var adminBtn = document.getElementById('adminReturnBtn');
+      if (adminBtn) {
+        adminBtn.addEventListener('click', function() {
+          window.location.href = 'admin/index.html';
+        });
+      }
+    });
+    // 로그인/로그아웃 시에도 updateNavForAdmin()을 호출해야 함 (app.js에서 처리 가능)
+  </script>
+  <script>
+// Intro overlay: GIF 1회만 보여주고 2초 후 ESC 효과 및 마지막 1초에 페이드아웃 디졸브 (총 3초만 재생)
+// 네비게이션 로고 클릭 시 항상 홈(index.html)으로 이동
+document.addEventListener('DOMContentLoaded', function() {
+  var homeLogo = document.getElementById('homeLogo');
+  if(homeLogo) {
+    homeLogo.addEventListener('click', function(e) {
+      e.preventDefault();
+      window.location.href = 'index.html';
+    });
+  }
+});
+
+// Intro overlay: GIF 1회만 보여주고 4초 후 페이드아웃, 새로고침 없이 사라짐
+(function(){
+  const overlay=document.getElementById('introOverlay');
+  const img=document.getElementById('introGif');
+  if(!overlay||!img) return;
+  // 세션 기준 1회만 보여주고, 이후엔 바로 숨김
+  const played=sessionStorage.getItem('intro_played_v10');
+  if(played){ overlay.style.display='none'; document.body.style.overflow=''; document.documentElement.style.overflow=''; return; }
+  function hideIntro(){
+    overlay.classList.add('hidden');
+    setTimeout(()=>{
+      if(img) img.remove();
+      overlay.style.display='none';
+      document.body.style.overflow='';
+      document.documentElement.style.overflow='';
+      sessionStorage.setItem('intro_played_v10','1');
+    }, 1000); // 디졸브 효과 1초
+  }
+  document.documentElement.style.overflow='hidden';
+  document.body.style.overflow='hidden';
+  setTimeout(hideIntro, 4000); // 4초 후 자동 페이드아웃
+  overlay.addEventListener('click', hideIntro);
+})();
+  </script>
+  <script>
+    // Extra best-effort content protection for this page
+    document.addEventListener('contextmenu', e=> e.preventDefault());
+    document.addEventListener('dragstart', e=> e.preventDefault());
+    document.addEventListener('copy', e=> { e.clipboardData?.setData('text/plain',''); e.preventDefault(); });
+    document.addEventListener('keydown', e=>{
+      if((e.ctrlKey||e.metaKey) && ['s','p','u','c'].includes(e.key.toLowerCase())) e.preventDefault();
+      if(e.key==='F12' || (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key))) e.preventDefault();
+    });
+    document.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('img,video').forEach(el=>{ el.setAttribute('draggable','false'); el.setAttribute('oncontextmenu','return false'); }); });
+    // ===== 네비게이션 스크롤 페이드 (아래 스크롤시 위로 디졸브 사라짐, 맨 위 복귀시 페이드 인) =====
+    (function(){
+      let lastY = window.scrollY;
+      const nav = document.getElementById('navbar');
+      const thresholdHide = 40; // 조금만 내려도 숨김 시작
+      let forcedShow = false;
+      function handleScroll(){
+        if(forcedShow){return;} // 마우스 최상단 강제 표시 상태
+        const y = window.scrollY;
+        if (y > thresholdHide) {
+          if (y > lastY) { // 아래로
+            nav.classList.add('nav-hidden');
+          } else { // 위로 올림
+            nav.classList.remove('nav-hidden');
+          }
+        } else {
+          nav.classList.remove('nav-hidden');
+        }
+        lastY = y;
+      }
+      window.addEventListener('scroll', handleScroll);
+      // 마우스가 화면 최상단(예: 24px) 영역에 들어오면 네비게이션 표시
+      window.addEventListener('mousemove', e => {
+        if (e.clientY <= 24) {
+          forcedShow = true;
+          nav.classList.remove('nav-hidden');
+          // 1.5초 후 스크롤 방향 다시 적용
+          clearTimeout(window.__navForceTimer);
+          window.__navForceTimer = setTimeout(()=>{ forcedShow=false; handleScroll(); },1500);
+        }
+      });
+    })();
+
+    // 메뉴 토글
+  const menuBtn = document.querySelector('.menu-btn');
+  const navLinks = document.querySelector('.nav-links');
+    menuBtn.addEventListener('click', () => {
+      menuBtn.classList.toggle('active');
+      navLinks.classList.toggle('active');
+    });
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) {
+          e.preventDefault();
+          t.scrollIntoView({ behavior:'smooth', block:'start' });
+        }
+      });
+    });
+    document.querySelectorAll('.nav-links a').forEach(l => {
+      l.addEventListener('click', () => {
+        menuBtn.classList.remove('active');
+        navLinks.classList.remove('active');
+      });
+    });
+
+  // 스크롤탑
+  document.getElementById('scrollToTop').addEventListener('click', () => {
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
+
+  // 테마 제거됨
+
+    // 스크롤 진행률
+    const bar = document.getElementById('scroll-progress');
+    function updateBar() {
+      const s = window.pageYOffset || document.documentElement.scrollTop;
+      const dh = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = dh ? (s/dh*100)+'%' : '0%';
+    }
+    window.addEventListener('scroll', updateBar);
+    window.addEventListener('resize', updateBar);
+    document.addEventListener('DOMContentLoaded', updateBar);
+
+    // 금 시세 API & 렌더링
+    const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
+    const CACHE_KEY = 'gold_price_cache_v3';
+    const fmt = n => Number(n).toLocaleString('ko-KR');
+    function getCache() {
+      try { return JSON.parse(localStorage.getItem(CACHE_KEY)); }
+      catch { return null; }
+    }
+    function setCache(d) {
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); }
+      catch {}
+    }
+    function renderPrice(data) {
+      const priceEl  = document.getElementById('mainPrice');
+      const changeEl = document.getElementById('priceChange');
+      const supplyEl = document.querySelector('.supply-price');
+      const supplyCh = document.querySelector('.supply-footer .change-line');
+      // 한글: 수동입력값 우선 표시
+      const manualGoldPrice = localStorage.getItem('manualGoldPrice');
+      if (manualGoldPrice) {
+        priceEl.textContent = fmt(manualGoldPrice) + '원';
+        changeEl.textContent = '변동없음';
+        changeEl.className = 'change-line';
+        // 공급 비교도 숨김
+        if (supplyCh) {
+          supplyCh.textContent = '–';
+          supplyCh.className = 'change-line';
+        }
+        return;
+      }
+      // ...기존 코드...
+      if (!data || !data.price) {
+        priceEl.textContent = '–';
+        changeEl.textContent = '';
+        changeEl.className = 'change-line';
+      } else {
+        priceEl.textContent = fmt(data.price) + '원';
+        const arrow = data.trend==='up' ? '▲' : data.trend==='down' ? '▼' : '';
+        const pct   = data.percent || '';
+        const chg   = data.change ? fmt(data.change)+'원' : '';
+        changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
+        changeEl.className = 'change-line' + (data.trend==='up'? ' up': data.trend==='down'? ' down':'');
+      }
+      if (supplyEl && supplyCh && data && data.price) {
+        const supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g,''));
+        if (supplyVal>0) {
+          const rate   = (data.price - supplyVal)/data.price*100;
+          const sign   = rate>0? '▼': '▲';
+          const absPct = Math.abs(rate).toFixed(2) + '%';
+          supplyCh.textContent = `${sign} ${absPct}`;
+          supplyCh.className = 'change-line down';
+        } else {
+          supplyCh.textContent = '–';
+          supplyCh.className = 'change-line';
+        }
+      }
+    }
+    async function loadGoldPrice() {
+      const cache = getCache();
+      if (cache) renderPrice(cache);
+      try {
+        const d = await fetch(API_URL, { cache:'no-store' }).then(r=>r.json());
+        if (!d.price) throw 0;
+        renderPrice(d);
+        setCache(d);
+      } catch {
+        if (!cache) renderPrice(null);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadGoldPrice);
+
+    // Section2: Carousel + 설명글 자동 생성
+    // — 최대 20개, VISIBLE_COUNT만큼만 표시
+    const MAX_ITEMS = 20;
+    const VISIBLE_COUNT = 13; // 1~MAX_ITEMS 사이의 값으로 조정하세요
+
+  document.addEventListener('DOMContentLoaded', () => {
+      const items = [
+        { img: 'section_1.jpg',  desc: '우간다 황금의 첫 걸음 — 땅속에서 피어나는 기회의 빛' },
+        { img: 'section_2.jpg',  desc: '지하 암석 속 황금의 길 — 끝없는 도전' },
+        { img: 'section_3.jpg',  desc: '대지 위에 펼쳐진 생명의 광맥 — 공동의 땀과 노력' },
+        { img: 'section_4.jpg',  desc: '노동의 힘이 계약이 되고, 희망이 된다 1' },
+        { img: 'section_5.jpg',  desc: '노동의 힘이 계약이 되고, 희망이 된다 2' },
+        { img: 'section_6.jpg',  desc: '붉은 대지에서 피어나는 황금의 열정' },
+        { img: 'section_7.jpg',  desc: '황토빛 물에서 캐내는 삶의 원천' },
+        { img: 'section_8.jpg',  desc: '함께하는 손길이 만드는 황금의 미래' },
+        { img: 'section_9.jpg',  desc: '첨단 기술이 더하는 가치 — 금의 새로운 시대' },
+        { img: 'section_10.jpg', desc: '노력의 황금의 결실에 대한 섬세한 성분 검사' },
+        { img: 'section_11.jpg', desc: '황금의 결실 — 우간다 땅에서 피어난 부와 가치' },
+        { img: 'section_12.jpg', desc: '안전 속에서 지켜낸 자원 — 책임 있는 채굴' },
+        { img: 'section_13.jpg', desc: '공식적인 계약과 약속 — 신뢰로 세워가는 황금의 미래' },
+        { img: 'section_14.jpg', desc: '사진14' },
+        { img: 'section_15.jpg', desc: '사진15' },
+        { img: 'section_16.jpg', desc: '사진16' },
+        { img: 'section_17.jpg', desc: '사진17' },
+        { img: 'section_18.jpg', desc: '사진18' },
+        { img: 'section_19.jpg', desc: '사진19' },
+        { img: 'section_20.jpg', desc: '사진20' }
+      ];
+
+      const track = document.getElementById('carousel-track');
+      const count = Math.min(VISIBLE_COUNT, MAX_ITEMS, items.length);
+
+      items.slice(0, count).forEach(item => {
+        // 이미지와 설명 모두 있을 때만 렌더링
+        if (item.img) {
+          const div = document.createElement('div');
+          div.className = 'carousel-item';
+          const imgEl = document.createElement('img');
+          imgEl.src = `img/${item.img}`;
+          imgEl.alt = item.desc;
+          const p = document.createElement('p');
+          p.textContent = item.desc;
+          div.append(imgEl, p);
+          track.append(div);
+        }
+      });
+
+  // 무한 루프를 위해 복제
+  track.innerHTML += track.innerHTML;
+    });
+
+    // (i18n & user nav handled by app.js) — 보조 보장 로직
+    document.addEventListener('DOMContentLoaded', () => {
+      // app.js 비동기 초기화 후 사용자 버튼 강제 재구성 (지연 보장)
+      function safeBuild(){
+        if(window.GSApp && typeof window.GSApp.buildUserNav === 'function'){
+          window.GSApp.buildUserNav();
+        }
+      }
+      safeBuild();
+      setTimeout(safeBuild, 300);
+      setTimeout(safeBuild, 1000);
+  // 테마 기능 삭제됨
+    });
+  </script>
+  <!-- 섹션3 GIF 자동재생 관련 JS 완전 삭제됨 -->
+
+</body>
+</html>
+ 위해 복제
+  track.innerHTML += track.innerHTML;
+    });
+
+    // (i18n & user nav handled by app.js) — 보조 보장 로직
+    document.addEventListener('DOMContentLoaded', () => {
+      // app.js 비동기 초기화 후 사용자 버튼 강제 재구성 (지연 보장)
+      function safeBuild(){
+        if(window.GSApp && typeof window.GSApp.buildUserNav === 'function'){
+          window.GSApp.buildUserNav();
+        }
+      }
+      safeBuild();
+      setTimeout(safeBuild, 300);
+      setTimeout(safeBuild, 1000);
+  // 테마 기능 삭제됨
+    });
+  </script>
+  <!-- 섹션3 GIF 자동재생 관련 JS 완전 삭제됨 -->
+
+</body>
+</html>

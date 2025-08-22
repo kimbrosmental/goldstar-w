@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script src="/api-rewrite.js"></script>
+  <script src="/config.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>로그인</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    body{padding-top:100px;}
+    .login-wrap{max-width:420px;margin:0 auto;background:#102522;padding:40px 36px;border-radius:16px;color:#fff;box-shadow:0 0 20px rgba(0,0,0,.4);}
+    .login-wrap h1{font-size:28px;margin-bottom:24px;color:#FFD700;text-align:center;}
+    label{display:block;font-size:14px;margin:14px 0 6px;color:#ccc;}
+    input{width:100%;padding:12px 14px;border:1px solid #1e4d47;background:#0b1917;color:#fff;border-radius:8px;font-size:15px;}
+    input:focus{outline:2px solid #FFD700;}
+    button{width:100%;padding:14px 18px;margin-top:26px;background:#00695C;border:none;color:#fff;font-size:17px;font-weight:600;border-radius:10px;cursor:pointer;transition:.3s;}
+    button:hover{background:#00897B;}
+    .msg{margin-top:12px;font-size:14px;min-height:18px;color:#ff5252;}
+    .nav-right .user-link{font-size:14px;}
+    .user-area{display:flex;justify-content:center;gap:10px;margin-top:20px;}
+  </style>
+</head>
+<body>
+<nav id="navbar">
+  <div class="container">
+    <div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="logo" /></div>
+    <div class="nav-center">
+      <ul class="nav-links">
+        <li><a href="index.html#section1" data-i18n="nav_intro">소개</a></li>
+        <li><a href="index.html#section2" data-i18n="nav_progress">진행</a></li>
+        <li><a href="index.html#section3" data-i18n="nav_video">영상</a></li>
+        <li><a href="index.html#section4" data-i18n="nav_history">이력</a></li>
+        <li><a href="index.html#section5" data-i18n="nav_contact">문의</a></li>
+      </ul>
+    </div>
+    <div class="nav-right">
+      <a href="index.html" class="home-icon" aria-label="홈" style="display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;"><span style="font-size:30px;color:#FFD700;">🏠</span></a>
+    </div>
+  </div>
+</nav>
+<main>
+  <div class="login-wrap">
+    <h1>로그인</h1>
+    <form id="loginForm">
+      <label for="loginId">아이디</label>
+      <input type="text" id="loginId" required placeholder="아이디" />
+      <label for="password">비밀번호</label>
+      <input type="password" id="password" required />
+      <div class="msg" id="msg"></div>
+      <button type="submit">로그인</button>
+    </form>
+    <div style="margin-top:14px;text-align:center;font-size:15px;color:#FFD700;">
+      처음이시면 회원가입을 진행해 주세요.<br />
+      <a href="signup.html"><button type="button" style="margin-top:10px;padding:10px 24px;background:#FFD700;color:#222;font-size:16px;font-weight:bold;border:none;border-radius:8px;cursor:pointer;">회원가입</button></a>
+    </div>
+  </div>
+</main>
+<script src="app.js"></script>
+<script>
+  // 메뉴 버튼
+  const menuBtn = document.querySelector('.menu-btn');
+  const navLinks = document.querySelector('.nav-links');
+  if (menuBtn && navLinks) {
+    menuBtn.addEventListener('click', () => {
+      menuBtn.classList.toggle('active');
+      navLinks.classList.toggle('active');
+    });
+  }
+  // 로그인 입력 및 처리
+  const idInput = document.getElementById('loginId');
+  const pwInput = document.getElementById('password');
+  const msg = document.getElementById('msg');
+  idInput.addEventListener('input', function(e) {
+    let val = idInput.value;
+    // 영문(대소문자), 숫자만 허용, 자동 소문자 변환
+    const filtered = val.replace(/[^a-zA-Z0-9]/g, '');
+    if (val !== filtered || /[A-Z]/.test(val)) {
+      idInput.value = filtered.toLowerCase();
+      msg.style.color = '#ff5252';
+      msg.textContent = '영문(소문자), 숫자만 입력 가능합니다.';
+    } else {
+      msg.style.color = '#ccc';
+      msg.textContent = '';
+    }
+  });
+  document.getElementById('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const id = idInput.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().trim();
+    const pw = String(pwInput.value).trim();
+    if (!id || !pw) {
+      msg.style.color = '#ff5252';
+      msg.textContent = '아이디와 비밀번호를 입력하세요.';
+      return;
+    }
+    try {
+      await window.GSApp.loginId(id, pw);
+      msg.style.color = '#4fc3f7';
+      msg.textContent = '로그인 성공';
+      setTimeout(() => location.href = 'profile.html', 600);
+    } catch (err) {
+      msg.style.color = '#ff5252';
+      msg.textContent = err.message || '로그인 실패';
+    }
+  });
+</script>
+</body>
+</html>
