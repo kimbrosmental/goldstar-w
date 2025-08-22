@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko" id="top">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>회사 홈페이지</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    /* ---------------- Section2 레이아웃 조정 ---------------- */
+    #section2 .content {
+      padding-top: 20px;
+      padding-bottom: 20px;
+      height: auto;
+    }
+    #section2 .story-content h2 {
+      margin-bottom: 16px;
+    }
+    #section2 .story-grid {
+      margin-bottom: 24px;
+    }
+
+    /* ---------------- Carousel 스타일 ---------------- */
+    .carousel-wrapper {
+      overflow: hidden;
+      width: 100%;
+      margin-top: 16px;
+    }
+    .carousel-track {
+      display: flex;
+      gap: 20px;
+      /* ↓ 속도 조절: 5s → 원하는 값으로 변경 */
+      animation: scroll 40s linear infinite;
+    }
+    .carousel-item {
+      flex: 0 0 auto;
+      width: 400px;
+      max-width: 400px;
+    }
+    .carousel-item img {
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      object-fit: contain;
+      display: block;
+    }
+    .carousel-item p {
+      text-align: center;
+      margin-top: 8px;
+      color: #fff;
+      font-size: 16px;
+    }
+    @keyframes scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-6760px); } /* 500×13 + 20×13 */
+    }
+
+    /* ---- Section1 gold-bar 이미지 반응형 숨김 ---- */
+    @media (max-width:1024px) {
+      #section1 .price-image { display: none !important; }
+      #section1 .gold-content { justify-content: center; }
+    }
+    @media (max-width:768px) {
+      #section1 .price-image { display: none !important; }
+      #section1 .gold-content { justify-content: center; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav id="navbar">
+    <div class="container">
+      <div class="logo">
+        <img src="img/logo.png" alt="골드스타 로고">
+      </div>
+      <div class="menu-btn">
+        <span></span><span></span><span></span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#section1">소개</a></li>
+        <li><a href="#section2">진행</a></li>
+        <li><a href="#section3">영상</a></li>
+        <li><a href="#section4">이력</a></li>
+        <li><a href="#section5">문의</a></li>
+      </ul>
+    </div>
+    <div id="scroll-progress"></div>
+  </nav>
+
+  <button id="scrollToTop"><i class="fas fa-arrow-up"></i></button>
+  <div class="fixed-social-icons">
+    <a href="#" class="social-icon">
+      <img src="img/카카오톡 문의.png" class="kakao-static" alt="카카오톡 상담">
+      <img src="img/카카오톡 문의2.gif" class="kakao-hover" alt="카카오톡 상담">
+    </a>
+  </div>
+
+  <main>
+    <!-- Section1 -->
+    <section id="section1" class="section">
+      <div class="content">
+        <h2 class="hook">
+          <span class="line line1">“금은 결국 오른다.”</span>
+          <span class="line line2">“다만, 합리적 금액에 살 수 있는 순간은 짧다.”</span>
+          <span class="line line3">지금이 바로 그 순간입니다,</span>
+          <span class="line line4"><strong>준비되셨나요?</strong></span>
+          <span class="shine-bar" aria-hidden="true"></span>
+        </h2>
+        <div class="price-box gold-box" id="priceBox">
+          <div class="gold-content">
+            <img src="img/gold-bar.jpg" class="price-image" alt="골드바 이미지">
+            <div class="gold-text">
+              <h2 class="price-title">오늘의 금 시세 (3.75g)</h2>
+              <div id="mainPrice" class="main-price">로딩중…</div>
+              <div id="priceChange" class="change-line"></div>
+              <span class="compare-note">[전일 기준 시세변동폭]</span>
+            </div>
+          </div>
+        </div>
+        <div class="price-box supply-box">
+          <h2 class="price-title supply">공급 가격 (3.75g)</h2>
+          <div class="main-price supply-price">520,000원</div>
+          <div class="supply-footer">
+            <span class="change-line">–</span>
+            <span class="compare-note">[현 시세 기준과 비교]</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section2: 진행 -->
+    <section id="section2" class="section">
+      <div class="content">
+        <div class="story-content">
+          <h2>검은 대륙의 금맥</h2>
+          <div class="story-grid">
+            <div class="story-item"><h3>3억2천만톤</h3><p>2023년 우간다 금 매장량 발견</p></div>
+            <div class="story-item"><h3>글로벌 주목</h3><p>12조원 가치평가, CNN, BBC 등 해외 언론 집중 보도</p></div>
+            <div class="story-item"><h3>독점 계약</h3><p>우간다 금맥, 중국 광산업체들과 채굴 독점 계약 체결 → 골드 스타, 중국 업체와 수입계약 체결</p></div>
+          </div>
+        </div>
+        <div class="carousel-wrapper">
+          <div class="carousel-track" id="carousel-track"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section3 -->
+    <section id="section3" class="section">
+      <div class="content">
+        <div class="process-content">
+          <h2>유통 구조의 혁신</h2>
+          <div class="process-flow">
+            <div class="process-step"><img src="img/mining.jpg" alt="채굴"><p>우간다 금 매장지</p></div>
+            <div class="process-step"><img src="img/transport.jpg" alt="운송"><p>실시간 금 운송/수입</p></div>
+            <div class="process-step"><img src="img/delivery.jpg" alt="공급"><p>플랫폼 회원 공동 공급</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section4 -->
+    <section id="section4" class="section">
+      <div class="content">
+        <div class="achievement-content">
+          <h2>실제 공급 성과</h2>
+          <div class="achievement-grid">
+            <div class="achievement-item"><h3>192kg</h3><p>총 공급 완료량</p></div>
+            <div class="achievement-item"><h3>13.4%</h3><p>시세 대비 평균 할인율</p></div>
+            <div class="achievement-item"><h3>1,982명</h3><p>누적 참여 회원</p></div>
+          </div>
+          <div class="testimonials"><img src="img/gold-delivery.jpg" alt="실제 금괴 배송"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section5 -->
+    <section id="section5" class="section">
+      <div class="content center">
+        <h2 class="section5-title">지금 바로 문의하세요</h2>
+        <p class="section5-text">골드스타와 함께 새로운 투자의 기회를 시작하세요</p>
+        <div class="contact-buttons">
+          <a href="#"><img src="img/카카오톡 문의.gif" alt="카카오톡 문의"/></a>
+          <a href="#"><img src="img/텔레그램 문의.gif" alt="텔레그램 문의"/></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="company-info">
+      <div class="info-content">
+        <div class="company-info-grid">
+          <div class="info-section">
+            <h3>회사 정보</h3>
+            <p>상호명: 골드스타</p>
+            <p>대표이사: 홍길동</p>
+            <p>사업자등록번호: 123-45-67890</p>
+            <p>통신판매업: 제2025-서울강남-0000호</p>
+          </div>
+          <div class="info-section">
+            <h3>연락처</h3>
+            <p>주소: 서울특별시 강남구 테헤란로 123</p>
+            <p>대표전화: 02-1234-5678</p>
+            <p>이메일: info@goldstar.com</p>
+            <p>팩스: 02-1234-5679</p>
+          </div>
+          <div class="info-section">
+            <h3>고객지원</h3>
+            <p>운영시간: 평일 09:00 - 18:00</p>
+            <p>점심시간: 12:00 - 13:00</p>
+            <p>토/일/공휴일 휴무</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="hover-gif.js"></script>
+  <script>
+    // 메뉴 토글
+    const menuBtn = document.querySelector('.menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+    menuBtn.addEventListener('click', () => {
+      menuBtn.classList.toggle('active');
+      navLinks.classList.toggle('active');
+    });
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) {
+          e.preventDefault();
+          t.scrollIntoView({ behavior:'smooth', block:'start' });
+        }
+      });
+    });
+    document.querySelectorAll('.nav-links a').forEach(l => {
+      l.addEventListener('click', () => {
+        menuBtn.classList.remove('active');
+        navLinks.classList.remove('active');
+      });
+    });
+
+    // 스크롤탑
+    document.getElementById('scrollToTop').addEventListener('click', () => {
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
+
+    // 스크롤 진행률
+    const bar = document.getElementById('scroll-progress');
+    function updateBar() {
+      const s = window.pageYOffset || document.documentElement.scrollTop;
+      const dh = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = dh ? (s/dh*100)+'%' : '0%';
+    }
+    window.addEventListener('scroll', updateBar);
+    window.addEventListener('resize', updateBar);
+    document.addEventListener('DOMContentLoaded', updateBar);
+
+    // 금 시세 API & 렌더링
+    const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
+    const CACHE_KEY = 'gold_price_cache_v3';
+    const fmt = n => Number(n).toLocaleString('ko-KR');
+    function getCache() {
+      try { return JSON.parse(localStorage.getItem(CACHE_KEY)); }
+      catch { return null; }
+    }
+    function setCache(d) {
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); }
+      catch {}
+    }
+    function renderPrice(data) {
+      const priceEl  = document.getElementById('mainPrice');
+      const changeEl = document.getElementById('priceChange');
+      const supplyEl = document.querySelector('.supply-price');
+      const supplyCh = document.querySelector('.supply-footer .change-line');
+      if (!data || !data.price) {
+        priceEl.textContent = '–';
+        changeEl.textContent = '';
+        changeEl.className = 'change-line';
+      } else {
+        priceEl.textContent = fmt(data.price) + '원';
+        const arrow = data.trend==='up' ? '▲' : data.trend==='down' ? '▼' : '';
+        const pct   = data.percent || '';
+        const chg   = data.change ? fmt(data.change)+'원' : '';
+        changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
+        changeEl.className = 'change-line' + (data.trend==='up'? ' up': data.trend==='down'? ' down':'');
+      }
+      if (supplyEl && supplyCh && data && data.price) {
+        const supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g,''));
+        if (supplyVal>0) {
+          const rate   = (data.price - supplyVal)/data.price*100;
+          const sign   = rate>0? '▼': '▲';
+          const absPct = Math.abs(rate).toFixed(2) + '%';
+          supplyCh.textContent = `${sign} ${absPct}`;
+          supplyCh.className = 'change-line down';
+        } else {
+          supplyCh.textContent = '–';
+          supplyCh.className = 'change-line';
+        }
+      }
+    }
+    async function loadGoldPrice() {
+      const cache = getCache();
+      if (cache) renderPrice(cache);
+      try {
+        const d = await fetch(API_URL, { cache:'no-store' }).then(r=>r.json());
+        if (!d.price) throw 0;
+        renderPrice(d);
+        setCache(d);
+      } catch {
+        if (!cache) renderPrice(null);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadGoldPrice);
+
+    // Section2: Carousel + 설명글 자동 생성
+    // — 최대 20개, VISIBLE_COUNT만큼만 표시
+    const MAX_ITEMS = 20;
+    const VISIBLE_COUNT = 13; // 1~MAX_ITEMS 사이의 값으로 조정하세요
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const items = [
+        { img: 'section-1.jpg',  desc: '금 매장지 확인, 기초 전경' },
+        { img: 'section-2.jpg',  desc: '지하 매장지 채굴 현장 전경' },
+        { img: 'section-3.jpg',  desc: '우간다 금 매장지 현장 전경' },
+        { img: 'section-4.jpg',  desc: '금 매장지, 현지 작업자 선별 채굴 전경 1' },
+        { img: 'section-5.jpg',  desc: '금 매장지, 현지 작업자 선별 채굴 전경 2' },
+        { img: 'section-6.jpg',  desc: '현지 작업자들의 금 입자 수작업 분류' },
+        { img: 'section-7.jpg',  desc: '세척 후 금 입자 선별 장면' },
+        { img: 'section-8.jpg',  desc: '세척 후 금 입자 2차 선별 장면' },
+        { img: 'section-9.jpg',  desc: '주조용 용광로 온도 점검 및 선별 투입' },
+        { img: 'section-10.jpg', desc: '금 함량 초기 검사' },
+        { img: 'section-11.jpg', desc: '1차 가공 완료' },
+        { img: 'section-12.jpg', desc: '금매장지 보안 경찰' },
+        { img: 'section-13.jpg', desc: '채굴 계약 현장 전경' },
+        { img: 'section-14.jpg', desc: '' },
+        { img: 'section-15.jpg', desc: '' },
+        { img: 'section-16.jpg', desc: '' },
+        { img: 'section-17.jpg', desc: '' },
+        { img: 'section-18.jpg', desc: '' },
+        { img: 'section-19.jpg', desc: '' },
+        { img: 'section-20.jpg', desc: '' }
+      ];
+
+      const track = document.getElementById('carousel-track');
+      const count = Math.min(VISIBLE_COUNT, MAX_ITEMS, items.length);
+
+      items.slice(0, count).forEach(item => {
+        // 이미지와 설명 모두 있을 때만 렌더링
+        if (item.img && item.desc) {
+          const div = document.createElement('div');
+          div.className = 'carousel-item';
+          const imgEl = document.createElement('img');
+          imgEl.src = `img/${item.img}`;
+          imgEl.alt = item.desc;
+          const p = document.createElement('p');
+          p.textContent = item.desc;
+          div.append(imgEl, p);
+          track.append(div);
+        }
+      });
+
+      // 무한 루프를 위해 복제
+      track.innerHTML += track.innerHTML;
+    });
+  </script>
+</body>
+</html>
