@@ -30,7 +30,7 @@
   }
 // Cloudflare Worker API로 회원 목록 조회
 async function fetchUsersFromAPI(){
-  const res = await fetch('https://users.hanoiosaka1.workers.dev', {
+  const res = await fetch('/api/admin/users', {
     method: 'GET'
   });
   if(res.status === 200){
