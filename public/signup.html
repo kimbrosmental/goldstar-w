@@ -102,7 +102,7 @@
         return;
       }
       try {
-        const res = await fetch('https://dupcheck.hanoiosaka1.workers.dev', {
+    const res = await fetch('/api/dupcheck', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username })
@@ -151,7 +151,7 @@
       if(!val){dupMsg.style.color='#ff5252';dupMsg.textContent=GSApp.t('dup_enter_username');return;}
       if(!/^[a-zA-Z0-9_]{3,20}$/.test(val)){dupMsg.style.color='#ff5252';dupMsg.textContent=GSApp.t('dup_invalid_format');return;}
       try {
-  const res = await fetch('https://dupcheck.hanoiosaka1.workers.dev', {
+  const res = await fetch('/api/dupcheck', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({username: val})
@@ -204,7 +204,7 @@
       if(password!==password2){msg.textContent='비밀번호가 일치하지 않습니다.';return;}
       if(!/^\S+@\S+\.\S+$/.test(email)){msg.textContent='이메일 형식이 올바르지 않습니다.';return;}
       try {
-        const res = await fetch('https://signup.hanoiosaka1.workers.dev', {
+  const res = await fetch('/api/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({username,name,birth,phone,email,bank,account,password})
