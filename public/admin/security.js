@@ -86,14 +86,14 @@
     updateMode();
     document.getElementById('btnSaveGoldPrice').onclick = function(){
       (async()=>{
-        // 서버에 저장 (KV)
-        const res = await fetch('/api/admin/security', {
+  // 서버에 저장 (KV)
+  const res = await fetch('/api/goldprice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ data: { manualGoldPrice: priceInput.value } })
         });
         // 저장 후 즉시 서버에서 최신값 불러와서 반영
-        const getRes = await fetch('/api/admin/security');
+  const getRes = await fetch('/api/goldprice');
         const json = await getRes.json();
         localStorage.setItem('manualGoldPrice', json.manualGoldPrice || '');
         updateMode();
