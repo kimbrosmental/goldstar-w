@@ -6,7 +6,7 @@ window.DEBUG = true;
   async function isUsernameTaken(username) {
     username = String(username).replace(/[^a-zA-Z0-9]/g, '').toLowerCase().trim();
     if (!username) return false;
-  const res = await fetch('https://dupcheck.hanoiosaka1.workers.dev', {
+  const res = await fetch('/api/dupcheck', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username })
@@ -30,7 +30,7 @@ window.DEBUG = true;
     if (!username) throw new Error('아이디를 입력하세요.');
     if (await isUsernameTaken(username)) throw new Error('이미 존재하는 아이디입니다.');
     if (await isEmailTaken(email)) throw new Error('이미 존재하는 이메일입니다.');
-  const res = await fetch('https://signup.hanoiosaka1.workers.dev', {
+  const res = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({username, name, birth, phone, email, bank, account, password, status: 'pending', created: new Date().toISOString()})
@@ -44,7 +44,7 @@ window.DEBUG = true;
     if (!id) throw new Error('아이디를 입력하세요.');
     let res;
     try {
-  res = await fetch('https://login.hanoiosaka1.workers.dev', {
+  res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: id, password })
@@ -162,7 +162,7 @@ window.GSApp.loginId = async function(id, pw){
   const pwTrimmed = String(pw).trim();
   let res;
   try {
-  res = await fetch('https://login.hanoiosaka1.workers.dev', {
+  res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: filtered, password: pwTrimmed })
