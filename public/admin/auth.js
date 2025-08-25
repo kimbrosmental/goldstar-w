@@ -99,8 +99,9 @@
     if (admin) {
       if (!bcryptCheck(pw, admin.passwordHash)) throw new Error('비밀번호 오류');
       localStorage.setItem(SESSION_KEY, JSON.stringify({ username: admin.username, role: admin.role, ts: Date.now() }));
-      if (window.DEBUG) console.log('관리자 로그인 성공:', admin);
-      return { role: 'admin' };
+  if (window.DEBUG) console.log('관리자 로그인 성공:', admin);
+  if (window.reloadAllData) await window.reloadAllData();
+  return { role: 'admin' };
     }
     // 유저 확인
     let users = [];
