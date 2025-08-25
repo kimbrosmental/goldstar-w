@@ -1,13 +1,28 @@
 export async function onRequest(context) {
-	const { request, env } = context;
-	if (request.method === 'GET') {
-		const kv = env.SECURITY;
-		const list = [];
-		for await (const key of kv.list()) {
-			const admin = await kv.get(key.name);
-			if (admin) list.push(JSON.parse(admin));
-		}
-		return new Response(JSON.stringify(list), { status: 200 });
-	}
-	return new Response('Method Not Allowed', { status: 405 });
+  const kv = context.env.SECURITY;
+  const method = context.request.method;
+
+  async function getAll() {
+    const raw = await kv.get("admins");
+    if (!raw) return [];
+    try { return JSON.parse(raw); } catch { return []; }
+  }
+
+  if (method === 'GET') {
+    const data = await getAll();
+    return Response.json({ ok:true, data });
+  }
+
+  if (method === 'POST') {
+    try {
+      const body = await context.request.json();
+      await kv.put("admins", JSON.stringify(body.data || []));
+      const data = await getAll();
+      return Response.json({ ok:true, data });
+    } catch (e) {
+      return Response.json({ ok:false, error:e.message }, { status:400 });
+    }
+  }
+
+  return Response.json({ ok:false, error:"Method Not Allowed" }, { status:405 });
 }
