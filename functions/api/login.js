@@ -48,7 +48,7 @@ async function pbkdf2Verify(stored, input){
 }
 async function verifyAny(stored, input){
   if (stored == null) return false;
-  if (stored === input) return true; // legacy plain (not recommended)
+  if (stored === input) return true; // legacy plain
   if (typeof stored === 'string' && stored.startsWith('pbkdf2$')) return pbkdf2Verify(stored, input);
   if (typeof stored === 'string' && stored.startsWith('sha256:')) { const hex=await sha256Hex(input); return stored.slice(7).toLowerCase()===hex.toLowerCase(); }
   if (typeof stored === 'string' && isHex64(stored))            { const hex=await sha256Hex(input); return stored.toLowerCase()===hex.toLowerCase(); }
@@ -74,14 +74,22 @@ export async function onRequest({ request, env }) {
     const pw = String(body.password||'').trim();
     if (!id || !pw) return new Response(JSON.stringify({ error:'아이디/비밀번호를 입력하세요.' }), { status:400, headers:CORS });
 
-    // 1) ADMIN: SECURITY.adminid (encrypted JSON or plain JSON with admins[])
+    // 1) ADMIN via SECURITY.adminid (encrypted or plain JSON), or SECURITY.get('admin:<id>')
     if (env.SECURITY) {
       const secVal = await env.SECURITY.get('adminid');
       if (secVal) {
         let admins = null;
         const dec = await decryptMaybe(secVal, env);
         if (dec && Array.isArray(dec.admins)) admins = dec.admins;
-        if (!admins) { try { const tmp = JSON.parse(secVal); if (tmp && Array.isArray(tmp.admins)) admins = tmp.admins; } catch {} }
+        if (!admins) {
+          try {
+            const obj = JSON.parse(secVal);
+            if (Array.isArray(obj)) admins = obj;
+            else if (obj && Array.isArray(obj.admins)) admins = obj.admins;
+            else if (obj && obj.username && obj.password) admins = [obj];
+            else if (obj && typeof obj.admins === 'object') { admins = Object.entries(obj.admins).map(([u,rec])=>({ username:u, ...(rec||{}) })); }
+          } catch { /* ignore */ }
+        }
         if (admins) {
           const adm = admins.find(a => String(a.username||'').toLowerCase().trim()===id);
           if (adm) {
@@ -92,12 +100,26 @@ export async function onRequest({ request, env }) {
             const role = (String(adm.role||'ADMIN').toUpperCase()==='MANAGER') ? 'MANAGER' : 'ADMIN';
             return new Response(JSON.stringify({ ok:true, role, username:id, status:'active' }), { status:200, headers:CORS });
           }
+        } else {
+          if (id === 'adminid' && await verifyAny(secVal, pw)) {
+            return new Response(JSON.stringify({ ok:true, role:'ADMIN', username:id, status:'active' }), { status:200, headers:CORS });
+          }
         }
-        // if adminid key exists but no parse -> fallthrough to normal user
+      }
+      const perKey = await env.SECURITY.get('admin:'+id);
+      if (perKey) {
+        let rec = null;
+        try { rec = JSON.parse(perKey); } catch { rec = perKey; }
+        let role = 'ADMIN', status = 'active', stored = rec;
+        if (rec && typeof rec === 'object') { role = (String(rec.role||'ADMIN').toUpperCase()==='MANAGER')?'MANAGER':'ADMIN'; status = String(rec.status||'active'); stored = rec.password||''; }
+        const ok = await verifyAny(stored, pw);
+        if (!ok) return new Response(JSON.stringify({ error:'비밀번호가 일치하지 않습니다.' }), { status:401, headers:CORS });
+        if (String(status).toLowerCase()!=='active') return new Response(JSON.stringify({ error:'비활성된 계정입니다. 최고관리자에게 확인 바랍니다.' }), { status:403, headers:CORS });
+        return new Response(JSON.stringify({ ok:true, role, username:id, status:'active' }), { status:200, headers:CORS });
       }
     }
 
-    // 2) Bootstrap admin via env vars
+    // 2) Bootstrap admin via env
     const bootId = (env.ADMIN_ID||'').toLowerCase().trim();
     const bootPw = String(env.ADMIN_PW||'').trim();
     if (bootId && bootPw && id===bootId && pw===bootPw) {
