@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
-\1
-  <base href=\"/\" />
-  <script src="/api-rewrite.js"></script>
-  <script src="/config.js"></script>
-  <meta charset="UTF-8" />
+<head>
+<meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>회원가입</title>
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="style.css" />
   <style>
     body{padding-top:100px;}
     .signup-wrapper{max-width:480px;margin:0 auto;background:#102522;padding:40px 36px;border-radius:16px;color:#fff;box-shadow:0 0 20px rgba(0,0,0,.4);}
@@ -224,5 +221,10 @@
     });
     document.addEventListener('DOMContentLoaded',()=>{ if(window.GSApp) GSApp.applyLang(); });
   </script>
+
+  <script src="/config.js"></script>
+  <script src="/api-rewrite.js" defer></script>
+  <script src="/app-init.js"></script>
+  <script src="/app.js" defer></script>
 </body>
 </html>
