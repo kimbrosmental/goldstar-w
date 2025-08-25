@@ -48,7 +48,7 @@ async function pbkdf2Verify(stored, input){
 }
 async function verifyAny(stored, input){
   if (stored == null) return false;
-  if (stored === input) return true; // legacy plain
+  if (stored === input) return true; // legacy plain (not recommended)
   if (typeof stored === 'string' && stored.startsWith('pbkdf2$')) return pbkdf2Verify(stored, input);
   if (typeof stored === 'string' && stored.startsWith('sha256:')) { const hex=await sha256Hex(input); return stored.slice(7).toLowerCase()===hex.toLowerCase(); }
   if (typeof stored === 'string' && isHex64(stored))            { const hex=await sha256Hex(input); return stored.toLowerCase()===hex.toLowerCase(); }
@@ -57,6 +57,8 @@ async function verifyAny(stored, input){
   return false;
 }
 
+
+function normId(s) { return String(s||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase().trim(); }
 
 export async function onRequest({ request, env }) {
   const CORS = {
@@ -70,52 +72,80 @@ export async function onRequest({ request, env }) {
 
   try {
     const body = await request.json();
-    const id = String(body.username||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase().trim();
+    const id = normId(body.username);
     const pw = String(body.password||'').trim();
     if (!id || !pw) return new Response(JSON.stringify({ error:'아이디/비밀번호를 입력하세요.' }), { status:400, headers:CORS });
 
-    // 1) ADMIN via SECURITY.adminid (encrypted or plain JSON), or SECURITY.get('admin:<id>')
+    // 1) ADMIN via SECURITY.adminid (supports ('id', 'pw', 'role', 'active')) or arrays, or SECURITY.get('admin:<id>')
     if (env.SECURITY) {
-      const secVal = await env.SECURITY.get('adminid');
-      if (secVal) {
-        let admins = null;
-        const dec = await decryptMaybe(secVal, env);
-        if (dec && Array.isArray(dec.admins)) admins = dec.admins;
-        if (!admins) {
-          try {
-            const obj = JSON.parse(secVal);
-            if (Array.isArray(obj)) admins = obj;
-            else if (obj && Array.isArray(obj.admins)) admins = obj.admins;
-            else if (obj && obj.username && obj.password) admins = [obj];
-            else if (obj && typeof obj.admins === 'object') { admins = Object.entries(obj.admins).map(([u,rec])=>({ username:u, ...(rec||{}) })); }
-          } catch { /* ignore */ }
-        }
-        if (admins) {
-          const adm = admins.find(a => String(a.username||'').toLowerCase().trim()===id);
-          if (adm) {
-            const active = (String(adm.status||'active').toLowerCase()==='active');
-            if (!active) return new Response(JSON.stringify({ error:'비활성된 계정입니다. 최고관리자에게 확인 바랍니다.' }), { status:403, headers:CORS });
-            const ok = await verifyAny(adm.password||'', pw);
-            if (!ok)  return new Response(JSON.stringify({ error:'비밀번호가 일치하지 않습니다.' }), { status:401, headers:CORS });
-            const role = (String(adm.role||'ADMIN').toUpperCase()==='MANAGER') ? 'MANAGER' : 'ADMIN';
-            return new Response(JSON.stringify({ ok:true, role, username:id, status:'active' }), { status:200, headers:CORS });
-          }
-        } else {
-          if (id === 'adminid' && await verifyAny(secVal, pw)) {
-            return new Response(JSON.stringify({ ok:true, role:'ADMIN', username:id, status:'active' }), { status:200, headers:CORS });
-          }
-        }
-      }
+      // per-admin key takes priority
       const perKey = await env.SECURITY.get('admin:'+id);
       if (perKey) {
         let rec = null;
         try { rec = JSON.parse(perKey); } catch { rec = perKey; }
-        let role = 'ADMIN', status = 'active', stored = rec;
-        if (rec && typeof rec === 'object') { role = (String(rec.role||'ADMIN').toUpperCase()==='MANAGER')?'MANAGER':'ADMIN'; status = String(rec.status||'active'); stored = rec.password||''; }
+        let role = 'ADMIN', statusActive = true, stored = rec;
+        if (rec && typeof rec === 'object') {
+          role = (String(rec.role||'ADMIN').toUpperCase()==='MANAGER') ? 'MANAGER':'ADMIN';
+          statusActive = ('active' in rec) ? !!rec.active : (String(rec.status||'active').toLowerCase()==='active');
+          stored = rec.pw || rec.password || '';
+        }
         const ok = await verifyAny(stored, pw);
         if (!ok) return new Response(JSON.stringify({ error:'비밀번호가 일치하지 않습니다.' }), { status:401, headers:CORS });
-        if (String(status).toLowerCase()!=='active') return new Response(JSON.stringify({ error:'비활성된 계정입니다. 최고관리자에게 확인 바랍니다.' }), { status:403, headers:CORS });
+        if (!statusActive) return new Response(JSON.stringify({ error:'비활성된 계정입니다. 최고관리자에게 확인 바랍니다.' }), { status:403, headers:CORS });
         return new Response(JSON.stringify({ ok:true, role, username:id, status:'active' }), { status:200, headers:CORS });
+      }
+
+      const secVal = await env.SECURITY.get('adminid');
+      if (secVal) {
+        // Try encrypted JSON
+        let admins = null;
+        const dec = await decryptMaybe(secVal, env);
+        if (dec) {
+          if (Array.isArray(dec)) admins = dec;
+          else if (Array.isArray(dec.admins)) admins = dec.admins;
+          else if (dec.id && (dec.pw || dec.password)) admins = [dec];
+        }
+        // Try plain JSON
+        if (!admins) { 
+          try {
+            const obj = JSON.parse(secVal);
+            if (Array.isArray(obj)) admins = obj;
+            else if (Array.isArray(obj.admins)) admins = obj.admins;
+            else if (obj.id && (obj.pw || obj.password)) admins = [obj]; // ★ 네가 준 형식
+            else if (obj.username && (obj.password||obj.pw)) admins = [obj];
+            else if (obj && typeof obj.admins === 'object') {
+              admins = Object.entries(obj.admins).map(([u,rec])=>({ username:u, ...(rec||{}) }));
+            }
+          } catch { /* ignore */ }
+        }
+        if (admins) {
+          const adm = admins.find(a => normId(a.username || a.id) === id);
+          if (adm) {
+            const role = (String((adm.role||'ADMIN')).toUpperCase()==='MANAGER') ? 'MANAGER':'ADMIN';
+            const active = ('active' in adm) ? !!adm.active : (String(adm.status||'active').toLowerCase()==='active');
+            const stored = adm.pw || adm.password || '';
+            const ok = await verifyAny(stored, pw);
+            if (!ok) return new Response(JSON.stringify({ error:'비밀번호가 일치하지 않습니다.' }), { status:401, headers:CORS });
+            if (!active) return new Response(JSON.stringify({ error:'비활성된 계정입니다. 최고관리자에게 확인 바랍니다.' }), { status:403, headers:CORS });
+            return new Response(JSON.stringify({ ok:true, role, username:id, status:'active' }), { status:200, headers:CORS });
+          }
+        } else {
+          // Treat as single admin 'adminid' with stored password (string or JSON)
+          try {
+            const single = JSON.parse(secVal);
+            if (normId(single.id||single.username) === id) {
+              const active = ('active' in single) ? !!single.active : (String(single.status||'active').toLowerCase()==='active');
+              const ok = await verifyAny(single.pw||single.password||'', pw);
+              if (!ok) return new Response(JSON.stringify({ error:'비밀번호가 일치하지 않습니다.' }), { status:401, headers:CORS });
+              if (!active) return new Response(JSON.stringify({ error:'비활성된 계정입니다. 최고관리자에게 확인 바랍니다.' }), { status:403, headers:CORS });
+              return new Response(JSON.stringify({ ok:true, role:(String(single.role||'ADMIN').toUpperCase()==='MANAGER')?'MANAGER':'ADMIN', username:id, status:'active' }), { status:200, headers:CORS });
+            }
+          } catch {
+            if (id === 'adminid' && await verifyAny(secVal, pw)) {
+              return new Response(JSON.stringify({ ok:true, role:'ADMIN', username:id, status:'active' }), { status:200, headers:CORS });
+            }
+          }
+        }
       }
     }
 
