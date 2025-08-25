@@ -12,7 +12,6 @@ export async function onRequest({ request, env }){
   if (request.method === 'OPTIONS') return new Response(null, { status:204, headers:CORS });
   const kv = env.USERS;
 
-  // helper to list all users
   async function listAll(){
     const out = [];
     let cursor;
@@ -35,6 +34,24 @@ export async function onRequest({ request, env }){
 
   if (request.method === 'POST'){
     let body={}; try{ body = await request.json(); }catch{}
+
+    // Bulk save path: accept { data: JSON-stringified array of users }
+    if (body && 'data' in body) {
+      try {
+        const arr = typeof body.data === 'string' ? JSON.parse(body.data) : (Array.isArray(body.data)? body.data : []);
+        if (!Array.isArray(arr)) return bad({ error:'invalid_data' }, 400);
+        for (const u of arr) {
+          const key = normId(u && (u.username||u.id));
+          if (!key) continue;
+          await kv.put(key, JSON.stringify({ ...u, username: key }));
+        }
+        try { await env.SECURITY.put('ver:users', Date.now().toString()); } catch {}
+        return ok({ ok:true, saved: arr.length });
+      } catch {
+        return bad({ error:'bad_data' }, 400);
+      }
+    }
+
     const action = String(body.action||'').toLowerCase();
     if (action === 'list' || action === 'get' || action === 'fetch'){
       const users = await listAll();
