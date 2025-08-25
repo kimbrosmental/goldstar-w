@@ -229,6 +229,7 @@
     };
   }
 
+  window.renderSecurity = render;
   // 초기 실행
   (async()=>{
     await loadAdmins();
