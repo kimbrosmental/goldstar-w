@@ -1,15 +1,21 @@
 export async function onRequest({ env }) {
   try {
-    await env.USERS.put('diag:ping', 'pong', { expirationTtl: 60 });
-    const v = await env.USERS.get('diag:ping');
-    const hasUsers = v === 'pong';
-    const hasSecurity = !!env.SECURITY;
-    const hasOrders = !!env.ORDERS;
-    return new Response(JSON.stringify({ kv: { USERS: hasUsers, SECURITY: hasSecurity, ORDERS: hasOrders } }), {
+    const res = {};
+    // Try basic write/read on USERS
+    try {
+      await env.USERS.put('diag:ping', 'pong', { expirationTtl: 60 });
+      res.USERS = (await env.USERS.get('diag:ping')) === 'pong';
+    } catch (e) { res.USERS = false; res.USERS_error = String(e); }
+    // SECURITY present?
+    try { res.SECURITY = !!env.SECURITY; } catch { res.SECURITY = false; }
+    // ORDERS present?
+    try { res.ORDERS = !!env.ORDERS; } catch { res.ORDERS = false; }
+
+    return new Response(JSON.stringify({ kv: res }), {
       headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*' }
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: 'KV binding missing?', message: String(e) }), {
+    return new Response(JSON.stringify({ error: 'diag-failed', message: String(e) }), {
       status: 500,
       headers: { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*' }
     });
