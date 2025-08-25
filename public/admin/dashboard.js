@@ -70,4 +70,5 @@
   // 최초 진입 시 전체 데이터 로드 및 대시보드 표시
   reloadAllData();
   showView('dashboard');
+  window.renderDashboard = renderDashboard;
 })();
