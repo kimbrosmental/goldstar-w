@@ -95,10 +95,16 @@
       return;
     }
     try {
-      await window.GSApp.loginId(id, pw);
+      const user = await window.GSApp.loginId(id, pw);
       msg.style.color = '#4fc3f7';
       msg.textContent = '로그인 성공';
-      setTimeout(() => location.href = 'profile.html', 600);
+      setTimeout(() => {
+        if (user && (user.role === 'ADMIN' || user.role === 'admin')) {
+          location.href = 'admin/index.html';
+        } else {
+          location.href = 'profile.html';
+        }
+      }, 600);
     } catch (err) {
       msg.style.color = '#ff5252';
       msg.textContent = err.message || '로그인 실패';
