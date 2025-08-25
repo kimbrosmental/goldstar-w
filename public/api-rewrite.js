@@ -11,8 +11,6 @@
 // IMPORTANT: Your Workers must return proper CORS (Access-Control-Allow-Origin) headers.
 
 (function(){
-  const USE = (typeof window !== 'undefined' && window.USE_EXTERNAL_WORKERS === true);
-  if (!USE) return;
   const ROUTES = [
     // Auth & signup
     { from: "/api/dupcheck",        to: "https://dupcheck.hanoiosaka1.workers.dev" },
