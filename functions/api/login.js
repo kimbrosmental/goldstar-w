@@ -1,5 +1,4 @@
 
-
 // === AES-GCM helpers (tolerant) ============================================
 function b64u(arr){ return btoa(String.fromCharCode(...arr)); }
 function u8(b64){ try { return Uint8Array.from(atob(b64), c => c.charCodeAt(0)); } catch { return null; } }
@@ -12,7 +11,7 @@ async function importAesKey(env) {
   } catch { return null; }
 }
 
-export async function decryptMaybe(str, env) {
+async function decryptMaybe(str, env) {
   try {
     if (typeof str !== 'string') return null;
     if (!str.startsWith('enc:v1:')) return null;
@@ -29,7 +28,7 @@ export async function decryptMaybe(str, env) {
 }
 
 
-// Hash/verify helpers --------------------------------------------------------
+// --- Password verify helpers -----------------------------------------------
 async function sha256Hex(text) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -52,11 +51,12 @@ async function verifyAny(stored, input){
   if (stored === input) return true; // legacy plain (not recommended)
   if (typeof stored === 'string' && stored.startsWith('pbkdf2$')) return pbkdf2Verify(stored, input);
   if (typeof stored === 'string' && stored.startsWith('sha256:')) { const hex=await sha256Hex(input); return stored.slice(7).toLowerCase()===hex.toLowerCase(); }
-  if (typeof stored === 'string' && isHex64(stored)) { const hex=await sha256Hex(input); return stored.toLowerCase()===hex.toLowerCase(); }
-  if (typeof stored === 'string' && isBase64(stored)) { try{ return atob(stored)===input; }catch{ return false; } }
+  if (typeof stored === 'string' && isHex64(stored))            { const hex=await sha256Hex(input); return stored.toLowerCase()===hex.toLowerCase(); }
+  if (typeof stored === 'string' && isBase64(stored))            { try{ return atob(stored)===input; }catch{ return false; } }
   if (typeof stored === 'string') { try{ const obj=JSON.parse(stored); if (obj && obj.password) return verifyAny(obj.password, input); }catch{} }
   return false;
 }
+
 
 export async function onRequest({ request, env }) {
   const CORS = {
@@ -66,54 +66,53 @@ export async function onRequest({ request, env }) {
     'Content-Type': 'application/json'
   };
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
-  if (request.method !== 'POST') return new Response(JSON.stringify({ ok:false, error:'Method Not Allowed' }), { status: 200, headers: CORS });
+  if (request.method !== 'POST')   return new Response(JSON.stringify({ error:'Method Not Allowed' }), { status:405, headers:CORS });
 
   try {
-    const { username, password } = await request.json();
-    const id = String(username||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase().trim();
-    const pw = String(password||'').trim();
-    if (!id || !pw) return new Response(JSON.stringify({ ok:false, error:'아이디/비밀번호를 입력하세요.' }), { status:200, headers:CORS });
+    const body = await request.json();
+    const id = String(body.username||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase().trim();
+    const pw = String(body.password||'').trim();
+    if (!id || !pw) return new Response(JSON.stringify({ error:'아이디/비밀번호를 입력하세요.' }), { status:400, headers:CORS });
 
-    // ADMIN list under SECURITY.adminid (encrypted JSON or plain JSON)
-    try {
-      const secVal = env.SECURITY ? await env.SECURITY.get('adminid') : null;
+    // 1) ADMIN: SECURITY.adminid (encrypted JSON or plain JSON with admins[])
+    if (env.SECURITY) {
+      const secVal = await env.SECURITY.get('adminid');
       if (secVal) {
         let admins = null;
         const dec = await decryptMaybe(secVal, env);
         if (dec && Array.isArray(dec.admins)) admins = dec.admins;
-        if (!admins) { // legacy JSON
-          try { const tmp = JSON.parse(secVal); if (tmp && Array.isArray(tmp.admins)) admins = tmp.admins; } catch {}
-        }
+        if (!admins) { try { const tmp = JSON.parse(secVal); if (tmp && Array.isArray(tmp.admins)) admins = tmp.admins; } catch {} }
         if (admins) {
-          const found = admins.find(a => String(a.username||'').toLowerCase().trim()===id);
-          if (found) {
-            const active = (String(found.status||'active').toLowerCase()==='active');
-            if (!active) return new Response(JSON.stringify({ ok:false, error:'비활성된 계정입니다. 최고관리자에게 확인 바랍니다.' }), { status:200, headers:CORS });
-            const ok = await verifyAny(found.password||'', pw);
-            if (!ok) return new Response(JSON.stringify({ ok:false, error:'비밀번호가 일치하지 않습니다.' }), { status:200, headers:CORS });
-            const role = (String(found.role||'ADMIN').toUpperCase()==='MANAGER') ? 'MANAGER' : 'ADMIN';
+          const adm = admins.find(a => String(a.username||'').toLowerCase().trim()===id);
+          if (adm) {
+            const active = (String(adm.status||'active').toLowerCase()==='active');
+            if (!active) return new Response(JSON.stringify({ error:'비활성된 계정입니다. 최고관리자에게 확인 바랍니다.' }), { status:403, headers:CORS });
+            const ok = await verifyAny(adm.password||'', pw);
+            if (!ok)  return new Response(JSON.stringify({ error:'비밀번호가 일치하지 않습니다.' }), { status:401, headers:CORS });
+            const role = (String(adm.role||'ADMIN').toUpperCase()==='MANAGER') ? 'MANAGER' : 'ADMIN';
             return new Response(JSON.stringify({ ok:true, role, username:id, status:'active' }), { status:200, headers:CORS });
           }
         }
+        // if adminid key exists but no parse -> fallthrough to normal user
       }
-    } catch { /* ignore admin path errors to allow user login */ }
+    }
 
-    // Bootstrap env admin
+    // 2) Bootstrap admin via env vars
     const bootId = (env.ADMIN_ID||'').toLowerCase().trim();
     const bootPw = String(env.ADMIN_PW||'').trim();
     if (bootId && bootPw && id===bootId && pw===bootPw) {
       return new Response(JSON.stringify({ ok:true, role:'ADMIN', username:id, status:'active' }), { status:200, headers:CORS });
     }
 
-    // Normal user
+    // 3) Normal user
     const raw = await env.USERS.get(id);
-    if (!raw) return new Response(JSON.stringify({ ok:false, error:'존재하지 않는 아이디입니다.' }), { status:200, headers:CORS });
-    let user; try{ user=JSON.parse(raw); }catch{ return new Response(JSON.stringify({ ok:false, error:'서버 데이터 오류' }), { status:200, headers:CORS }); }
+    if (!raw) return new Response(JSON.stringify({ error:'존재하지 않는 아이디입니다.' }), { status:404, headers:CORS });
+    let user; try { user = JSON.parse(raw); } catch { return new Response(JSON.stringify({ error:'서버 데이터 오류' }), { status:500, headers:CORS }); }
     const ok = await verifyAny(user.password||'', pw);
-    if (!ok) return new Response(JSON.stringify({ ok:false, error:'비밀번호가 일치하지 않습니다.' }), { status:200, headers:CORS });
+    if (!ok) return new Response(JSON.stringify({ error:'비밀번호가 일치하지 않습니다.' }), { status:401, headers:CORS });
     const role = user.role||'USER'; const status = user.status||'active';
     return new Response(JSON.stringify({ ok:true, role, username:id, status }), { status:200, headers:CORS });
   } catch (e) {
-    return new Response(JSON.stringify({ ok:false, error:'요청 본문 오류' }), { status:200, headers:CORS });
+    return new Response(JSON.stringify({ error:'요청 본문 오류' }), { status:400, headers:CORS });
   }
 }
