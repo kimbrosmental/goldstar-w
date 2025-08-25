@@ -1,7 +1,7 @@
 // 주문 관리 기능 (목록/상세/상태변경/문서다운로드)
 (function(){
   // 샘플 주문 데이터
-  let orders = [];
+  let orders = window.AdminData ? window.AdminData.orders : [];
   // 암호화 저장/불러오기 함수
   async function saveOrders() {
     const encrypted = await window.encrypt(orders);
@@ -10,13 +10,10 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ data: encrypted })
     });
+    if (window.reloadAllData) await window.reloadAllData();
   }
-  async function loadOrders() {
-    const res = await fetch('/api/admin/orders');
-    const json = await res.json();
-    orders = window.decrypt(json.data);
-  }
-  function render(){
+  // 데이터는 reloadAllData에서 관리
+  function renderOrders(){
   var html = `<button class="dashboard-top-btn" id="btnAddOrder">주문 추가</button>`;
     html += '<table class="admin-table"><thead><tr><th>주문번호</th><th>주문일</th><th>회원</th><th>금액</th><th>상태</th><th>메모</th><th>관리</th></tr></thead><tbody>';
     orders.forEach((o,i)=>{
@@ -28,8 +25,9 @@
     });
     html += '</tbody></table>';
     html += `<div id="orderModal" class="modal" style="display:none;"></div>`;
-    document.getElementById('view-orders').innerHTML = html;
-    document.getElementById('btnAddOrder').onclick = showAddOrder;
+  document.getElementById('view-orders').innerHTML = html;
+  document.getElementById('btnAddOrder').onclick = showAddOrder;
+  window.renderOrders = renderOrders;
   }
 
   window.editOrder = function(idx){
@@ -81,6 +79,6 @@
       modal.style.display = 'none';
     };
   }
-  document.addEventListener('DOMContentLoaded', render);
+  document.addEventListener('DOMContentLoaded', renderOrders);
   document.addEventListener('DOMContentLoaded', async ()=>{ await loadOrders(); render(); });
 })();
