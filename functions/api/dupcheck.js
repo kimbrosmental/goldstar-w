@@ -47,17 +47,25 @@ export async function onRequest({ request, env }) {
 
   if (!key) return new Response('아이디를 입력하세요.', { status:400, headers: HDR });
 
-  // USERS KV
+  // USERS KV check
   if (await env.USERS.get(key)) return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
 
-  // SECURITY.adminid — encrypted admins[] or plain JSON. If unreadable, at least reserve "adminid"
+  // SECURITY.adminid check (encrypted/plain)
   try {
     const secVal = env.SECURITY ? await env.SECURITY.get('adminid') : null;
     if (secVal) {
       let admins = null;
       const dec = await decryptMaybe(secVal, env);
       if (dec && Array.isArray(dec.admins)) admins = dec.admins;
-      if (!admins) { try { const tmp = JSON.parse(secVal); if (tmp && Array.isArray(tmp.admins)) admins = tmp.admins; } catch {} }
+      if (!admins) {
+        try {
+          const obj = JSON.parse(secVal);
+          if (Array.isArray(obj)) admins = obj;
+          else if (obj && Array.isArray(obj.admins)) admins = obj.admins;
+          else if (obj && obj.username && obj.password) admins = [obj];
+          else if (obj && typeof obj.admins === 'object') { admins = Object.entries(obj.admins).map(([u,rec])=>({ username:u, ...(rec||{}) })); }
+        } catch { }
+      }
       if (admins) {
         if (admins.find(a => String(a.username||'').toLowerCase().trim()===key)) {
           return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
@@ -66,6 +74,12 @@ export async function onRequest({ request, env }) {
         if (key === 'adminid') return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
       }
     }
+  } catch { /* ignore */ }
+
+  // SECURITY per-admin key
+  try {
+    const per = env.SECURITY ? await env.SECURITY.get('admin:'+key) : null;
+    if (per) return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
   } catch { /* ignore */ }
 
   return new Response('사용 가능한 아이디입니다.', { status:200, headers: HDR });
