@@ -28,6 +28,8 @@ async function decryptMaybe(str, env) {
 }
 
 
+function normId(s) { return String(s||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase().trim(); }
+
 export async function onRequest({ request, env }) {
   const HDR = { 'Access-Control-Allow-Origin':'*', 'Access-Control-Allow-Methods':'GET,POST,OPTIONS', 'Access-Control-Allow-Headers':'Content-Type', 'Content-Type':'text/plain; charset=utf-8' };
   if (request.method === 'OPTIONS') return new Response(null, { status:204, headers: HDR });
@@ -36,10 +38,10 @@ export async function onRequest({ request, env }) {
   try {
     if (request.method === 'GET') {
       const u = new URL(request.url);
-      key = String(u.searchParams.get('username')||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase().trim();
+      key = normId(u.searchParams.get('username'));
     } else if (request.method === 'POST') {
       const body = await request.json();
-      key = String(body.username||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase().trim();
+      key = normId(body.username);
     } else {
       return new Response('Method Not Allowed', { status:405, headers: HDR });
     }
@@ -50,36 +52,41 @@ export async function onRequest({ request, env }) {
   // USERS KV check
   if (await env.USERS.get(key)) return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
 
-  // SECURITY.adminid check (encrypted/plain)
+  // SECURITY per-admin key
+  try {
+    const per = env.SECURITY ? await env.SECURITY.get('admin:'+key) : null;
+    if (per) return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
+  } catch { /* ignore */ }
+
+  // SECURITY.adminid with ('id', 'pw', 'role', 'active') or array/plain
   try {
     const secVal = env.SECURITY ? await env.SECURITY.get('adminid') : null;
     if (secVal) {
       let admins = null;
       const dec = await decryptMaybe(secVal, env);
-      if (dec && Array.isArray(dec.admins)) admins = dec.admins;
+      if (dec) {
+        if (Array.isArray(dec)) admins = dec;
+        else if (Array.isArray(dec.admins)) admins = dec.admins;
+        else if (dec.id && (dec.pw || dec.password)) admins = [dec];
+      }
       if (!admins) {
         try {
           const obj = JSON.parse(secVal);
           if (Array.isArray(obj)) admins = obj;
-          else if (obj && Array.isArray(obj.admins)) admins = obj.admins;
-          else if (obj && obj.username && obj.password) admins = [obj];
+          else if (Array.isArray(obj.admins)) admins = obj.admins;
+          else if (obj.id && (obj.pw || obj.password)) admins = [obj]; // ★ 네가 준 형식
+          else if (obj.username && (obj.password||obj.pw)) admins = [obj];
           else if (obj && typeof obj.admins === 'object') { admins = Object.entries(obj.admins).map(([u,rec])=>({ username:u, ...(rec||{}) })); }
-        } catch { }
+        } catch { /* ignore */ }
       }
       if (admins) {
-        if (admins.find(a => String(a.username||'').toLowerCase().trim()===key)) {
+        if (admins.find(a => normId(a.username || a.id) === key)) {
           return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
         }
       } else {
         if (key === 'adminid') return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
       }
     }
-  } catch { /* ignore */ }
-
-  // SECURITY per-admin key
-  try {
-    const per = env.SECURITY ? await env.SECURITY.get('admin:'+key) : null;
-    if (per) return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
   } catch { /* ignore */ }
 
   return new Response('사용 가능한 아이디입니다.', { status:200, headers: HDR });
