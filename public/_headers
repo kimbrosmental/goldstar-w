@@ -1,0 +1,4 @@
+/*
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: blob: https:; connect-src 'self' https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https:; script-src 'self' 'unsafe-inline';
+  Referrer-Policy: no-referrer-when-downgrade
+  X-Content-Type-Options: nosniff
