@@ -1,13 +1,14 @@
-export async function onRequest(context) {
-	const { request, env } = context;
-	if (request.method === 'GET') {
-		const kv = env.USERS;
-		const list = [];
-		for await (const key of kv.list()) {
-			const user = await kv.get(key.name);
-			if (user) list.push(JSON.parse(user));
-		}
-		return new Response(JSON.stringify(list), { status: 200 });
-	}
-	return new Response('Method Not Allowed', { status: 405 });
+export async function onRequest({ request, env }) {
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers: { 'content-type':'application/json; charset=utf-8','access-control-allow-origin':'*' } });
+  }
+  const list = await env.USERS.list({ prefix: 'user:' });
+  const data = [];
+  for (const k of list.keys) {
+    const raw = await env.USERS.get(k.name);
+    if (raw) {
+      try { data.push(JSON.parse(raw)); } catch {}
+    }
+  }
+  return new Response(JSON.stringify({ data }), { headers: { 'content-type':'application/json; charset=utf-8','access-control-allow-origin':'*' } });
 }
