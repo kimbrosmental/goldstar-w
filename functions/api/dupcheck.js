@@ -1,37 +1,35 @@
+export async function onRequest({ request, env }) {
+  const kv = env.INQUIRIES;
+  const cors = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+  };
 
-export async function onRequest(context) {
-  const { request, env } = context;
-  if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      }
-    });
-  }
-  if (request.method === 'POST') {
-    const { username } = await request.json();
-    const kv = env.USERS;
-    const key = String(username).replace(/[^a-zA-Z0-9]/g, '').toLowerCase().trim();
-    if (!key) return new Response('아이디를 입력하세요.', {
-      status: 400,
-      headers: { 'Access-Control-Allow-Origin': '*' }
-    });
-    if (await kv.get(key)) {
-      return new Response('이미 사용중인 아이디입니다.', {
-        status: 409,
-        headers: { 'Access-Control-Allow-Origin': '*' }
-      });
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+
+  if (request.method === "GET") {
+    const list = await kv.list();
+    const items = [];
+    for (const key of list.keys) {
+      const val = await kv.get(key.name);
+      if (val) items.push(JSON.parse(val));
     }
-    return new Response('사용 가능한 아이디입니다.', {
-      status: 200,
-      headers: { 'Access-Control-Allow-Origin': '*' }
-    });
+    return new Response(JSON.stringify(items), { headers: { ...cors, "Content-Type": "application/json" } });
   }
-  return new Response('Method Not Allowed', {
-    status: 405,
-    headers: { 'Access-Control-Allow-Origin': '*' }
-  });
+
+  if (request.method === "POST") {
+    const data = await request.json();
+    const key = `inq_${Date.now()}`;
+    await kv.put(key, JSON.stringify(data));
+    return new Response("ok", { headers: cors });
+  }
+
+  if (request.method === "DELETE") {
+    const { id } = await request.json();
+    await kv.delete(id);
+    return new Response("deleted", { headers: cors });
+  }
+
+  return new Response("Method Not Allowed", { status: 405, headers: cors });
 }
