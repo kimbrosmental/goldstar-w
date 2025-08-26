@@ -3,35 +3,48 @@ export async function onRequest({ request, env }) {
   const cors = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Content-Type": "application/json; charset=utf-8"
+    "Access-Control-Allow-Headers": "Content-Type"
   };
 
-  if (request.method === "OPTIONS") {
+  if (request.method === "OPTIONS") 
     return new Response(null, { status: 204, headers: cors });
-  }
 
   if (request.method === "GET") {
-    // 전체 회원 배열을 하나의 key("users_all")에 저장하는 구조
-    const raw = await kv.get("users_all");
-    let users = [];
-    try { if (raw) users = JSON.parse(raw); } catch {}
-    return new Response(JSON.stringify(users), { headers: cors });
+    try {
+      const list = await kv.list();
+      const items = [];
+      for (const key of list.keys) {
+        const val = await kv.get(key.name);
+        if (val) {
+          try {
+            items.push(JSON.parse(val));
+          } catch {
+            // JSON 파싱 실패 시 문자열 그대로 push
+            items.push({ key: key.name, raw: val });
+          }
+        }
+      }
+      return new Response(JSON.stringify(items), {
+        headers: { ...cors, "Content-Type": "application/json" }
+      });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: "KV 조회 실패", detail: e.message }), {
+        status: 500,
+        headers: cors
+      });
+    }
   }
 
   if (request.method === "POST") {
-    // 프론트에서 {data: encryptedArray} 형태로 전달
-    const { data } = await request.json();
-    if (!data) {
-      return new Response("no data", { status: 400, headers: cors });
-    }
-    await kv.put("users_all", JSON.stringify(data));
+    const data = await request.json();
+    const key = (data.username || `user_${Date.now()}`);
+    await kv.put(key, JSON.stringify(data));
     return new Response("ok", { headers: cors });
   }
 
   if (request.method === "DELETE") {
-    // 전체 삭제
-    await kv.delete("users_all");
+    const { id } = await request.json();
+    await kv.delete(id);
     return new Response("deleted", { headers: cors });
   }
 
