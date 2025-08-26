@@ -154,7 +154,6 @@ document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState=
 window.addEventListener('pageshow', triggerRefresh);
 
 // 로그인 시 승인대기 회원은 pending.html로 이동
-// 로그인 시 승인대기 회원은 pending.html로 이동
 window.GSApp.loginId = async function(id, pw){
   if(!id) throw new Error('아이디를 입력하세요.');
   // 입력값을 소문자/숫자만 허용하고, 앞뒤 공백 제거

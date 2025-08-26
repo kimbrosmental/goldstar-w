@@ -12,6 +12,38 @@
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
+/* ====== 고급 호버 이펙트: 검정색 제외, 구별선 제외, 섹션별 적용 ====== */
+/* 박스류만 금빛 테두리, 텍스트/아이콘은 살짝 올라가는 이펙트만 */
+/* 박스류 금빛 테두리, 텍스트/아이콘은 살짝 올라가는 이펙트 */
+.price-box:hover, .carousel-item:hover, .achievement-item:hover, .trade-card:hover,
+.story-item:hover, .video-wrap:hover, .supply-box:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 0 32px 8px rgba(255, 215, 0, 0.18), 0 0 0 4px rgba(255, 215, 0, 0.12);
+  position: relative;
+}
+ .price-box:hover::before, .carousel-item:hover::before, .achievement-item:hover::before, .trade-card:hover::before,
+ .story-item:hover::before, .video-wrap:hover::before, .supply-box:hover::before {
+  content: '';
+  position: absolute;
+  left: -8px; right: -8px; top: -8px; bottom: -8px;
+  pointer-events: none;
+  border-radius: 18px;
+  box-shadow: 0 0 32px 8px rgba(255,215,0,0.25), 0 0 0 4px rgba(255,215,0,0.18);
+  z-index: 2;
+  animation: shineGlow 1.2s cubic-bezier(.22,1,.36,1);
+}
+/* 텍스트/아이콘 살짝 올라가는 이펙트 */
+.section5-title:hover, .section5-text:hover, .kakao-link:hover, .fixed-social-icons a:hover,
+.section5 .telegram-link:hover, .section4 .achievement-content h2:hover, .section4 .trade-history-title:hover,
+.section2 .story-content h2:hover, .hook .line:hover {
+  transform: translateY(-6px) scale(1.01);
+  transition: transform 0.35s cubic-bezier(.22,1,.36,1);
+}
+@keyframes shineGlow {
+  0% { opacity: 0; box-shadow: 0 0 0 0 rgba(255,215,0,0.0); }
+  40% { opacity: 1; box-shadow: 0 0 32px 8px rgba(255,215,0,0.25), 0 0 0 4px rgba(255,215,0,0.18); }
+  100% { opacity: 0.7; box-shadow: 0 0 24px 4px rgba(255,215,0,0.12), 0 0 0 2px rgba(255,215,0,0.10); }
+}
   /* 페이드인 디졸브 효과 */
   .fadein {
     opacity: 0;
@@ -136,12 +168,12 @@
     @media (max-width:1024px) {
   #section1 .price-image { display: none !important; }
   #section1 .gold-content { justify-content: center; }
-  #section1 .main-price { text-align: center !important; margin-left: auto !important; margin-right: auto !important; display: block !important; }
+  #section1 .main-price, #section1 .supply-price { text-align: center !important; margin-left: auto !important; margin-right: auto !important; display: block !important; }
     }
     @media (max-width:768px) {
   #section1 .price-image { display: none !important; }
   #section1 .gold-content { justify-content: center; flex-direction: column; }
-  #section1 .main-price { text-align: center !important; margin-left: auto !important; margin-right: auto !important; display: block !important; }
+  #section1 .main-price, #section1 .supply-price { text-align: center !important; margin-left: auto !important; margin-right: auto !important; display: block !important; }
     }
 
     /* 버튼 스타일 추가 */
@@ -284,9 +316,9 @@
         <div class="story-content">
           <h2>주요 이슈</h2>
           <div class="story-grid">
-            <div class="story-item"><h3>3억2천만톤</h3><p>2022년 7월우간다 금 매장량 발견</p></div>
-            <div class="story-item"><h3>글로벌 주목</h3><p>12조원 가치평가, CNN, BBC 등 해외 언론 집중 보도</p></div>
-            <div class="story-item"><h3>독점 계약</h3><p>우간다 금맥, 중국 광산업체들과 채굴 독점 계약 체결 → 골드 스타, 중국 업체와 수입계약 체결</p></div>
+            <div class="story-item"><h3>3억2천만톤</h3><p>2022년 7월<br>우간다 금 매장량 발견</p></div>
+            <div class="story-item"><h3>글로벌 주목</h3><p>12조원 가치평가,<br>CNN, BBC 등<br>해외 언론 집중 보도</p></div>
+            <div class="story-item"><h3>독점 계약</h3><p>중국 광산 업체들과<br>채굴 독점 계약 체결<br>→ 골드 스타, 중국 업체와<br>수입계약 체결</p></div>
           </div>
         </div>
         <div class="carousel-wrapper">
@@ -385,7 +417,8 @@
     <section id="section5" class="section">
   <div class="content center fadein">
   <h2 class="section5-title">지금 바로 문의하세요</h2>
-  <h2 class="section5-title">현재 회원가입은 텔레그램 문의로 진행됩니다.<br><br> 텔레그램으로 문의 주세요.</h2>
+  <h2 class="section5-title">회원가입 후 직접 주문 가능합니다.</h2>
+  <h2 class="section5-title"> 궁금하신 사항은 텔레그램 으로 문의 주세요.</h2>
   <p class="section5-text">골드스타와 함께 새로운 투자의 기회를 시작하세요</p>
         <div class="contact-buttons">
           <a href="#" class="kakao-link"><img src="img/카카오톡 문의.gif" alt="카카오톡 문의"/></a>
@@ -420,6 +453,7 @@
   <script src="hover-gif.js"></script>
   <script src="app.js"></script>
   <script>
+     
   // 카카오톡 문의 클릭 시 "준비중입니다." 알림
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.kakao-link').forEach(el => {
@@ -764,6 +798,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // intro webp가 끝난 뒤에 금액 애니메이션 항상 실행 (transitionend, click 모두 1초 후)
   document.addEventListener('DOMContentLoaded', function(){
+    // 금시세, 공급가격 모두 0원으로 초기화 및 가운데 정렬
+    const priceEl = document.getElementById('mainPrice');
+    const supplyEl = document.querySelector('.supply-price');
+    if (priceEl) {
+      priceEl.textContent = '0원';
+      priceEl.style.textAlign = 'center';
+      priceEl.style.marginLeft = 'auto';
+      priceEl.style.marginRight = 'auto';
+      priceEl.style.display = 'block';
+    }
+    if (supplyEl) {
+      supplyEl.textContent = '0원';
+      supplyEl.style.textAlign = 'center';
+      supplyEl.style.marginLeft = 'auto';
+      supplyEl.style.marginRight = 'auto';
+      supplyEl.style.display = 'block';
+    }
     let animationStarted = false;
     function startAnimation() {
       if (!animationStarted) {
@@ -782,7 +833,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       overlay.addEventListener('transitionend', trigger);
       overlay.addEventListener('click', trigger);
-      // 혹시 transitionend가 발생하지 않으면 5초 후 강제 실행
       setTimeout(trigger, 6000);
     } else {
       startAnimation();
@@ -854,29 +904,42 @@ document.addEventListener('DOMContentLoaded', function() {
   // 테마 기능 삭제됨
     });
   </script>
-  <!-- 섹션3 GIF 자동재생 관련 JS 완전 삭제됨 -->
+  <script>
+// 섹션5 텔레그램 문의.gif에 호버 이펙트가 적용되도록 JS 보장
 
-</body>
-</html>
- 위해 복제
-  track.innerHTML += track.innerHTML;
+document.addEventListener('DOMContentLoaded', function(){
+  // 텔레그램 문의.gif 이미지에 호버 이벤트 추가
+  document.querySelectorAll('.contact-buttons img, .fixed-social-icons img').forEach(function(img){
+    img.addEventListener('mouseenter', function(){
+      img.style.transform = 'translateY(-8px) scale(1.03)';
     });
-
-    // (i18n & user nav handled by app.js) — 보조 보장 로직
-    document.addEventListener('DOMContentLoaded', () => {
-      // app.js 비동기 초기화 후 사용자 버튼 강제 재구성 (지연 보장)
-      function safeBuild(){
-        if(window.GSApp && typeof window.GSApp.buildUserNav === 'function'){
-          window.GSApp.buildUserNav();
-        }
-      }
-      safeBuild();
-      setTimeout(safeBuild, 300);
-      setTimeout(safeBuild, 1000);
-  // 테마 기능 삭제됨
+    img.addEventListener('mouseleave', function(){
+      img.style.transform = '';
     });
+  });
+});
   </script>
-  <!-- 섹션3 GIF 자동재생 관련 JS 완전 삭제됨 -->
+  <script>
+// 맨위로 버튼 아이콘을 올바른 위쪽 화살표로 직접 수정
+// (FontAwesome 사용 시 <i class="fas fa-arrow-up"></i> 또는 유니코드 ↑)
 
+document.addEventListener('DOMContentLoaded', function(){
+  var scrollBtn = document.getElementById('scrollToTop');
+  if(scrollBtn) {
+    // 아이콘이 잘못된 경우 교체
+    var icon = scrollBtn.querySelector('i');
+    if(icon) {
+      icon.className = 'fas fa-arrow-up'; // FontAwesome 위쪽 화살표
+      icon.textContent = '';
+    } else {
+      // 아이콘이 없으면 직접 추가
+      var newIcon = document.createElement('i');
+      newIcon.className = 'fas fa-arrow-up';
+      scrollBtn.innerHTML = '';
+      scrollBtn.appendChild(newIcon);
+    }
+  }
+});
+  </script>
 </body>
 </html>

@@ -14,7 +14,8 @@ body,.section,.section .content{background-color:#000000;}
   to{text-shadow:0 0 10px rgba(255,255,255,.8),0 0 20px rgba(255,255,255,.6),0 0 30px rgba(255,255,255,.4);}
 }
 .nav-links{display:flex;gap:30px;list-style:none;margin:0;}
-.nav-links a{color:#fff;text-decoration:none;font-size:24px;}
+.nav-links a{color:#fff;text-decoration:none;font-size:24px;position:relative;font-weight:500;transition:color .3s ease, transform .35s cubic-bezier(.22,1,.36,1);}
+.nav-links a:hover{color:#FFD700;font-weight:700;transform:translateY(-6px) scale(1.03);box-shadow:0 2px 12px rgba(255,215,0,0.18),0 0 0 2px #FFD700;border-radius:8px;}
 /* 우측 툴 (언어선택, 번역버튼, 사용자영역, 모바일 메뉴버튼) */
 .nav-right{display:flex;align-items:center;gap:8px;}
 .lang-select{background:#004D40;color:#fff;border:1px solid #00695C;padding:6px 10px;border-radius:6px;font-size:14px;cursor:pointer;}
@@ -185,13 +186,8 @@ body,.section,.section .content{background-color:#000000;}
 @keyframes playFullGif{0%,100%{opacity:1;}}
 
 /* scroll top */
-#scrollToTop{position:fixed;right:calc((100% - 1200px)/2 + 20px);bottom:30px;width:50px;height:50px;background:#003D33;border:2px solid #003D33;border-radius:50%;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:999;transition:.3s;animation:glowButton 1.5s ease-in-out infinite alternate;}
-#scrollToTop:hover{background:#004D40;border-color:#004D40;}
-@keyframes glowButton{
-  from{box-shadow:0 0 5px #003D33,0 0 10px #003D33,0 0 15px #003D33;}
-  to{box-shadow:0 0 10px #004D40,0 0 20px #004D40,0 0 30px #004D40;}
-}
-
+#scrollToTop{position:fixed;right:calc((100% - 1200px)/2 + 20px);bottom:30px;width:50px;height:50px;background:#003D33;border:2px solid #FFD700;border-radius:50%;color:#FFD700;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:999;transition:background .3s,border-color .3s,color .3s,box-shadow .35s cubic-bezier(.22,1,.36,1),transform .35s cubic-bezier(.22,1,.36,1);box-shadow:0 0 10px #FFD70044;}
+#scrollToTop:hover{background:#222;border-color:#FFD700;color:#fffbe6;transform:translateY(-8px) scale(1.08);box-shadow:0 0 24px #FFD70099,0 0 0 4px #FFD70044;}
 /* footer */
 .company-info{width:100%;height:200px;background:#333;display:flex;align-items:center;justify-content:center;padding:0;margin:0;}
 .info-content{width:100%;max-width:1200px;margin:0 auto;padding:0 40px;}
@@ -242,7 +238,6 @@ body,.section,.section .content{background-color:#000000;}
 /* ===== 금 시세 / 공급 가격 박스 ===== */
 .price-box {
   width: 100%;
-  /* 기존 max-width: 300px; 에서 보다 넉넉하게 늘립니다 */
   max-width: 800px;
   margin: 24px auto 0;
   padding: 22px 28px;
@@ -323,7 +318,8 @@ body,.section,.section .content{background-color:#000000;}
   display:block;
   position:relative;
   margin:6px 0;
-  animation:fadeUp 1s ease both, shine 3s linear infinite;
+  /* fadeUp animation 제거, shine만 유지 */
+  animation:shine 3s linear infinite;
   background:linear-gradient(90deg,#FFD700 0%, #ffae00 40%, #ffffff 60%, #FFD700 100%);
   background-size:200% 100%;
   -webkit-background-clip:text;
@@ -331,9 +327,13 @@ body,.section,.section .content{background-color:#000000;}
   -webkit-text-fill-color:transparent;
   color:transparent;
   text-shadow:0 0 6px rgba(255,215,0,.15);
+  transition:transform 0.35s cubic-bezier(.22,1,.36,1),text-shadow 0.45s cubic-bezier(.22,1,.36,1);
 }
-.hook .line2{animation-delay:.3s;}
-.hook .line3{animation-delay:.6s;}
+.hook .line:hover {
+  transform: translateY(-8px) scale(1.04);
+  text-shadow: 0 0 24px #FFD700cc, 0 0 8px #fffbe6;
+  animation-play-state: paused;
+}
 /* 파란색 & 더 크게 */
 .hook .line4{
   animation-delay:.9s;
@@ -356,9 +356,9 @@ body,.section,.section .content{background-color:#000000;}
   display:block;
   width:80%;
   max-width:600px;
-  height:4px;
-  margin:28px auto 0;
-  border-radius:2px;
+  height:6px;
+  margin:25px auto 0;
+  border-radius:3px;
   background:linear-gradient(90deg,
     rgba(255,215,0,.15) 0%,
     rgba(255,215,0,.35) 20%,
@@ -470,36 +470,68 @@ body,.section,.section .content{background-color:#000000;}
     flex-direction: column; /* 필요하다면 세로 스택으로 */
   }
 }
-/* 네비게이션 링크 호버 이펙트 */
+/* 네비게이션 링크 호버 이펙트: 살짝 위로 올라감 + 금빛 테두리 */
 .nav-links a {
   position: relative;
-  font-weight: 500; /* 기본 굵기 */
-  transition: color 0.3s ease;
-}
-
-.nav-links a::before {
-  content: '';
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 0; height: 0;
-  background: radial-gradient(circle, rgba(255,215,0,0.4) 0%, rgba(255,215,0,0) 80%);
-  border-radius: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  transition: transform 0.5s ease, width 0.5s ease, height 0.5s ease;
-  pointer-events: none;
-  z-index: -1;
+  font-weight: 500;
+  transition: color 0.3s ease, transform 0.35s cubic-bezier(.22,1,.36,1), box-shadow 0.35s cubic-bezier(.22,1,.36,1);
 }
 
 .nav-links a:hover {
   color: #FFD700;
   font-weight: 700;
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 2px 12px rgba(255,215,0,0.18), 0 0 0 2px #FFD700;
+  border-radius: 8px;
 }
 
-.nav-links a:hover::before {
-  width: 240%;    /* 폭 넉넉히 늘려서 빛이 퍼지도록 */
-  height: 240%;
-  transform: translate(-50%, -50%) scale(1);
+/* 네비게이션 링크 고급 호버 이펙트: 텍스트 주위로 금빛 원이 회전하는 효과 */
+.nav-links a {
+  position: relative;
+  font-weight: 500;
+  overflow: visible;
+  transition: color 0.3s cubic-bezier(.4,0,.2,1),
+              transform 0.45s cubic-bezier(.22,1,.36,1),
+              font-size 0.45s cubic-bezier(.22,1,.36,1),
+              text-shadow 0.45s cubic-bezier(.22,1,.36,1);
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.2em;
+  height: 2.2em;
+  border-radius: 50%;
+  border: 2.5px solid #FFD700;
+  box-shadow: 0 0 18px #FFD70099, 0 0 8px #fffbe6;
+  transform: translate(-50%, -50%) scale(0.7) rotate(0deg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s, transform 0.7s cubic-bezier(.22,1,.36,1);
+  z-index: 0;
+}
+.nav-links a:hover {
+  color: #FFD700;
+  font-weight: 700;
+  font-size: 36px;
+  transform: scale(1.18) translateY(-2px);
+  text-shadow: 0 2px 18px #FFD70099, 0 0 8px #fffbe6;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+.nav-links a:hover::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.08) rotate(360deg);
+  animation: goldRingSpin 1.2s linear infinite;
+}
+@keyframes goldRingSpin {
+  0% { transform: translate(-50%, -50%) scale(1.08) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) scale(1.08) rotate(360deg); }
+}
+
 /* 태블릿 이하에서 훅 앞 여백 제거 */
 @media (max-width: 1024px) {
   .hook {
@@ -583,6 +615,14 @@ body,.section,.section .content{background-color:#000000;}
 }
 .slide p {
   font-size: 14px;
+}
+
+/* carousel-item p 태그 스타일 추가 */
+.carousel-item p {
+  text-align: center;
+  margin-top: 8px;
+  color: #fff;
+  font-size: 18px;
 }
 
 
@@ -684,8 +724,8 @@ body,.section,.section .content{background-color:#000000;}
 #floatingButtons button{width:50px;height:50px;background:#003D33;border:2px solid #003D33;border-radius:50%;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.3s;animation:glowButton 1.5s ease-in-out infinite alternate;}
 #floatingButtons button:hover{background:#004D40;border-color:#004D40;}
 #scrollToTop{width:50px;height:50px;}
-@media(max-width:1024px){#floatingButtons{right:20px;bottom:20px;}}
-@media(max-width:768px){#floatingButtons{right:10px;bottom:20px;}}
+@media(max-width:1024px){#floatingButtons{right:20px;bottom:20px}}
+@media(max-width:768px){#floatingButtons{right:10px;bottom:20px}}
 
 /* ===== 섹션3: 영상 2행 프레임 ===== */
 .video-row{display:grid;grid-template-columns:1fr 600px;gap:24px;align-items:center;margin:24px 0;width:100%;max-width:1200px}
@@ -694,12 +734,11 @@ body,.section,.section .content{background-color:#000000;}
 .video-row .video-wrap video{width:600px;max-width:100%;height:auto;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#000}
 @media(max-width:1024px){.video-row{grid-template-columns:1fr;}.video-row.bottom{grid-template-columns:1fr}}
 
-/* (테마 라이트 제거) */
 
 /* ===== 섹션3: 영상 2행 프레임 ===== */
 .video-row{display:grid;grid-template-columns:1fr 600px;gap:24px;align-items:center;margin:24px 0;width:100%;max-width:1200px}
 .video-row.bottom{grid-template-columns:600px 1fr}
-.video-row .desc{color:#fff;font-size:18px;line-height:1.7}
+.video-row .desc{color:#fff;font-size:22px;line-height:1.7}
 .video-row .video-wrap video{width:600px;max-width:100%;height:auto;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#000}
 @media(max-width:1024px){.video-row{grid-template-columns:1fr;}.video-row.bottom{grid-template-columns:1fr}}
 
@@ -708,7 +747,120 @@ body,.section,.section .content{background-color:#000000;}
 #floatingButtons button{width:50px;height:50px;background:#003D33;border:2px solid #003D33;border-radius:50%;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.3s;animation:glowButton 1.5s ease-in-out infinite alternate;}
 #floatingButtons button:hover{background:#004D40;border-color:#004D40;}
 #scrollToTop{width:50px;height:50px;}
-@media(max-width:1024px){#floatingButtons{right:20px;bottom:20px;}}
-@media(max-width:768px){#floatingButtons{right:10px;bottom:20px;}}
+@media(max-width:1024px){#floatingButtons{right:20px;bottom:20px}}
+@media(max-width:768px){#floatingButtons{right:10px;bottom:20px}}
 
-/* (테마 라이트 제거) */
+/* 섹션5 텔레그램 문의.gif 호버시 살짝 위로 올라가는 효과 */
+.contact-buttons a, .contact-buttons img, .fixed-social-icons a, .fixed-social-icons img {
+  transition: transform 0.35s cubic-bezier(.22,1,.36,1);
+}
+.contact-buttons a:hover, .contact-buttons img:hover, .fixed-social-icons a:hover, .fixed-social-icons img:hover {
+  transform: translateY(-8px) scale(1.03);
+}
+
+/* 네비게이션 링크 호버시 네모난 금빛 테두리/box-shadow 완전 제거 */
+.nav-links a {
+  position: relative;
+  font-weight: 500;
+  overflow: visible;
+  transition: color 0.3s cubic-bezier(.4,0,.2,1),
+              transform 0.45s cubic-bezier(.22,1,.36,1),
+              font-size 0.45s cubic-bezier(.22,1,.36,1),
+              text-shadow 0.45s cubic-bezier(.22,1,.36,1);
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+.nav-links a:hover {
+  color: #FFD700;
+  font-weight: 700;
+  font-size: 36px;
+  transform: scale(1.18) translateY(-2px);
+  text-shadow: 0 2px 18px #FFD70099, 0 0 8px #fffbe6;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+/* 네비게이션 이동버튼: 원형 금빛이 더 강하게, 확실하게 회전하는 이펙트 */
+.nav-links a {
+  position: relative;
+  font-weight: 500;
+  overflow: visible;
+  color: #fff;
+  transition: transform 0.45s cubic-bezier(.22,1,.36,1),
+              font-size 0.45s cubic-bezier(.22,1,.36,1),
+              text-shadow 0.45s cubic-bezier(.22,1,.36,1);
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.6em;
+  height: 2.6em;
+  border-radius: 50%;
+  border: 3px solid #FFD700;
+  box-shadow: 0 0 24px #FFD700cc, 0 0 12px #fffbe6;
+  transform: translate(-50%, -50%) scale(0.8) rotate(0deg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s, transform 0.7s cubic-bezier(.22,1,.36,1);
+  z-index: 0;
+}
+.nav-links a:hover {
+  font-weight: 700;
+  font-size: 36px;
+  transform: scale(1.18) translateY(-2px);
+  text-shadow: 0 2px 18px #FFD70099, 0 0 8px #fffbe6;
+}
+.nav-links a:hover::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.12) rotate(0deg);
+  animation: goldRingSpinStrong 0.8s linear infinite;
+}
+@keyframes goldRingSpinStrong {
+  0% { transform: translate(-50%, -50%) scale(1.12) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) scale(1.12) rotate(360deg); }
+}
+
+/* 네비게이션 이동버튼 텍스트 색상 변화 제거 */
+.nav-links a:hover {
+  color: #fff;
+}
+
+/* 네비게이션 로고 이미지 고급 호버 이펙트: 금빛 페이드 + 부드러운 줌인 + 마스크로 대각선 슬라이드 효과 */
+.logo {
+  position: relative;
+  overflow: visible;
+}
+.logo img {
+  transition: filter 0.7s cubic-bezier(.22,1,.36,1),
+              transform 0.7s cubic-bezier(.22,1,.36,1),
+              mask-position 1.2s cubic-bezier(.22,1,.36,1);
+  mask-size: 200% 200%;
+  mask-position: 0% 0%;
+}
+.logo img:hover {
+  transform: scale(1.2);
+  mask-position: 100% 100%;
+}
+
+/* 네비게이션 로고 이미지 위아래 여백 조정 (세로폭 조절) */
+.logo img {
+  padding-bottom: 0px;
+  padding-top: 12px;
+  height: 110px;
+  object-fit: contain;
+}
+
+/* 맨위로 버튼에 더 고급스러운 유니코드 화살표(⇧)로 표시 */
+#scrollToTop i {
+  font-size: 28px;
+  color: #FFD700;
+  vertical-align: middle;
+  font-family: inherit;
+}
+#scrollToTop i::before {
+  content: '⇧'; /* 유니코드 업워드 화살표 */
+}
+
+
