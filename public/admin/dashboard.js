@@ -1,31 +1,54 @@
-// 관리자 대시보드 SPA 라우팅 및 메뉴 처리
-(function(){
-  const views = {
-    dashboard: document.getElementById('view-dashboard'),
-    users: document.getElementById('view-users'),
-    orders: document.getElementById('view-orders'),
-    inquiries: document.getElementById('view-inquiries'),
-    security: document.getElementById('view-security')
-  };
-  function showView(view){
-    Object.values(views).forEach(v=>v.style.display='none');
-    if(views[view]) {
-      views[view].style.display='block';
-      // 각 영역 진입 시 렌더 함수 자동 실행
-      if(view==='dashboard' && typeof window.renderDashboard==='function') window.renderDashboard();
-      if(view==='users' && typeof window.renderUsers==='function') window.renderUsers();
-      if(view==='orders' && typeof window.renderOrders==='function') window.renderOrders();
-      if(view==='inquiries' && typeof window.renderInquiries==='function') window.renderInquiries();
-      if(view==='security' && typeof window.renderSecurity==='function') window.renderSecurity();
+// public/admin/dashboard.js
+(async function () {
+  let users = [], orders = [], inquiries = [];
+
+  async function fetchJSON(url) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return await res.json();
+    } catch {}
+    return [];
+  }
+
+  async function loadData() {
+    users = await fetchJSON("/api/users");
+    orders = await fetchJSON("/api/orders");
+    inquiries = await fetchJSON("/api/inquiries");
+  }
+
+  function renderDashboard() {
+    const dashboard = document.getElementById("view-dashboard");
+    if (!dashboard) return;
+
+    const pendingUsers = users.filter((u) => u.status === "pending");
+    dashboard.innerHTML = `
+      <div style="font-size:1.2em;font-weight:bold;margin-bottom:18px;">
+        전체 회원수: ${users.length}명
+      </div>
+      <div>총 주문수: ${orders.length}건</div>
+      <div>1:1 문의: ${inquiries.length}건</div>
+    `;
+
+    if (pendingUsers.length) {
+      dashboard.innerHTML += `
+        <div style="background:#FFD70022;color:#b5942b;padding:18px 24px;border-radius:12px;
+                    margin-top:12px;font-size:1.15em;font-weight:bold;cursor:pointer;"
+             onclick="window.gotoPendingUser()">
+          회원가입 요청 ${pendingUsers.length}건 - 클릭하여 승인
+        </div>
+      `;
     }
   }
-  document.querySelectorAll('.admin-sidebar nav a').forEach(a=>{
-    a.addEventListener('click',function(e){
-      e.preventDefault();
-      const hash = a.getAttribute('href').replace('#','');
-      showView(hash);
-    });
+
+  // 최초 실행
+  document.addEventListener("DOMContentLoaded", async () => {
+    await loadData();
+    renderDashboard();
   });
-  // 기본: 대시보드
-  showView('dashboard');
+
+  // 새로고침 버튼 등 추가 필요시
+  window.refreshDashboard = async function () {
+    await loadData();
+    renderDashboard();
+  };
 })();
