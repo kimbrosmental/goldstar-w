@@ -230,6 +230,7 @@
   }
 
   window.renderSecurity = render;
+  // SPA 구조에서는 최초 진입 시만 데이터 로딩
   // 초기 실행
   (async()=>{
     await loadAdmins();
