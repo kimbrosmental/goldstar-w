@@ -33,11 +33,11 @@
           window.location.href = 'index.html';
         } else if (result.role === 'user') {
           if (result.status === 'pending') {
-            window.location.href = '../pending.html?msg=회원가입 승인 대기중입니다.';
+            window.location.href = '../pending.html?msg=' + encodeURIComponent(result.msg||'회원가입 승인 대기중입니다.');
           } else if (result.status === 'active') {
             window.location.href = '../profile.html';
           } else if (result.status === 'rejected') {
-            window.location.href = '../pending.html?msg=회원가입 거절입니다. 관리자에게 문의하세요!';
+            window.location.href = '../pending.html?msg=' + encodeURIComponent(result.msg||'회원가입 거절입니다. 관리자에게 문의하세요!');
           } else {
             document.getElementById('login-error').textContent = '승인되지 않은 회원 상태입니다.';
           }

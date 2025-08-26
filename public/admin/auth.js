@@ -76,23 +76,22 @@
       if (window.DEBUG) console.log('관리자 로그인 성공:', admin);
       return { role: 'admin' };
     }
-    // 유저 확인
-    let users = [];
+    // 유저 확인 (API에서 status와 msg를 반환하도록 변경)
+    let result;
     try {
-      users = await getUsersFromKV();
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password: pw })
+      });
+      result = await res.json();
     } catch (e) {
       throw new Error('회원 데이터 복호화 실패');
     }
-    if (window.DEBUG) console.log('로그인 시도(유저):', users);
-    const user = users.find(u => u.username === username);
-    if (!user) throw new Error('존재하지 않는 계정');
-    if (!bcryptCheck(pw, user.passwordHash)) throw new Error('비밀번호 오류');
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ username: user.username, role: 'user', status: user.status, ts: Date.now() }));
-    // 상태값을 명확히 반환
-    if (user.status === 'pending') return { role: 'user', status: 'pending' };
-    if (user.status === 'rejected') return { role: 'user', status: 'rejected' };
-    if (user.status === 'active') return { role: 'user', status: 'active' };
-    return { role: 'user', status: user.status || 'unknown' };
+    if (window.DEBUG) console.log('로그인 시도(유저):', result);
+    if (!result.ok) throw new Error(result.msg || '로그인 실패');
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ username: result.username, role: 'user', status: result.status, ts: Date.now() }));
+    return { role: 'user', status: result.status, msg: result.msg };
   }
 
   function logout() { localStorage.removeItem(SESSION_KEY); }
