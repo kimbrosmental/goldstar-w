@@ -32,7 +32,13 @@ export async function onRequest({ request, env }) {
   if (request.method === "POST") {
     const data = await request.json();
     const key = data.username || `user_${Date.now()}`;
-    await kv.put(key, JSON.stringify({ ...data, created: new Date().toISOString() }));
+    const now = new Date().toISOString();
+    await kv.put(key, JSON.stringify({
+      ...data,
+      created: now,
+      updated: now,
+      status: 'pending'
+    }));
     return new Response("created", { headers: cors });
   }
 
@@ -43,7 +49,11 @@ export async function onRequest({ request, env }) {
     if (!key) {
       return new Response("username required", { status: 400, headers: cors });
     }
-    await kv.put(key, JSON.stringify(data));
+    const now = new Date().toISOString();
+    await kv.put(key, JSON.stringify({
+      ...data,
+      updated: now
+    }));
     return new Response("updated", { headers: cors });
   }
 

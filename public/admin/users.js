@@ -32,9 +32,9 @@
 
   function render(){
     var html = `<button class="dashboard-top-btn" id="btnAddUser">회원 추가</button>`;
-    html += '<table class="admin-table"><thead><tr><th>아이디</th><th>비밀번호</th><th>이름</th><th>생년월일</th><th>연락처</th><th>이메일</th><th>은행</th><th>계좌번호</th><th>상태</th><th>생성일</th><th>관리</th></tr></thead><tbody>';
+    html += '<table class="admin-table"><thead><tr><th>아이디</th><th>이름</th><th>생년월일</th><th>연락처</th><th>이메일</th><th>은행</th><th>계좌번호</th><th>상태</th><th>생성일</th><th>수정일</th><th>관리</th></tr></thead><tbody>';
     users.forEach((u,i)=>{
-      html += `<tr><td>${u.username}</td><td>●●●●</td><td>${u.name||''}</td><td>${u.birth||''}</td><td>${u.phone||''}</td><td>${u.email||''}</td><td>${u.bank||''}</td><td>${u.account||''}</td><td>${u.status||''}</td><td>${u.created||''}</td><td>
+      html += `<tr><td>${u.username}</td><td>${u.name||''}</td><td>${u.birth||''}</td><td>${u.phone||''}</td><td>${u.email||''}</td><td>${u.bank||''}</td><td>${u.account||''}</td><td>${u.status||''}</td><td>${u.created||''}</td><td>${u.updated||''}</td><td>
         <button class="dashboard-top-btn" style="padding:8px 18px;font-size:1em;" onclick="editUser(${i})">수정</button>
         <button class="dashboard-top-btn" style="padding:8px 18px;font-size:1em;" onclick="deleteUser(${i})">삭제</button>
         <button class="dashboard-top-btn" style="padding:8px 18px;font-size:1em;" onclick="changePwUser(${i})">비번변경</button>
