@@ -25,16 +25,7 @@
 <body>
 <nav id="navbar">
   <div class="container">
-    <div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="logo" /></div>
-    <div class="nav-center">
-      <ul class="nav-links">
-        <li><a href="index.html#section1" data-i18n="nav_intro">소개</a></li>
-        <li><a href="index.html#section2" data-i18n="nav_progress">진행</a></li>
-        <li><a href="index.html#section3" data-i18n="nav_video">영상</a></li>
-        <li><a href="index.html#section4" data-i18n="nav_history">이력</a></li>
-        <li><a href="index.html#section5" data-i18n="nav_contact">문의</a></li>
-      </ul>
-    </div>
+    <div class="logo"><img src="img/logo.png" alt="logo" /></div>
     <div class="nav-right">
       <a href="index.html" class="home-icon" aria-label="홈" style="display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;"><span style="font-size:30px;color:#FFD700;">🏠</span></a>
     </div>
@@ -59,24 +50,12 @@
 </main>
 <script src="app.js"></script>
 <script>
-  // 메뉴 버튼
-  const menuBtn = document.querySelector('.menu-btn');
-  const navLinks = document.querySelector('.nav-links');
-  if (menuBtn && navLinks) {
-    menuBtn.addEventListener('click', () => {
-      menuBtn.classList.toggle('active');
-      navLinks.classList.toggle('active');
-    });
-  }
-
-  // 로그인 입력 및 처리
   const idInput = document.getElementById('loginId');
   const pwInput = document.getElementById('password');
   const msg = document.getElementById('msg');
 
   idInput.addEventListener('input', function() {
     let val = idInput.value;
-    // 영문(대소문자), 숫자만 허용, 자동 소문자 변환
     const filtered = val.replace(/[^a-zA-Z0-9]/g, '');
     if (val !== filtered || /[A-Z]/.test(val)) {
       idInput.value = filtered.toLowerCase();
@@ -99,37 +78,29 @@
     }
 
     try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: id, password: pw })
-      });
+      const res = await window.GSApp.loginId(id, pw);
 
-      const text = await res.text();
+      // 정상 응답 → 세션 저장
+      localStorage.setItem("user", JSON.stringify(res));
 
-      try {
-        // JSON 응답 → 로그인 성공
-        const obj = JSON.parse(text);
-        if (obj.ok) {
-          msg.style.color = '#4fc3f7';
-          msg.textContent = '로그인 성공';
-          setTimeout(() => {
-            if (obj.role === 'ADMIN') {
-              location.href = '/admin/index.html';
-            } else {
-              location.href = 'profile.html';
-            }
-          }, 600);
-          return;
+      if (res.role === 'ADMIN') {
+        location.href = '/admin/index.html';
+      } else {
+        if (res.status === 'active') {
+          location.href = 'profile.html';
+        } else if (res.status === 'pending') {
+          alert("가입승인 대기 상태입니다. 고객센터 문의 시간이 지난경우는 익일날 처리됩니다. 계속 대기 상태일경우 고객센터 메신져로 문의 바랍니다.");
+          localStorage.clear();
+          location.href = 'pending.html';
+        } else if (res.status === 'rejected') {
+          alert("가입거절입니다. 고객센터 문의 바랍니다.");
+          localStorage.clear();
+          location.href = 'pending.html';
         }
-      } catch {
-        // 문자열 응답 → 에러 메시지
-        msg.style.color = '#ff5252';
-        msg.textContent = text;
       }
-    } catch {
+    } catch (err) {
       msg.style.color = '#ff5252';
-      msg.textContent = '로그인 요청 중 오류 발생';
+      msg.textContent = err.message || '로그인 실패';
     }
   });
 </script>
