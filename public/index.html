@@ -599,7 +599,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
 
   // 슬롯머신 숫자 애니메이션 함수
-  function animateNumber(el, from, to, duration = 1200) {
+  function animateNumber(el, from, to, duration = 2000) {
     from = Number(from) || 0;
     to = Number(to) || 0;
     if (from === to) {
@@ -607,9 +607,13 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     const start = performance.now();
+    function easeOut(t) {
+      return 1 - Math.pow(1 - t, 2); // 처음 느리게, 끝 빠르게
+    }
     function step(now) {
       const progress = Math.min((now - start) / duration, 1);
-      const value = Math.floor(from + (to - from) * progress);
+      const eased = easeOut(progress);
+      const value = Math.floor(from + (to - from) * eased);
       el.textContent = fmt(value) + '원';
       if (progress < 1) {
         requestAnimationFrame(step);
@@ -638,16 +642,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
       let basePrice = 0;
 
+      let supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g, '')) || 0;
       if (manual > 0) {
         // KV값 우선 반영
         basePrice = manual;
         animateNumber(priceEl, prevMain, manual);
+        // 공급가도 KV/manual 값에 맞춰서 동기화 (예시: 공급가가 basePrice보다 낮으면 자동 적용)
+        if (supplyEl) animateNumber(supplyEl, prevSupply, supplyVal);
       } else {
         // 2) KV 값이 없으면 자동 크롤링 값 사용
         const d = await fetch(API_URL).then(r=>r.json());
         if (d && d.price) {
           basePrice = d.price;
           animateNumber(priceEl, prevMain, d.price);
+          // 공급가도 최신 basePrice에 맞춰서 동기화
+          if (supplyEl) animateNumber(supplyEl, prevSupply, supplyVal);
           const arrow = d.trend==='up' ? '▲' : d.trend==='down' ? '▼' : '';
           const pct   = d.percent || '';
           const chg   = d.change ? fmt(d.change)+'원' : '';
