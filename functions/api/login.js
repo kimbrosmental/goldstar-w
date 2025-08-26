@@ -11,36 +11,42 @@ export async function onRequest({ request, env }) {
 
   try {
     const { username, password } = await request.json();
-    const id = String(username || "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase().trim();
+    const id = String(username || "").trim().toLowerCase();
     const pw = String(password || "").trim();
 
     if (!id || !pw) {
       return new Response(JSON.stringify({ ok: false, error: "아이디/비밀번호를 입력하세요." }), { status: 400, headers: cors });
     }
 
-    // 1) 관리자 계정 확인 (SECURITY KV)
+    // -----------------------------
+    // 1) 관리자 계정 확인 (SECURITY.adminid)
+    // -----------------------------
     try {
-      const secRaw = await env.SECURITY.get("adminid");
-      if (secRaw) {
-        const sec = JSON.parse(secRaw);
-        if (Array.isArray(sec.admins)) {
-          const found = sec.admins.find(a => String(a.username || "").toLowerCase().trim() === id);
-          if (found) {
-            if (String(found.status || "active").toLowerCase() !== "active") {
-              return new Response(JSON.stringify({ ok: false, error: "비활성된 계정입니다." }), { status: 403, headers: cors });
-            }
-            if (found.password !== pw) {
-              return new Response(JSON.stringify({ ok: false, error: "비밀번호가 일치하지 않습니다." }), { status: 401, headers: cors });
-            }
-            return new Response(JSON.stringify({ ok: true, role: found.role || "ADMIN", username: id, status: found.status || "active" }), { status: 200, headers: cors });
+      const rawAdmin = await env.SECURITY.get("adminid");
+      if (rawAdmin) {
+        const admin = JSON.parse(rawAdmin);
+        if (admin.id && admin.id.toLowerCase() === id) {
+          if (!admin.active) {
+            return new Response(JSON.stringify({ ok: false, error: "비활성된 계정입니다." }), { status: 403, headers: cors });
           }
+          // 입력 pw → sha256 hex 변환
+          const enc = new TextEncoder().encode(pw);
+          const digest = await crypto.subtle.digest("SHA-256", enc);
+          const hashHex = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+
+          if (hashHex !== admin.pw) {
+            return new Response(JSON.stringify({ ok: false, error: "비밀번호가 일치하지 않습니다." }), { status: 401, headers: cors });
+          }
+          return new Response(JSON.stringify({ ok: true, role: admin.role || "ADMIN", username: admin.id, status: "active" }), { status: 200, headers: cors });
         }
       }
     } catch (e) {
-      // SECURITY 파싱 에러는 무시 → 유저 검사로 넘어감
+      // SECURITY 파싱 에러 → 유저 검사로 넘어감
     }
 
+    // -----------------------------
     // 2) 일반 유저 확인 (USERS KV)
+    // -----------------------------
     const raw = await env.USERS.get(id);
     if (!raw) {
       return new Response(JSON.stringify({ ok: false, error: "존재하지 않는 아이디입니다." }), { status: 404, headers: cors });
@@ -51,7 +57,7 @@ export async function onRequest({ request, env }) {
       return new Response(JSON.stringify({ ok: false, error: "서버 데이터 오류" }), { status: 500, headers: cors });
     }
 
-    if (user.password !== pw) {
+    if (String(user.password || "").trim() !== pw) {
       return new Response(JSON.stringify({ ok: false, error: "비밀번호가 일치하지 않습니다." }), { status: 401, headers: cors });
     }
 
