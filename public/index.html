@@ -740,9 +740,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const changeEl = document.getElementById('priceChange');
     const supplyEl = document.querySelector('.supply-price');
     const supplyCh = document.querySelector('.supply-footer .change-line');
-  // DOM 준비 후, 초기값을 0으로 세팅 (시작전 - 대신 0)
-  if (priceEl) priceEl.textContent = '0원';
-  if (supplyEl) supplyEl.textContent = '0원';
+    // DOM 준비 후, 초기값을 0으로 세팅 (시작전 - 대신 0)
+    if (priceEl) priceEl.textContent = '0원';
+    if (supplyEl) supplyEl.textContent = '0원';
     let prevMain = 0;
     let prevSupply = 0;
 
@@ -753,7 +753,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const manual = kvJson && kvJson.manualGoldPrice ? Number(kvJson.manualGoldPrice) : 0;
 
       let basePrice = 0;
-      let supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g, '')) || 0;
+      let supplyVal = 520000; // 공급가격을 항상 520,000원으로 고정
       // intro webp가 끝난 뒤에만 애니메이션 실행
       function runEffects(main, supply) {
         // 항상 0에서 시작해 가격이 올라가는 이펙트
@@ -781,7 +781,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       // 공급가 대비 퍼센트만 표시
       if (supplyEl && supplyCh && basePrice > 0) {
-        const supplyVal2 = Number(supplyEl.textContent.replace(/[^0-9]/g,''));
+        const supplyVal2 = supplyVal;
         if (supplyVal2 > 0) {
           const rate = (basePrice - supplyVal2)/basePrice*100;
           const sign = rate > 0 ? '▼' : '▲';
@@ -819,7 +819,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function startAnimation() {
       if (!animationStarted) {
         animationStarted = true;
-        setTimeout(renderGoldPrice, 1000); // intro 끝나고 1초 후 실행
+        setTimeout(renderGoldPrice, 500); // intro 끝나고 0.5초 후 실행
       }
     }
     const overlay = document.getElementById('introOverlay');
