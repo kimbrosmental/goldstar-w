@@ -683,13 +683,15 @@ document.addEventListener('DOMContentLoaded', function() {
   const fmt = n => Number(n).toLocaleString('ko-KR');
 
   async function renderGoldPrice(){
-  const priceEl  = document.getElementById('mainPrice');
-  const changeEl = document.getElementById('priceChange');
-  const supplyEl = document.querySelector('.supply-price');
-  const supplyCh = document.querySelector('.supply-footer .change-line');
-  // 항상 0에서 시작 (기본값 0)
-  let prevMain = 0;
-  let prevSupply = 0;
+    const priceEl  = document.getElementById('mainPrice');
+    const changeEl = document.getElementById('priceChange');
+    const supplyEl = document.querySelector('.supply-price');
+    const supplyCh = document.querySelector('.supply-footer .change-line');
+    // DOM 준비 후, 초기값을 0으로 세팅
+    if (priceEl) priceEl.textContent = '0원';
+    if (supplyEl) supplyEl.textContent = '0원';
+    let prevMain = 0;
+    let prevSupply = 0;
 
     try {
       // 1) KV에서 goldprice 값 확인
@@ -702,7 +704,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // intro webp가 끝난 뒤에만 애니메이션 실행
       function runEffects(main, supply) {
         // 항상 0에서 시작해 가격이 올라가는 이펙트
-        animateNumber(priceEl, 0, main, 2800, ()=>{
+        if (priceEl) animateNumber(priceEl, 0, main, 2800, ()=>{
           goldFirework(priceEl);
         });
         if (supplyEl) animateNumber(supplyEl, 0, supply, 2800, ()=>{
