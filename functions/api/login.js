@@ -18,21 +18,43 @@ export async function onRequest({ request, env }) {
       return new Response(JSON.stringify({ ok: false, error: "아이디/비밀번호를 입력하세요." }), { status: 400, headers: cors });
     }
 
-    // KV에서 사용자 조회
+    // 1) 관리자 계정 확인 (SECURITY KV)
+    try {
+      const secRaw = await env.SECURITY.get("adminid");
+      if (secRaw) {
+        const sec = JSON.parse(secRaw);
+        if (Array.isArray(sec.admins)) {
+          const found = sec.admins.find(a => String(a.username || "").toLowerCase().trim() === id);
+          if (found) {
+            if (String(found.status || "active").toLowerCase() !== "active") {
+              return new Response(JSON.stringify({ ok: false, error: "비활성된 계정입니다." }), { status: 403, headers: cors });
+            }
+            if (found.password !== pw) {
+              return new Response(JSON.stringify({ ok: false, error: "비밀번호가 일치하지 않습니다." }), { status: 401, headers: cors });
+            }
+            return new Response(JSON.stringify({ ok: true, role: found.role || "ADMIN", username: id, status: found.status || "active" }), { status: 200, headers: cors });
+          }
+        }
+      }
+    } catch (e) {
+      // SECURITY 파싱 에러는 무시 → 유저 검사로 넘어감
+    }
+
+    // 2) 일반 유저 확인 (USERS KV)
     const raw = await env.USERS.get(id);
     if (!raw) {
       return new Response(JSON.stringify({ ok: false, error: "존재하지 않는 아이디입니다." }), { status: 404, headers: cors });
     }
 
     let user;
-    try { user = JSON.parse(raw); } catch { return new Response(JSON.stringify({ ok: false, error: "서버 데이터 오류" }), { status: 500, headers: cors }); }
+    try { user = JSON.parse(raw); } catch {
+      return new Response(JSON.stringify({ ok: false, error: "서버 데이터 오류" }), { status: 500, headers: cors });
+    }
 
-    // 비밀번호 검증 (단순 평문 버전)
     if (user.password !== pw) {
       return new Response(JSON.stringify({ ok: false, error: "비밀번호가 일치하지 않습니다." }), { status: 401, headers: cors });
     }
 
-    // 로그인 성공
     return new Response(JSON.stringify({ ok: true, role: user.role || "USER", username: id, status: user.status || "active" }), { status: 200, headers: cors });
 
   } catch (e) {
