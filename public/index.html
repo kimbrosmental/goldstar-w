@@ -600,7 +600,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 슬롯머신 숫자 애니메이션 함수
   // 고급 Elastic/EaseOut + 폭죽 효과
-  function animateNumber(el, from, to, duration = 2800, onComplete) {
+  // 슬롯머신 스타일: 느리게→빠르게→한자리씩 정지
+  function animateNumber(el, from, to, duration = 3500, onComplete) {
     from = Number(from) || 0;
     to = Number(to) || 0;
     if (from === to) {
@@ -609,22 +610,39 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     const start = performance.now();
-    // Elastic easeOut (조금 튀면서 부드럽게)
-    function elasticOut(t) {
-      if (t === 0 || t === 1) return t;
-      const c4 = (2 * Math.PI) / 3;
-      return Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
+    const toStr = fmt(to);
+    const digits = toStr.replace(/[^0-9]/g, '').split('');
+    const len = digits.length;
+    let lastFrame = false;
+    function slotEase(t) {
+      // 0~0.2: 매우 느림, 0.2~0.7: 5배 빠름, 0.7~1: 한자리씩 정지
+      if (t < 0.2) return t * 0.3;
+      if (t < 0.7) return 0.06 + (t-0.2)*1.5;
+      return 0.81 + (t-0.7)*0.95;
     }
     function step(now) {
       const progress = Math.min((now - start) / duration, 1);
-      const eased = elasticOut(progress);
-      const value = Math.floor(from + (to - from) * eased);
-      el.textContent = fmt(value) + '원';
+      const eased = slotEase(progress);
+      let curVal = Math.floor(from + (to - from) * eased);
+      let curStr = fmt(curVal);
+      // 마지막 0.3구간: 한자리씩 정지
+      if (progress > 0.7) {
+        let arr = curStr.replace(/[^0-9]/g, '').split('');
+        for (let i = 0; i < len; i++) {
+          if (progress < 0.75 + i*0.05) arr[i] = Math.floor(Math.random()*10).toString();
+          else arr[i] = digits[i];
+        }
+        curStr = arr.join('').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+      }
+      el.textContent = curStr + '원';
       if (progress < 1) {
         requestAnimationFrame(step);
       } else {
-        el.textContent = fmt(to) + '원';
-        if (onComplete) onComplete();
+        el.textContent = toStr + '원';
+        if (!lastFrame) {
+          lastFrame = true;
+          if (onComplete) onComplete();
+        }
       }
     }
     requestAnimationFrame(step);
@@ -743,7 +761,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // intro webp가 끝난 뒤에만 금액 애니메이션 실행 (종료 1초 후)
+  // intro webp가 끝난 뒤에 금액 애니메이션 항상 실행 (transitionend, click 모두 1초 후)
   document.addEventListener('DOMContentLoaded', function(){
     let animationStarted = false;
     function startAnimation() {
@@ -753,10 +771,18 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
     const overlay = document.getElementById('introOverlay');
-    if (overlay && !overlay.classList.contains('hidden')) {
-      // intro webp 자연 종료(transitionend) 또는 강제 넘김(클릭 등) 모두 1초 후 실행
-      overlay.addEventListener('transitionend', startAnimation);
-      overlay.addEventListener('click', startAnimation);
+    if (overlay) {
+      let ended = false;
+      function trigger() {
+        if (!ended) {
+          ended = true;
+          startAnimation();
+        }
+      }
+      overlay.addEventListener('transitionend', trigger);
+      overlay.addEventListener('click', trigger);
+      // 혹시 transitionend가 발생하지 않으면 5초 후 강제 실행
+      setTimeout(trigger, 6000);
     } else {
       startAnimation();
     }
