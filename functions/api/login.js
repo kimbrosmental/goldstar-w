@@ -55,8 +55,18 @@ export async function onRequest({ request, env }) {
       return new Response("비밀번호가 일치하지 않습니다.", { status: 401, headers: cors });
     }
 
-    // ✅ 일반 유저 로그인 성공 → role 함께 전달
-    return new Response(JSON.stringify({ ok: true, role: user.role || "USER", username: id }), { status: 200, headers: cors });
+    // 상태별 처리
+    if (user.status === 'pending') {
+      return new Response(JSON.stringify({ ok: true, role: 'USER', username: id, status: 'pending', msg: '회원가입 승인 대기중입니다.' }), { status: 200, headers: cors });
+    }
+    if (user.status === 'rejected') {
+      return new Response(JSON.stringify({ ok: true, role: 'USER', username: id, status: 'rejected', msg: '회원가입 거절입니다. 관리자에게 문의하세요!' }), { status: 200, headers: cors });
+    }
+    if (user.status === 'active') {
+      return new Response(JSON.stringify({ ok: true, role: 'USER', username: id, status: 'active' }), { status: 200, headers: cors });
+    }
+    // 기타 상태
+    return new Response(JSON.stringify({ ok: true, role: 'USER', username: id, status: user.status || 'unknown' }), { status: 200, headers: cors });
 
   } catch (e) {
     return new Response("요청 처리 오류", { status: 400, headers: cors });
