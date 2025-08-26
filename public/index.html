@@ -601,7 +601,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // 슬롯머신 숫자 애니메이션 함수
   // 고급 Elastic/EaseOut + 폭죽 효과
   // 슬롯머신 스타일: 느리게→빠르게→한자리씩 정지
-  function animateNumber(el, from, to, duration = 3500, onComplete) {
+  // 슬롯머신 스타일: 느리게→빠르게→한자리씩 정지 (더 느리게)
+  function animateNumber(el, from, to, duration = 5200, onComplete) {
     from = Number(from) || 0;
     to = Number(to) || 0;
     if (from === to) {
@@ -615,10 +616,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const len = digits.length;
     let lastFrame = false;
     function slotEase(t) {
-      // 0~0.2: 매우 느림, 0.2~0.7: 5배 빠름, 0.7~1: 한자리씩 정지
-      if (t < 0.2) return t * 0.3;
-      if (t < 0.7) return 0.06 + (t-0.2)*1.5;
-      return 0.81 + (t-0.7)*0.95;
+      // 0~0.25: 매우 느림, 0.25~0.7: 5배 빠름, 0.7~1: 한자리씩 정지 (전체적으로 더 느리게)
+      if (t < 0.25) return t * 0.15;
+      if (t < 0.7) return 0.0375 + (t-0.25)*1.1;
+      return 0.45 + (t-0.7)*0.8;
     }
     function step(now) {
       const progress = Math.min((now - start) / duration, 1);
@@ -653,25 +654,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const rect = targetEl.getBoundingClientRect();
     const canvas = document.createElement('canvas');
     canvas.style.position = 'fixed';
-    canvas.style.left = rect.left + window.scrollX + 'px';
-    canvas.style.top = rect.top + window.scrollY + 'px';
-    canvas.width = rect.width;
-    canvas.height = rect.height;
+    canvas.style.left = (rect.left + window.scrollX - rect.width*0.5) + 'px';
+    canvas.style.top = (rect.top + window.scrollY - rect.height*0.5) + 'px';
+    canvas.width = rect.width*2;
+    canvas.height = rect.height*2;
     canvas.style.pointerEvents = 'none';
     canvas.style.zIndex = 9999;
     document.body.appendChild(canvas);
     const ctx = canvas.getContext('2d');
     const particles = [];
     const colors = ['#FFD700','#FFF8DC','#FFEC8B','#FFFACD','#F5DEB3'];
-    for(let i=0;i<32;i++){
-      const angle = (Math.PI*2*i)/32;
-      const speed = 2+Math.random()*3;
+    for(let i=0;i<48;i++){
+      const angle = (Math.PI*2*i)/48;
+      const speed = 3+Math.random()*5;
       particles.push({
-        x: rect.width/2,
-        y: rect.height/2,
+        x: canvas.width/2,
+        y: canvas.height/2,
         vx: Math.cos(angle)*speed,
         vy: Math.sin(angle)*speed,
-        r: 3+Math.random()*3,
+        r: 4+Math.random()*5,
         color: colors[Math.floor(Math.random()*colors.length)],
         alpha: 1
       });
@@ -687,10 +688,10 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fill();
         p.x += p.vx;
         p.y += p.vy;
-        p.alpha -= 0.025;
+        p.alpha -= 0.012;
       });
       frame++;
-      if(frame<40){
+      if(frame<90){
         requestAnimationFrame(draw);
       }else{
         canvas.remove();
@@ -705,9 +706,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const changeEl = document.getElementById('priceChange');
     const supplyEl = document.querySelector('.supply-price');
     const supplyCh = document.querySelector('.supply-footer .change-line');
-    // DOM 준비 후, 초기값을 0으로 세팅
-    if (priceEl) priceEl.textContent = '0원';
-    if (supplyEl) supplyEl.textContent = '0원';
+  // DOM 준비 후, 초기값을 0으로 세팅 (시작전 - 대신 0)
+  if (priceEl) priceEl.textContent = '0원';
+  if (supplyEl) supplyEl.textContent = '0원';
     let prevMain = 0;
     let prevSupply = 0;
 
