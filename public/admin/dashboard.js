@@ -9,7 +9,15 @@
   };
   function showView(view){
     Object.values(views).forEach(v=>v.style.display='none');
-    if(views[view]) views[view].style.display='block';
+    if(views[view]) {
+      views[view].style.display='block';
+      // 각 영역 진입 시 렌더 함수 자동 실행
+      if(view==='dashboard' && typeof window.renderDashboard==='function') window.renderDashboard();
+      if(view==='users' && typeof window.renderUsers==='function') window.renderUsers();
+      if(view==='orders' && typeof window.renderOrders==='function') window.renderOrders();
+      if(view==='inquiries' && typeof window.renderInquiries==='function') window.renderInquiries();
+      if(view==='security' && typeof window.renderSecurity==='function') window.renderSecurity();
+    }
   }
   document.querySelectorAll('.admin-sidebar nav a').forEach(a=>{
     a.addEventListener('click',function(e){
