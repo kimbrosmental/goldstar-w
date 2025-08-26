@@ -24,9 +24,24 @@
     }
   }
   async function loadAdmins() {
-  const res = await fetch('/api/admins');
-  const json = await res.json();
-  admins = window.decrypt(json.data);
+  try {
+    const res = await fetch('/api/admins');
+    const json = await res.json();
+    // 데이터 구조 방어적 처리
+    if (json && json.data) {
+      try {
+        admins = window.decrypt(json.data);
+      } catch (e) {
+        admins = [];
+      }
+    } else if (Array.isArray(json)) {
+      admins = json;
+    } else {
+      admins = [];
+    }
+  } catch (e) {
+    admins = [];
+  }
   ensureDefaultAdmin();
   }
   async function saveIPRules() {
@@ -37,9 +52,23 @@
     });
   }
   async function loadIPRules() {
-    const res = await fetch('/api/iprules');
-    const json = await res.json();
-    ipRules = window.decrypt(json.data);
+    try {
+      const res = await fetch('/api/iprules');
+      const json = await res.json();
+      if (json && json.data) {
+        try {
+          ipRules = window.decrypt(json.data);
+        } catch (e) {
+          ipRules = [];
+        }
+      } else if (Array.isArray(json)) {
+        ipRules = json;
+      } else {
+        ipRules = [];
+      }
+    } catch (e) {
+      ipRules = [];
+    }
   }
   function render(){
   ensureDefaultAdmin();
