@@ -411,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('DOMContentLoaded', updateBar);
 
     // 금 시세 API & 렌더링
-  const API_URL = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
+  const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
   const fmt = n => Number(n).toLocaleString('ko-KR');
 
   async function renderGoldPrice(){
@@ -419,53 +419,51 @@ document.addEventListener('DOMContentLoaded', function() {
     const changeEl = document.getElementById('priceChange');
     const supplyEl = document.querySelector('.supply-price');
     const supplyCh = document.querySelector('.supply-footer .change-line');
+
     try {
-      // KV goldprice 확인
+      // 1) KV에서 goldprice 값 확인
       const kvRes = await fetch('/api/security?type=goldprice');
       const kvJson = await kvRes.json();
       const manual = kvJson && kvJson.manualGoldPrice ? Number(kvJson.manualGoldPrice) : 0;
 
       let basePrice = 0;
+
       if (manual > 0) {
+        // KV값 우선 반영
         basePrice = manual;
         priceEl.textContent = fmt(manual) + '원';
       } else {
+        // 2) KV 값이 없으면 자동 크롤링 값 사용
         const d = await fetch(API_URL).then(r=>r.json());
         if (d && d.price) {
           basePrice = d.price;
           priceEl.textContent = fmt(d.price) + '원';
           const arrow = d.trend==='up' ? '▲' : d.trend==='down' ? '▼' : '';
           const pct   = d.percent || '';
-          changeEl.textContent = [arrow, pct].filter(Boolean).join(' ');
+          const chg   = d.change ? fmt(d.change)+'원' : '';
+          changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
           changeEl.className = 'change-line' + (d.trend==='up'? ' up': d.trend==='down'? ' down':'');
         }
       }
 
-      // 공급가 대비 퍼센트만 표시
+      // 3) 공급가 대비 퍼센트만 표시
       if (supplyEl && supplyCh && basePrice > 0) {
         const supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g,''));
         if (supplyVal > 0) {
           const rate = (basePrice - supplyVal)/basePrice*100;
           const sign = rate > 0 ? '▼' : '▲';
           const absPct = Math.abs(rate).toFixed(2) + '%';
-          supplyCh.textContent = `${sign} ${absPct}`;
+          supplyCh.textContent = `${sign} ${absPct}`;   // ✅ 퍼센트만 표시
           supplyCh.className = 'change-line ' + (rate > 0 ? 'down' : 'up');
         }
       }
-    } catch {
+    } catch (e) {
       priceEl.textContent = '–';
       changeEl.textContent = '';
     }
   }
-  document.addEventListener('DOMContentLoaded', renderGoldPrice);
 
-  // fadein 효과 적용
-  document.addEventListener('DOMContentLoaded', function(){
-    const fadeEls = document.querySelectorAll('.fadein');
-    fadeEls.forEach(el=>{
-      setTimeout(()=>el.classList.add('visible'), 300);
-    });
-  });
+  document.addEventListener('DOMContentLoaded', renderGoldPrice);
 
     // Section2: Carousel + 설명글 자동 생성
     // — 최대 20개, VISIBLE_COUNT만큼만 표시
