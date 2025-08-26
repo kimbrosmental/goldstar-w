@@ -9,7 +9,7 @@
     renderDashboardCharts();
   }
 
-  function renderDashboard(){
+  function renderDashboardCharts(){
     // ChartDataLabels 플러그인 로드
     if (!window.ChartDataLabels) {
       var dlabelScript = document.createElement('script');
@@ -21,19 +21,15 @@
     }
 
     function drawAllCharts() {
-      // AdminData에서 최신값 반영
-      var stats = {
-        totalUsers: window.AdminData?.users?.length || 0,
-        newUsers: window.AdminData?.users?.filter(u=>{
-          const today = new Date();
-          const created = new Date(u.created);
-          return created.toDateString() === today.toDateString();
-        }).length || 0,
-        totalOrders: window.AdminData?.orders?.length || 0,
-        pendingOrders: window.AdminData?.orders?.filter(o=>o.status==='결제대기'||o.status==='pending').length || 0,
-        totalInquiries: window.AdminData?.inquiries?.length || 0,
-        unansweredInquiries: window.AdminData?.inquiries?.filter(q=>q.status==='미답변'||q.status==='미답변').length || 0
-      };
+    // 실제 데이터 연동 필요, 샘플 데이터 제거
+    var stats = {
+      totalUsers: 0,
+      newUsers: 0,
+      totalOrders: 0,
+      pendingOrders: 0,
+      totalInquiries: 0,
+      unansweredInquiries: 0
+    };
     // 상단 버튼/날짜/로그아웃/홈
     var today = new Date();
     var dateStr = today.toLocaleDateString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit', weekday:'short' });
@@ -218,5 +214,4 @@
       });
     }
   }
-  window.renderDashboard = renderDashboard;
 })();

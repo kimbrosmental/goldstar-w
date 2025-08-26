@@ -1,93 +1,37 @@
 
-// === AES-GCM helpers (tolerant) ============================================
-function b64u(arr){ return btoa(String.fromCharCode(...arr)); }
-function u8(b64){ try { return Uint8Array.from(atob(b64), c => c.charCodeAt(0)); } catch { return null; } }
-
-async function importAesKey(env) {
-  try {
-    if (!env || !env.DATA_KEY) return null;
-    const raw = Uint8Array.from(atob(env.DATA_KEY), c => c.charCodeAt(0));
-    return await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt','decrypt']);
-  } catch { return null; }
-}
-
-async function decryptMaybe(str, env) {
-  try {
-    if (typeof str !== 'string') return null;
-    if (!str.startsWith('enc:v1:')) return null;
-    const key = await importAesKey(env);
-    if (!key) return null;
-    const parts = str.split(':');
-    if (parts.length !== 4) return null;
-    const iv = u8(parts[2]); const ct = u8(parts[3]);
-    if (!iv || !ct) return null;
-    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, ct);
-    const json = new TextDecoder().decode(pt);
-    return JSON.parse(json);
-  } catch { return null; }
-}
-
-
-function normId(s) { return String(s||'').replace(/[^a-zA-Z0-9]/g,'').toLowerCase().trim(); }
-
-export async function onRequest({ request, env }) {
-  const HDR = { 'Access-Control-Allow-Origin':'*', 'Access-Control-Allow-Methods':'GET,POST,OPTIONS', 'Access-Control-Allow-Headers':'Content-Type', 'Content-Type':'text/plain; charset=utf-8' };
-  if (request.method === 'OPTIONS') return new Response(null, { status:204, headers: HDR });
-
-  let key = '';
-  try {
-    if (request.method === 'GET') {
-      const u = new URL(request.url);
-      key = normId(u.searchParams.get('username'));
-    } else if (request.method === 'POST') {
-      const body = await request.json();
-      key = normId(body.username);
-    } else {
-      return new Response('Method Not Allowed', { status:405, headers: HDR });
+export async function onRequest(context) {
+  const { request, env } = context;
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      }
+    });
+  }
+  if (request.method === 'POST') {
+    const { username } = await request.json();
+    const kv = env.USERS;
+    const key = String(username).replace(/[^a-zA-Z0-9]/g, '').toLowerCase().trim();
+    if (!key) return new Response('아이디를 입력하세요.', {
+      status: 400,
+      headers: { 'Access-Control-Allow-Origin': '*' }
+    });
+    if (await kv.get(key)) {
+      return new Response('이미 사용중인 아이디입니다.', {
+        status: 409,
+        headers: { 'Access-Control-Allow-Origin': '*' }
+      });
     }
-  } catch { return new Response('요청 본문 오류', { status:400, headers: HDR }); }
-
-  if (!key) return new Response('아이디를 입력하세요.', { status:400, headers: HDR });
-
-  // USERS KV check
-  if (await env.USERS.get(key)) return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
-
-  // SECURITY per-admin key
-  try {
-    const per = env.SECURITY ? await env.SECURITY.get('admin:'+key) : null;
-    if (per) return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
-  } catch { /* ignore */ }
-
-  // SECURITY.adminid with ('id', 'pw', 'role', 'active') or array/plain
-  try {
-    const secVal = env.SECURITY ? await env.SECURITY.get('adminid') : null;
-    if (secVal) {
-      let admins = null;
-      const dec = await decryptMaybe(secVal, env);
-      if (dec) {
-        if (Array.isArray(dec)) admins = dec;
-        else if (Array.isArray(dec.admins)) admins = dec.admins;
-        else if (dec.id && (dec.pw || dec.password)) admins = [dec];
-      }
-      if (!admins) {
-        try {
-          const obj = JSON.parse(secVal);
-          if (Array.isArray(obj)) admins = obj;
-          else if (Array.isArray(obj.admins)) admins = obj.admins;
-          else if (obj.id && (obj.pw || obj.password)) admins = [obj]; // ★ 네가 준 형식
-          else if (obj.username && (obj.password||obj.pw)) admins = [obj];
-          else if (obj && typeof obj.admins === 'object') { admins = Object.entries(obj.admins).map(([u,rec])=>({ username:u, ...(rec||{}) })); }
-        } catch { /* ignore */ }
-      }
-      if (admins) {
-        if (admins.find(a => normId(a.username || a.id) === key)) {
-          return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
-        }
-      } else {
-        if (key === 'adminid') return new Response('이미 존재하는 아이디입니다.', { status:409, headers: HDR });
-      }
-    }
-  } catch { /* ignore */ }
-
-  return new Response('사용 가능한 아이디입니다.', { status:200, headers: HDR });
+    return new Response('사용 가능한 아이디입니다.', {
+      status: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' }
+    });
+  }
+  return new Response('Method Not Allowed', {
+    status: 405,
+    headers: { 'Access-Control-Allow-Origin': '*' }
+  });
 }

@@ -1,4 +1,8 @@
 // functions/price.js
+// 목적: 순금(24k-3.75g) "가격, 등락퍼센트, 등락금액"을 JSON으로 반환
+// 1순위: 순금나라 gold_list.html 파싱 (가능하면)
+// 2순위: 한국금거래소 지점 페이지들(jongro, songpa, nonhyeon, youngjongdo)에서 안정 파싱
+
 export async function onRequest() {
   try {
     // 1) 순금나라 시도

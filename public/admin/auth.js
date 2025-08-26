@@ -7,34 +7,8 @@
   function bcryptHash(pw){ return pw; /* 실제 구현시 bcrypt 적용 */ }
   function bcryptCheck(pw, hash){ return pw===hash; /* 실제 구현시 bcrypt 적용 */ }
 
-  // SECURITY 또는 /api/admin/admins에서 관리자 계정 가져오기
-  async function getAdmins(){
-    // 1) /api/admin/admins 우선
-    try {
-      const r = await fetch('/api/admin/admins');
-      if (r.ok) {
-        const j = await r.json();
-        if (j && j.data) {
-          try {
-            const arr = await (window.decrypt ? window.decrypt(j.data) : JSON.parse(j.data));
-            if (Array.isArray(arr) && arr.length) return arr;
-          } catch {}
-        }
-      }
-    } catch {}
-    // 2) /api/security fallback (admins 플레인 배열)
-    try {
-      const r2 = await fetch('/api/security');
-      if (r2.ok) {
-        const json = await r2.json();
-        if (Array.isArray(json.admins) && json.admins.length) return json.admins;
-      }
-    } catch {}
-    return [];
-  }
-
   // SECURITY에서 관리자 계정 가져오기
-  async function __LEGACY_DO_NOT_USE__() {
+  async function getAdminsFromSecurity() {
     const res = await fetch('/api/security');
     if (res.ok) {
       const json = await res.json();
@@ -90,7 +64,7 @@
     // 관리자 먼저 확인
     let admins = [];
     try {
-      admins = await getAdmins();
+      admins = await getAdminsFromSecurity();
     } catch (e) {
       throw new Error('관리자 데이터 복호화 실패');
     }
@@ -99,9 +73,8 @@
     if (admin) {
       if (!bcryptCheck(pw, admin.passwordHash)) throw new Error('비밀번호 오류');
       localStorage.setItem(SESSION_KEY, JSON.stringify({ username: admin.username, role: admin.role, ts: Date.now() }));
-  if (window.DEBUG) console.log('관리자 로그인 성공:', admin);
-  if (window.reloadAllData) await window.reloadAllData();
-  return { role: 'admin' };
+      if (window.DEBUG) console.log('관리자 로그인 성공:', admin);
+      return { role: 'admin' };
     }
     // 유저 확인
     let users = [];

@@ -1,19 +1,22 @@
 // 주문 관리 기능 (목록/상세/상태변경/문서다운로드)
 (function(){
   // 샘플 주문 데이터
-  let orders = window.AdminData ? window.AdminData.orders : [];
+  let orders = [];
   // 암호화 저장/불러오기 함수
   async function saveOrders() {
     const encrypted = await window.encrypt(orders);
-    await fetch('/api/admin/orders', {
+    await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ data: encrypted })
     });
-    if (window.reloadAllData) await window.reloadAllData();
   }
-  // 데이터는 reloadAllData에서 관리
-  function renderOrders(){
+  async function loadOrders() {
+    const res = await fetch('/api/orders');
+    const json = await res.json();
+    orders = window.decrypt(json.data);
+  }
+  function render(){
   var html = `<button class="dashboard-top-btn" id="btnAddOrder">주문 추가</button>`;
     html += '<table class="admin-table"><thead><tr><th>주문번호</th><th>주문일</th><th>회원</th><th>금액</th><th>상태</th><th>메모</th><th>관리</th></tr></thead><tbody>';
     orders.forEach((o,i)=>{
@@ -25,10 +28,8 @@
     });
     html += '</tbody></table>';
     html += `<div id="orderModal" class="modal" style="display:none;"></div>`;
-  document.getElementById('view-orders').innerHTML = html;
-  document.getElementById('btnAddOrder').onclick = showAddOrder;
-  window.renderOrders = renderOrders;
-  // SPA 구조에서는 최초 진입 시만 데이터 로딩
+    document.getElementById('view-orders').innerHTML = html;
+    document.getElementById('btnAddOrder').onclick = showAddOrder;
   }
 
   window.editOrder = function(idx){
@@ -80,6 +81,6 @@
       modal.style.display = 'none';
     };
   }
-  document.addEventListener('DOMContentLoaded', renderOrders);
+  document.addEventListener('DOMContentLoaded', render);
   document.addEventListener('DOMContentLoaded', async ()=>{ await loadOrders(); render(); });
 })();

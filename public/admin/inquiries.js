@@ -1,19 +1,22 @@
 // 1:1 문의 관리 기능 (목록/상세/답변)
 (function(){
   // 샘플 문의 데이터
-  let inquiries = window.AdminData ? window.AdminData.inquiries : [];
+  let inquiries = [];
   // 암호화 저장/불러오기 함수
   async function saveInquiries() {
     const encrypted = await window.encrypt(inquiries);
-    await fetch('/api/admin/inquiries', {
+    await fetch('/api/inquiries', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ data: encrypted })
     });
-    if (window.reloadAllData) await window.reloadAllData();
   }
-  // 데이터는 reloadAllData에서 관리
-  function renderInquiries(){
+  async function loadInquiries() {
+    const res = await fetch('/api/inquiries');
+    const json = await res.json();
+    inquiries = window.decrypt(json.data);
+  }
+  function render(){
     var html = `<button class="dashboard-top-btn" id="btnAddInquiry">문의 추가</button>`;
     html += '<table class="admin-table"><thead><tr><th>문의ID</th><th>회원</th><th>제목</th><th>생성일</th><th>상태</th><th>관리</th></tr></thead><tbody>';
     inquiries.forEach((q,i)=>{
@@ -25,9 +28,8 @@
     });
     html += '</tbody></table>';
     html += `<div id="inquiryModal" class="modal" style="display:none;"></div>`;
-  document.getElementById('view-inquiries').innerHTML = html;
-  document.getElementById('btnAddInquiry').onclick = showAddInquiry;
-  window.renderInquiries = renderInquiries;
+    document.getElementById('view-inquiries').innerHTML = html;
+    document.getElementById('btnAddInquiry').onclick = showAddInquiry;
   }
 
   window.editInquiry = function(idx){
@@ -74,5 +76,6 @@
       modal.style.display = 'none';
     };
   }
-  document.addEventListener('DOMContentLoaded', renderInquiries);
+  document.addEventListener('DOMContentLoaded', render);
+  document.addEventListener('DOMContentLoaded', async ()=>{ await loadInquiries(); render(); });
 })();
