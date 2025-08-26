@@ -91,7 +91,18 @@
     if (window.DEBUG) console.log('로그인 시도(유저):', result);
     if (!result.ok) throw new Error(result.msg || '로그인 실패');
     localStorage.setItem(SESSION_KEY, JSON.stringify({ username: result.username, role: 'user', status: result.status, ts: Date.now() }));
-    return { role: 'user', status: result.status, msg: result.msg };
+    // 상태별 처리: pending이면 반드시 pending.html로 이동하도록 명시적으로 반환
+    if (result.status === 'pending') {
+      return { role: 'user', status: 'pending', msg: result.msg || '회원가입 승인 대기중입니다.', redirect: '../pending.html?msg=' + encodeURIComponent(result.msg || '회원가입 승인 대기중입니다.') };
+    }
+    if (result.status === 'rejected') {
+      return { role: 'user', status: 'rejected', msg: result.msg || '회원가입 거절입니다. 관리자에게 문의하세요!', redirect: '../pending.html?msg=' + encodeURIComponent(result.msg || '회원가입 거절입니다. 관리자에게 문의하세요!') };
+    }
+    if (result.status === 'active') {
+      return { role: 'user', status: 'active', msg: result.msg, redirect: '../profile.html' };
+    }
+    // 기타 상태
+    return { role: 'user', status: result.status, msg: result.msg, redirect: null };
   }
 
   function logout() { localStorage.removeItem(SESSION_KEY); }
