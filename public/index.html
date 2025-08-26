@@ -134,12 +134,14 @@
 
     /* ---- Section1 gold-bar 이미지 반응형 숨김 ---- */
     @media (max-width:1024px) {
-      #section1 .price-image { display: none !important; }
-      #section1 .gold-content { justify-content: center; }
+  #section1 .price-image { display: none !important; }
+  #section1 .gold-content { justify-content: center; }
+  #section1 .main-price { text-align: center !important; margin-left: auto !important; margin-right: auto !important; display: block !important; }
     }
     @media (max-width:768px) {
-      #section1 .price-image { display: none !important; }
-      #section1 .gold-content { justify-content: center; flex-direction: column; }
+  #section1 .price-image { display: none !important; }
+  #section1 .gold-content { justify-content: center; flex-direction: column; }
+  #section1 .main-price { text-align: center !important; margin-left: auto !important; margin-right: auto !important; display: block !important; }
     }
 
     /* 버튼 스타일 추가 */
@@ -595,13 +597,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 금 시세 API & 렌더링
   const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
+
+  // 슬롯머신 숫자 애니메이션 함수
+  function animateNumber(el, from, to, duration = 1200) {
+    from = Number(from) || 0;
+    to = Number(to) || 0;
+    if (from === to) {
+      el.textContent = fmt(to) + '원';
+      return;
+    }
+    const start = performance.now();
+    function step(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const value = Math.floor(from + (to - from) * progress);
+      el.textContent = fmt(value) + '원';
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = fmt(to) + '원';
+      }
+    }
+    requestAnimationFrame(step);
+  }
   const fmt = n => Number(n).toLocaleString('ko-KR');
 
   async function renderGoldPrice(){
-    const priceEl  = document.getElementById('mainPrice');
-    const changeEl = document.getElementById('priceChange');
-    const supplyEl = document.querySelector('.supply-price');
-    const supplyCh = document.querySelector('.supply-footer .change-line');
+  const priceEl  = document.getElementById('mainPrice');
+  const changeEl = document.getElementById('priceChange');
+  const supplyEl = document.querySelector('.supply-price');
+  const supplyCh = document.querySelector('.supply-footer .change-line');
+  // 이전 금액 저장
+  let prevMain = Number(priceEl.textContent.replace(/[^0-9]/g, '')) || 0;
+  let prevSupply = Number(supplyEl.textContent.replace(/[^0-9]/g, '')) || 0;
 
     try {
       // 1) KV에서 goldprice 값 확인
@@ -614,13 +641,13 @@ document.addEventListener('DOMContentLoaded', function() {
       if (manual > 0) {
         // KV값 우선 반영
         basePrice = manual;
-        priceEl.textContent = fmt(manual) + '원';
+        animateNumber(priceEl, prevMain, manual);
       } else {
         // 2) KV 값이 없으면 자동 크롤링 값 사용
         const d = await fetch(API_URL).then(r=>r.json());
         if (d && d.price) {
           basePrice = d.price;
-          priceEl.textContent = fmt(d.price) + '원';
+          animateNumber(priceEl, prevMain, d.price);
           const arrow = d.trend==='up' ? '▲' : d.trend==='down' ? '▼' : '';
           const pct   = d.percent || '';
           const chg   = d.change ? fmt(d.change)+'원' : '';
@@ -633,6 +660,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (supplyEl && supplyCh && basePrice > 0) {
         const supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g,''));
         if (supplyVal > 0) {
+          animateNumber(supplyEl, prevSupply, supplyVal);
           const rate = (basePrice - supplyVal)/basePrice*100;
           const sign = rate > 0 ? '▼' : '▲';
           const absPct = Math.abs(rate).toFixed(2) + '%';
