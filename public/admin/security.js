@@ -3,91 +3,57 @@
   window.admins = [];
   let ipRules = [];
 
-  // -----------------------------
-  // 기본 관리자 계정 항상 보장
   function ensureDefaultAdmin() {
     if (!admins.some(a => a.username === 'admin')) {
       admins.unshift({ username:'admin', role:'ADMIN', status:'active', password:'admin', default:true });
     }
   }
 
-  // -----------------------------
-  // 관리자 계정 저장/로드
+  // 관리자 계정
   async function saveAdmins() {
     try {
       const encrypted = await window.encrypt(window.admins);
       const adminid = window.admins.length > 0 ? JSON.stringify(window.admins[0]) : '';
-      const res = await fetch('/api/security?type=admin', {
+      await fetch('/api/security?type=admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: encrypted, adminid })
       });
-      if (!res.ok) throw new Error('서버 저장 실패');
-
-      await loadAdmins(); // 저장 후 최신 데이터 다시 로드
-      render();
+      location.reload(); // ✅ 저장 후 항상 전체 새로고침
     } catch (err) {
       alert('관리자 저장 오류: ' + err.message);
     }
   }
-
   async function loadAdmins() {
-    try {
-      const res = await fetch('/api/security?type=admin');
-      const json = await res.json();
-      if (json && json.data) {
-        try { window.admins = window.decrypt(json.data); }
-        catch { window.admins = []; }
-      } else if (Array.isArray(json)) {
-        window.admins = json;
-      } else {
-        window.admins = [];
-      }
-      if (json && json.adminid) {
-        try { window.adminid = JSON.parse(json.adminid); }
-        catch { window.adminid = null; }
-      }
-    } catch {
-      window.admins = [];
-      window.adminid = null;
+    const res = await fetch('/api/security?type=admin');
+    const json = await res.json();
+    try { window.admins = window.decrypt(json.data); }
+    catch { window.admins = []; }
+    if (json.adminid) {
+      try { window.adminid = JSON.parse(json.adminid); } catch {}
     }
     ensureDefaultAdmin();
   }
 
-  // -----------------------------
-  // IP 규칙 저장/로드
+  // IP 규칙
   async function saveIPRules() {
     try {
-      const res = await fetch('/api/security?type=iprules', {
+      await fetch('/api/security?type=iprules', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rules: ipRules })
       });
-      if (!res.ok) throw new Error('IP 규칙 저장 실패');
-
-      await loadIPRules(); // 저장 후 최신 데이터 다시 로드
-      render();
+      location.reload(); // ✅ 저장 후 전체 새로고침
     } catch (err) {
       alert('IP 규칙 저장 오류: ' + err.message);
     }
   }
-
   async function loadIPRules() {
-    try {
-      const res = await fetch('/api/security?type=iprules');
-      const json = await res.json();
-      if (Array.isArray(json)) {
-        ipRules = json;
-      } else {
-        ipRules = [];
-      }
-    } catch {
-      ipRules = [];
-    }
+    const res = await fetch('/api/security?type=iprules');
+    ipRules = await res.json();
   }
 
-  // -----------------------------
-  // 금시세 수동 입력 저장
+  // 금시세
   async function saveGoldPrice(price) {
     try {
       await fetch('/api/security?type=goldprice', {
@@ -95,17 +61,12 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ manualGoldPrice: price })
       });
-      const res = await fetch('/api/security?type=goldprice');
-      const json = await res.json();
-      localStorage.setItem('manualGoldPrice', json.manualGoldPrice || '');
-      alert('오늘의 금시세가 저장되었습니다.');
-      render();
-    } catch (e) {
+      location.reload(); // ✅ 저장 후 전체 새로고침
+    } catch {
       alert('금시세 저장 실패');
     }
   }
 
-  // -----------------------------
   // 렌더링
   function render(){
     ensureDefaultAdmin();

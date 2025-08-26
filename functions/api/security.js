@@ -8,7 +8,8 @@ export async function onRequest({ request, env }) {
   // 금시세 (goldprice)
   if (type === "goldprice") {
     if (request.method === "GET") {
-      return new Response(await kv.get("goldprice") || "{}", { headers: cors });
+      const raw = await kv.get("goldprice");
+      return new Response(raw || "{}", { headers: cors });
     }
     if (request.method === "POST") {
       const body = await request.json();
@@ -21,18 +22,12 @@ export async function onRequest({ request, env }) {
   // 관리자 계정 관리 (admins + adminid)
   if (type === "admin") {
     if (request.method === "GET") {
-      const raw = await kv.get("admins");      // 암호화된 전체 관리자 배열
-      const adminid = await kv.get("adminid"); // 개별 관리자 기본 계정
+      const raw = await kv.get("admins");
+      const adminid = await kv.get("adminid");
       if (raw) {
         return new Response(JSON.stringify({ data: raw, adminid }), { status: 200, headers: cors });
       } else {
-        // fallback: 전체 KV 스캔
-        const list = [];
-        for await (const key of kv.list()) {
-          const admin = await kv.get(key.name);
-          if (admin) list.push(JSON.parse(admin));
-        }
-        return new Response(JSON.stringify(list), { status: 200, headers: cors });
+        return new Response(JSON.stringify({ data: "[]", adminid: null }), { status: 200, headers: cors });
       }
     }
 
@@ -51,7 +46,8 @@ export async function onRequest({ request, env }) {
   // IP 접근 관리 (iprules)
   if (type === "iprules") {
     if (request.method === "GET") {
-      return new Response(await kv.get("iprules") || "[]", { headers: cors });
+      const raw = await kv.get("iprules");
+      return new Response(raw || "[]", { headers: cors });
     }
     if (request.method === "POST") {
       const body = await request.json();
