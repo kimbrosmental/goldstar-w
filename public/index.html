@@ -599,29 +599,86 @@ document.addEventListener('DOMContentLoaded', function() {
   const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
 
   // 슬롯머신 숫자 애니메이션 함수
-  function animateNumber(el, from, to, duration = 2000) {
+  // 고급 Elastic/EaseOut + 폭죽 효과
+  function animateNumber(el, from, to, duration = 2800, onComplete) {
     from = Number(from) || 0;
     to = Number(to) || 0;
     if (from === to) {
       el.textContent = fmt(to) + '원';
+      if (onComplete) onComplete();
       return;
     }
     const start = performance.now();
-    function easeOut(t) {
-      return 1 - Math.pow(1 - t, 2); // 처음 느리게, 끝 빠르게
+    // Elastic easeOut (조금 튀면서 부드럽게)
+    function elasticOut(t) {
+      if (t === 0 || t === 1) return t;
+      const c4 = (2 * Math.PI) / 3;
+      return Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
     }
     function step(now) {
       const progress = Math.min((now - start) / duration, 1);
-      const eased = easeOut(progress);
+      const eased = elasticOut(progress);
       const value = Math.floor(from + (to - from) * eased);
       el.textContent = fmt(value) + '원';
       if (progress < 1) {
         requestAnimationFrame(step);
       } else {
         el.textContent = fmt(to) + '원';
+        if (onComplete) onComplete();
       }
     }
     requestAnimationFrame(step);
+  }
+
+  // 금색 폭죽 효과 (canvas)
+  function goldFirework(targetEl) {
+    const rect = targetEl.getBoundingClientRect();
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'fixed';
+    canvas.style.left = rect.left + window.scrollX + 'px';
+    canvas.style.top = rect.top + window.scrollY + 'px';
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = 9999;
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const particles = [];
+    const colors = ['#FFD700','#FFF8DC','#FFEC8B','#FFFACD','#F5DEB3'];
+    for(let i=0;i<32;i++){
+      const angle = (Math.PI*2*i)/32;
+      const speed = 2+Math.random()*3;
+      particles.push({
+        x: rect.width/2,
+        y: rect.height/2,
+        vx: Math.cos(angle)*speed,
+        vy: Math.sin(angle)*speed,
+        r: 3+Math.random()*3,
+        color: colors[Math.floor(Math.random()*colors.length)],
+        alpha: 1
+      });
+    }
+    let frame=0;
+    function draw(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      particles.forEach(p=>{
+        ctx.globalAlpha = p.alpha;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.025;
+      });
+      frame++;
+      if(frame<40){
+        requestAnimationFrame(draw);
+      }else{
+        canvas.remove();
+      }
+    }
+    draw();
   }
   const fmt = n => Number(n).toLocaleString('ko-KR');
 
@@ -630,9 +687,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const changeEl = document.getElementById('priceChange');
   const supplyEl = document.querySelector('.supply-price');
   const supplyCh = document.querySelector('.supply-footer .change-line');
-  // 이전 금액 저장
-  let prevMain = Number(priceEl.textContent.replace(/[^0-9]/g, '')) || 0;
-  let prevSupply = Number(supplyEl.textContent.replace(/[^0-9]/g, '')) || 0;
+  // 항상 0에서 시작
+  let prevMain = 0;
+  let prevSupply = 0;
 
     try {
       // 1) KV에서 goldprice 값 확인
@@ -641,22 +698,24 @@ document.addEventListener('DOMContentLoaded', function() {
       const manual = kvJson && kvJson.manualGoldPrice ? Number(kvJson.manualGoldPrice) : 0;
 
       let basePrice = 0;
-
       let supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g, '')) || 0;
+      // intro webp가 끝난 뒤에만 애니메이션 실행
+      function runEffects(main, supply) {
+        animateNumber(priceEl, 0, main, 2800, ()=>{
+          goldFirework(priceEl);
+        });
+        if (supplyEl) animateNumber(supplyEl, 0, supply, 2800, ()=>{
+          goldFirework(supplyEl);
+        });
+      }
       if (manual > 0) {
-        // KV값 우선 반영
         basePrice = manual;
-        animateNumber(priceEl, prevMain, manual);
-        // 공급가도 KV/manual 값에 맞춰서 동기화 (예시: 공급가가 basePrice보다 낮으면 자동 적용)
-        if (supplyEl) animateNumber(supplyEl, prevSupply, supplyVal);
+        runEffects(manual, supplyVal);
       } else {
-        // 2) KV 값이 없으면 자동 크롤링 값 사용
         const d = await fetch(API_URL).then(r=>r.json());
         if (d && d.price) {
           basePrice = d.price;
-          animateNumber(priceEl, prevMain, d.price);
-          // 공급가도 최신 basePrice에 맞춰서 동기화
-          if (supplyEl) animateNumber(supplyEl, prevSupply, supplyVal);
+          runEffects(d.price, supplyVal);
           const arrow = d.trend==='up' ? '▲' : d.trend==='down' ? '▼' : '';
           const pct   = d.percent || '';
           const chg   = d.change ? fmt(d.change)+'원' : '';
@@ -664,16 +723,14 @@ document.addEventListener('DOMContentLoaded', function() {
           changeEl.className = 'change-line' + (d.trend==='up'? ' up': d.trend==='down'? ' down':'');
         }
       }
-
-      // 3) 공급가 대비 퍼센트만 표시
+      // 공급가 대비 퍼센트만 표시
       if (supplyEl && supplyCh && basePrice > 0) {
-        const supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g,''));
-        if (supplyVal > 0) {
-          animateNumber(supplyEl, prevSupply, supplyVal);
-          const rate = (basePrice - supplyVal)/basePrice*100;
+        const supplyVal2 = Number(supplyEl.textContent.replace(/[^0-9]/g,''));
+        if (supplyVal2 > 0) {
+          const rate = (basePrice - supplyVal2)/basePrice*100;
           const sign = rate > 0 ? '▼' : '▲';
           const absPct = Math.abs(rate).toFixed(2) + '%';
-          supplyCh.textContent = `${sign} ${absPct}`;   // ✅ 퍼센트만 표시
+          supplyCh.textContent = `${sign} ${absPct}`;
           supplyCh.className = 'change-line ' + (rate > 0 ? 'down' : 'up');
         }
       }
@@ -683,7 +740,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  document.addEventListener('DOMContentLoaded', renderGoldPrice);
+  // intro webp가 끝난 뒤에만 금액 애니메이션 실행
+  document.addEventListener('DOMContentLoaded', function(){
+    function afterIntro(){
+      setTimeout(renderGoldPrice, 400); // intro 끝나고 0.4초 후 실행
+    }
+    const overlay = document.getElementById('introOverlay');
+    if(overlay && !overlay.classList.contains('hidden')){
+      overlay.addEventListener('transitionend', afterIntro);
+    }else{
+      afterIntro();
+    }
+  });
 
     // Section2: Carousel + 설명글 자동 생성
     // — 최대 20개, VISIBLE_COUNT만큼만 표시
