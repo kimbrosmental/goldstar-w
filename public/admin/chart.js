@@ -9,7 +9,7 @@
     renderDashboardCharts();
   }
 
-  function renderDashboardCharts(){
+  window.renderDashboard = function renderDashboardCharts(){
     // ChartDataLabels 플러그인 로드
     if (!window.ChartDataLabels) {
       var dlabelScript = document.createElement('script');

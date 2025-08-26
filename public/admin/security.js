@@ -1,7 +1,7 @@
 // 보안/설정/관리자 계정 관리 기능 (최대 3개, 비번변경/비활성/삭제)
 (function(){
   // 샘플 관리자 계정 데이터 (실제 구현시 암호화/DB 연동)
-  let admins = [];
+  window.admins = [];
   // 기본 관리자 계정(admin/admin) 항상 존재
   function ensureDefaultAdmin() {
     if (!admins.some(a => a.username === 'admin')) {
@@ -12,7 +12,7 @@
   // 암호화 저장/불러오기 함수
   async function saveAdmins() {
     try {
-      const encrypted = await window.encrypt(admins);
+      const encrypted = await window.encrypt(window.admins);
       const res = await fetch('/api/admins', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -30,17 +30,17 @@
     // 데이터 구조 방어적 처리
     if (json && json.data) {
       try {
-        admins = window.decrypt(json.data);
+        window.admins = window.decrypt(json.data);
       } catch (e) {
-        admins = [];
+        window.admins = [];
       }
     } else if (Array.isArray(json)) {
-      admins = json;
+      window.admins = json;
     } else {
-      admins = [];
+      window.admins = [];
     }
   } catch (e) {
-    admins = [];
+    window.admins = [];
   }
   ensureDefaultAdmin();
   }

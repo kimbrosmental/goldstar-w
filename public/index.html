@@ -611,18 +611,28 @@ document.addEventListener('DOMContentLoaded', function() {
       const supplyEl = document.querySelector('.supply-price');
       const supplyCh = document.querySelector('.supply-footer .change-line');
       // 한글: 수동입력값 우선 표시
-      const manualGoldPrice = localStorage.getItem('manualGoldPrice');
-      if (manualGoldPrice) {
-        priceEl.textContent = fmt(manualGoldPrice) + '원';
-        changeEl.textContent = '변동없음';
-        changeEl.className = 'change-line';
-        // 공급 비교도 숨김
-        if (supplyCh) {
-          supplyCh.textContent = '–';
-          supplyCh.className = 'change-line';
+      // 서버에서 manualGoldPrice 우선 fetch
+      window.fetch('/api/goldprice').then(res => res.json()).then(json => {
+        if (json.manualGoldPrice && !isNaN(json.manualGoldPrice)) {
+          priceEl.textContent = fmt(json.manualGoldPrice) + '원';
+          changeEl.textContent = '변동없음';
+          changeEl.className = 'change-line';
+          if (supplyCh) {
+            supplyCh.textContent = '–';
+            supplyCh.className = 'change-line';
+          }
+        } else {
+          // ...기존 코드...
+          if (!data || !data.price) {
+            priceEl.textContent = '–';
+            changeEl.textContent = '';
+            if (supplyCh) supplyCh.textContent = '–';
+            return;
+          }
+          priceEl.textContent = fmt(data.price) + '원';
+          // ...기존 변동폭/공급 비교 코드...
         }
-        return;
-      }
+      });
       // ...기존 코드...
       if (!data || !data.price) {
         priceEl.textContent = '–';
