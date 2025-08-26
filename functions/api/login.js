@@ -232,3 +232,4 @@ export async function onRequest(context) {
   } catch {
     return new Response(JSON.stringify({ok:false,error:"요청 본문 오류"}), {status:200, headers:CORS});
   }
+}
