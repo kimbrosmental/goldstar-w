@@ -594,85 +594,76 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('DOMContentLoaded', updateBar);
 
     // 금 시세 API & 렌더링
-    const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
-    const CACHE_KEY = 'gold_price_cache_v3';
-    const fmt = n => Number(n).toLocaleString('ko-KR');
-    function getCache() {
-      try { return JSON.parse(localStorage.getItem(CACHE_KEY)); }
-      catch { return null; }
-    }
-    function setCache(d) {
-      try { localStorage.setItem(CACHE_KEY, JSON.stringify(d)); }
-      catch {}
-    }
-    function renderPrice(data) {
-      const priceEl  = document.getElementById('mainPrice');
-      const changeEl = document.getElementById('priceChange');
-      const supplyEl = document.querySelector('.supply-price');
-      const supplyCh = document.querySelector('.supply-footer .change-line');
-      // 한글: 수동입력값 우선 표시
-      // 서버에서 manualGoldPrice 우선 fetch
-      window.fetch('/api/goldprice').then(res => res.json()).then(json => {
-        if (json.manualGoldPrice && !isNaN(json.manualGoldPrice)) {
-          priceEl.textContent = fmt(json.manualGoldPrice) + '원';
-          changeEl.textContent = '변동없음';
-          changeEl.className = 'change-line';
-          if (supplyCh) {
-            supplyCh.textContent = '–';
-            supplyCh.className = 'change-line';
+  const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
+  const fmt = n => Number(n).toLocaleString('ko-KR');
+
+  async function renderGoldPrice(){
+    const priceEl  = document.getElementById('mainPrice');
+    const changeEl = document.getElementById('priceChange');
+    const supplyEl = document.querySelector('.supply-price');
+    const supplyCh = document.querySelector('.supply-footer .change-line');
+
+    try {
+      // 1) KV에서 goldprice 값 확인
+      const kvRes = await fetch('/api/security?type=goldprice');
+      const kvJson = await kvRes.json();
+      const manual = kvJson && kvJson.manualGoldPrice ? Number(kvJson.manualGoldPrice) : 0;
+
+      if (manual > 0) {
+        // KV값 우선 반영
+        priceEl.textContent = fmt(manual) + '원';
+
+        // 자동 크롤링 값도 불러와서 비교
+        const api = await fetch(API_URL).then(r=>r.json()).catch(()=>null);
+        if (api && api.price) {
+          const diff = manual - api.price;
+          const pct  = ((diff/api.price)*100).toFixed(2) + '%';
+
+          if (diff > 0) {
+            changeEl.textContent = `▲ ${pct} +${fmt(diff)}원`;
+            changeEl.className = 'change-line up';
+          } else if (diff < 0) {
+            changeEl.textContent = `▼ ${pct} ${fmt(diff)}원`;
+            changeEl.className = 'change-line down';
+          } else {
+            changeEl.textContent = '변동없음';
+            changeEl.className = 'change-line';
           }
-        } else {
-          // ...기존 코드...
-          if (!data || !data.price) {
-            priceEl.textContent = '–';
-            changeEl.textContent = '';
-            if (supplyCh) supplyCh.textContent = '–';
-            return;
-          }
-          priceEl.textContent = fmt(data.price) + '원';
-          // ...기존 변동폭/공급 비교 코드...
         }
-      });
-      // ...기존 코드...
-      if (!data || !data.price) {
-        priceEl.textContent = '–';
-        changeEl.textContent = '';
-        changeEl.className = 'change-line';
-      } else {
-        priceEl.textContent = fmt(data.price) + '원';
-        const arrow = data.trend==='up' ? '▲' : data.trend==='down' ? '▼' : '';
-        const pct   = data.percent || '';
-        const chg   = data.change ? fmt(data.change)+'원' : '';
-        changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
-        changeEl.className = 'change-line' + (data.trend==='up'? ' up': data.trend==='down'? ' down':'');
+        return;
       }
-      if (supplyEl && supplyCh && data && data.price) {
+
+      // 2) KV 값이 없으면 자동 크롤링 값 사용
+      const d = await fetch(API_URL).then(r=>r.json());
+      if (d && d.price) {
+        priceEl.textContent = fmt(d.price) + '원';
+        const arrow = d.trend==='up' ? '▲' : d.trend==='down' ? '▼' : '';
+        const pct   = d.percent || '';
+        const chg   = d.change ? fmt(d.change)+'원' : '';
+        changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
+        changeEl.className = 'change-line' + (d.trend==='up'? ' up': d.trend==='down'? ' down':'');
+      }
+
+      // 3) 공급가 대비 비교
+      if (supplyEl && supplyCh && (manual>0 || (d && d.price))) {
+        const base = manual>0 ? manual : d.price;
         const supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g,''));
         if (supplyVal>0) {
-          const rate   = (data.price - supplyVal)/data.price*100;
+          const rate   = (base - supplyVal)/base*100;
           const sign   = rate>0? '▼': '▲';
           const absPct = Math.abs(rate).toFixed(2) + '%';
-          supplyCh.textContent = `${sign} ${absPct}`;
-          supplyCh.className = 'change-line down';
-        } else {
-          supplyCh.textContent = '–';
-          supplyCh.className = 'change-line';
+          const diff   = base - supplyVal;
+          supplyCh.textContent = `${sign} ${absPct} (${fmt(diff)}원)`;
+          supplyCh.className = 'change-line ' + (rate>0?'down':'up');
         }
       }
+    } catch (e) {
+      priceEl.textContent = '–';
+      changeEl.textContent = '';
     }
-    async function loadGoldPrice() {
-      const cache = getCache();
-      if (cache) renderPrice(cache);
-      try {
-        const d = await fetch(API_URL, { cache:'no-store' }).then(r=>r.json());
-        if (!d.price) throw 0;
-        renderPrice(d);
-        setCache(d);
-      } catch {
-        if (!cache) renderPrice(null);
-      }
-    }
-    document.addEventListener('DOMContentLoaded', loadGoldPrice);
+  }
+
+  document.addEventListener('DOMContentLoaded', renderGoldPrice);
 
     // Section2: Carousel + 설명글 자동 생성
     // — 최대 20개, VISIBLE_COUNT만큼만 표시
