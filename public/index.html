@@ -609,52 +609,35 @@ document.addEventListener('DOMContentLoaded', function() {
       const kvJson = await kvRes.json();
       const manual = kvJson && kvJson.manualGoldPrice ? Number(kvJson.manualGoldPrice) : 0;
 
+      let basePrice = 0;
+
       if (manual > 0) {
         // KV값 우선 반영
+        basePrice = manual;
         priceEl.textContent = fmt(manual) + '원';
-
-        // 자동 크롤링 값도 불러와서 비교
-        const api = await fetch(API_URL).then(r=>r.json()).catch(()=>null);
-        if (api && api.price) {
-          const diff = manual - api.price;
-          const pct  = ((diff/api.price)*100).toFixed(2) + '%';
-
-          if (diff > 0) {
-            changeEl.textContent = `▲ ${pct} +${fmt(diff)}원`;
-            changeEl.className = 'change-line up';
-          } else if (diff < 0) {
-            changeEl.textContent = `▼ ${pct} ${fmt(diff)}원`;
-            changeEl.className = 'change-line down';
-          } else {
-            changeEl.textContent = '변동없음';
-            changeEl.className = 'change-line';
-          }
+      } else {
+        // 2) KV 값이 없으면 자동 크롤링 값 사용
+        const d = await fetch(API_URL).then(r=>r.json());
+        if (d && d.price) {
+          basePrice = d.price;
+          priceEl.textContent = fmt(d.price) + '원';
+          const arrow = d.trend==='up' ? '▲' : d.trend==='down' ? '▼' : '';
+          const pct   = d.percent || '';
+          const chg   = d.change ? fmt(d.change)+'원' : '';
+          changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
+          changeEl.className = 'change-line' + (d.trend==='up'? ' up': d.trend==='down'? ' down':'');
         }
-        return;
       }
 
-      // 2) KV 값이 없으면 자동 크롤링 값 사용
-      const d = await fetch(API_URL).then(r=>r.json());
-      if (d && d.price) {
-        priceEl.textContent = fmt(d.price) + '원';
-        const arrow = d.trend==='up' ? '▲' : d.trend==='down' ? '▼' : '';
-        const pct   = d.percent || '';
-        const chg   = d.change ? fmt(d.change)+'원' : '';
-        changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
-        changeEl.className = 'change-line' + (d.trend==='up'? ' up': d.trend==='down'? ' down':'');
-      }
-
-      // 3) 공급가 대비 비교
-      if (supplyEl && supplyCh && (manual>0 || (d && d.price))) {
-        const base = manual>0 ? manual : d.price;
+      // 3) 공급가 대비 퍼센트만 표시
+      if (supplyEl && supplyCh && basePrice > 0) {
         const supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g,''));
-        if (supplyVal>0) {
-          const rate   = (base - supplyVal)/base*100;
-          const sign   = rate>0? '▼': '▲';
+        if (supplyVal > 0) {
+          const rate = (basePrice - supplyVal)/basePrice*100;
+          const sign = rate > 0 ? '▼' : '▲';
           const absPct = Math.abs(rate).toFixed(2) + '%';
-          const diff   = base - supplyVal;
-          supplyCh.textContent = `${sign} ${absPct} (${fmt(diff)}원)`;
-          supplyCh.className = 'change-line ' + (rate>0?'down':'up');
+          supplyCh.textContent = `${sign} ${absPct}`;   // ✅ 퍼센트만 표시
+          supplyCh.className = 'change-line ' + (rate > 0 ? 'down' : 'up');
         }
       }
     } catch (e) {
