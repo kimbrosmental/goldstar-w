@@ -98,13 +98,14 @@
         if (res.status === 'active') {
           location.href = 'profile.html';
         } else if (res.status === 'pending') {
-          alert("가입승인 대기 상태입니다. 고객센터 문의 시간이 지난경우는 익일날 처리됩니다. 계속 대기 상태일경우 고객센터 메신져로 문의 바랍니다.");
+          // 대기 상태: pending.html로 이동 후, 메세지는 페이지에서 노출
           localStorage.clear();
-          location.href = 'pending.html';
+          location.href = 'pending.html?msg=' + encodeURIComponent('회원가입 승인 대기중입니다. 관리자 승인 후 로그인 가능합니다.');
         } else if (res.status === 'rejected') {
-          alert("가입거절입니다. 고객센터 문의 바랍니다.");
+          // 거절 상태: 메세지 alert 후 index.html로 이동
+          alert('회원가입이 거절되었습니다. 관리자에게 문의하세요!');
           localStorage.clear();
-          location.href = 'pending.html';
+          location.href = 'index.html';
         }
       }
     } catch (err) {
