@@ -68,11 +68,13 @@
       navLinks.classList.toggle('active');
     });
   }
+
   // 로그인 입력 및 처리
   const idInput = document.getElementById('loginId');
   const pwInput = document.getElementById('password');
   const msg = document.getElementById('msg');
-  idInput.addEventListener('input', function(e) {
+
+  idInput.addEventListener('input', function() {
     let val = idInput.value;
     // 영문(대소문자), 숫자만 허용, 자동 소문자 변환
     const filtered = val.replace(/[^a-zA-Z0-9]/g, '');
@@ -81,27 +83,53 @@
       msg.style.color = '#ff5252';
       msg.textContent = '영문(소문자), 숫자만 입력 가능합니다.';
     } else {
-      msg.style.color = '#ccc';
       msg.textContent = '';
     }
   });
+
   document.getElementById('loginForm').addEventListener('submit', async e => {
     e.preventDefault();
     const id = idInput.value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().trim();
     const pw = String(pwInput.value).trim();
+
     if (!id || !pw) {
       msg.style.color = '#ff5252';
       msg.textContent = '아이디와 비밀번호를 입력하세요.';
       return;
     }
+
     try {
-      await window.GSApp.loginId(id, pw);
-      msg.style.color = '#4fc3f7';
-      msg.textContent = '로그인 성공';
-      setTimeout(() => location.href = 'profile.html', 600);
-    } catch (err) {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: id, password: pw })
+      });
+
+      const text = await res.text();
+
+      try {
+        // JSON 응답 → 로그인 성공
+        const obj = JSON.parse(text);
+        if (obj.ok) {
+          msg.style.color = '#4fc3f7';
+          msg.textContent = '로그인 성공';
+          setTimeout(() => {
+            if (obj.role === 'ADMIN') {
+              location.href = '/admin/index.html';
+            } else {
+              location.href = 'profile.html';
+            }
+          }, 600);
+          return;
+        }
+      } catch {
+        // 문자열 응답 → 에러 메시지
+        msg.style.color = '#ff5252';
+        msg.textContent = text;
+      }
+    } catch {
       msg.style.color = '#ff5252';
-      msg.textContent = err.message || '로그인 실패';
+      msg.textContent = '로그인 요청 중 오류 발생';
     }
   });
 </script>
