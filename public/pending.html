@@ -25,11 +25,16 @@
   <main>
     <div class="pending-wrap">
       <h1>가입 승인 대기중</h1>
-      <div class="msg">관리자 승인 후 로그인 가능합니다.<br> 5~10분 정도 소요될 수 있습니다.</div>
+      <div class="msg" id="pending-msg">관리자 승인 후 로그인 가능합니다.<br> 5~10분 정도 소요될 수 있습니다.</div>
       </div>
       <div class="helper"><br><div>
       <a href="index.html"><button class="home-btn">홈으로</button></a>
     </div>
   </main>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const msg = params.get('msg') || '회원가입 승인 대기중입니다.';
+    document.getElementById('pending-msg').textContent = msg;
+  </script>
 </body>
 </html>

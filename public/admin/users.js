@@ -126,7 +126,7 @@
       html += `<label>이메일<input name="email" value="${user.email||''}" required></label>`;
       html += `<label>은행<input name="bank" value="${user.bank||''}" required></label>`;
       html += `<label>계좌번호<input name="account" value="${user.account||''}" required></label>`;
-      html += `<label>상태<select name="status"><option value="active"${user.status==='active'?' selected':''}>활성</option><option value="pending"${user.status==='pending'?' selected':''}>대기</option></select></label>`;
+      html += `<label>상태<select name="status"><option value="active"${user.status==='active'?' selected':''}>활성</option><option value="pending"${user.status==='pending'?' selected':''}>대기</option><option value="rejected"${user.status==='rejected'?' selected':''}>거절</option></select></label>`;
       html += `</div>`;
       html += `<label>비밀번호<input name="password" type="password" value="${user.password||''}" required></label>`;
     } else {
