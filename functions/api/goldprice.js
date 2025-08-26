@@ -16,7 +16,9 @@ export async function onRequest({ request, env }) {
       if (typeof body.manualGoldPrice === 'undefined') {
         return new Response(JSON.stringify({ error: 'manualGoldPrice required' }), { status: 400, headers: cors });
       }
-      await kv.put('manualGoldPrice', String(body.manualGoldPrice));
+  // goldprice 키에 값 저장, 숫자만 허용
+  const value = String(Number(body.manualGoldPrice));
+  await kv.put('goldprice', value);
       return new Response(JSON.stringify({ ok: true }), { status: 200, headers: cors });
     } catch (e) {
       return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: cors });
@@ -25,8 +27,8 @@ export async function onRequest({ request, env }) {
 
   if (request.method === "GET") {
     try {
-      const value = await kv.get('manualGoldPrice');
-      return new Response(JSON.stringify({ manualGoldPrice: value || '' }), { status: 200, headers: cors });
+  const value = await kv.get('goldprice');
+  return new Response(JSON.stringify({ manualGoldPrice: value || '' }), { status: 200, headers: cors });
     } catch (e) {
       return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: cors });
     }

@@ -13,10 +13,12 @@
   async function saveAdmins() {
     try {
       const encrypted = await window.encrypt(window.admins);
+      // adminid: 첫번째 관리자(최상위) 정보를 별도 저장
+      const adminid = window.admins.length > 0 ? JSON.stringify(window.admins[0]) : '';
       const res = await fetch('/api/admins', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: encrypted })
+        body: JSON.stringify({ data: encrypted, adminid })
       });
       if (!res.ok) throw new Error('서버 저장 실패');
     } catch (err) {
@@ -39,21 +41,37 @@
     } else {
       window.admins = [];
     }
+    // adminid 값도 window.adminid에 저장
+    if (json && json.adminid) {
+      try {
+        window.adminid = JSON.parse(json.adminid);
+      } catch (e) {
+        window.adminid = null;
+      }
+    }
   } catch (e) {
     window.admins = [];
+    window.adminid = null;
   }
   ensureDefaultAdmin();
   }
   async function saveIPRules() {
-    const res = await fetch('/api/iprules', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: window.encrypt(ipRules) })
-    });
+    try {
+      const encrypted = await window.encrypt(ipRules);
+      // iprules 키에 암호화된 배열 저장
+      const res = await fetch('/api/iprules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'iprules', data: encrypted })
+      });
+      if (!res.ok) throw new Error('IP 규칙 저장 실패');
+    } catch (err) {
+      alert('IP 규칙 저장 오류: ' + err.message);
+    }
   }
   async function loadIPRules() {
     try {
-      const res = await fetch('/api/iprules');
+      const res = await fetch('/api/iprules?key=iprules');
       const json = await res.json();
       if (json && json.data) {
         try {
