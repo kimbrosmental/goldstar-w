@@ -1,73 +1,39 @@
-// functions/api/admins.js
 export async function onRequest({ request, env }) {
-  const cors = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
-  };
   const kv = env.SECURITY;
 
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: cors });
+  if (request.method === 'GET') {
+    try {
+      const raw = await kv.get('admins');
+      const adminid = await kv.get('adminid');
+      if (raw) {
+        return new Response(JSON.stringify({ data: raw, adminid }), { status: 200 });
+      }
+      // fallback: 키 전체 스캔
+      const list = [];
+      const keys = await kv.list();
+      for (const key of keys.keys) {
+        const admin = await kv.get(key.name);
+        if (admin) {
+          try { list.push(JSON.parse(admin)); } catch { }
+        }
+      }
+      return new Response(JSON.stringify(list), { status: 200 });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: "KV read error", details: e.message }), { status: 500 });
+    }
   }
 
-  try {
-    if (request.method === "GET") {
-      // "adminid" 또는 "admins" 키 지원
-      let admins = [];
-      const raw = await kv.get("admins");
-      const single = await kv.get("adminid");
-
-      if (raw) {
-        try { admins = JSON.parse(raw); } catch { admins = []; }
-      } else if (single) {
-        try { admins = JSON.parse(single); } catch { admins = []; }
-      }
-
-      if (!Array.isArray(admins)) admins = [admins];
-      return new Response(JSON.stringify(admins), {
-        headers: { ...cors, "Content-Type": "application/json" }
-      });
+  if (request.method === 'POST') {
+    try {
+      const { data, adminid } = await request.json();
+      if (!data) return new Response('Missing data', { status: 400 });
+      await kv.put('admins', data);
+      if (adminid) await kv.put('adminid', adminid);
+      return new Response('ok', { status: 200 });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: "KV write error", details: e.message }), { status: 500 });
     }
-
-    if (request.method === "POST") {
-      const body = await request.json();
-      let admins = [];
-      const raw = await kv.get("admins");
-      if (raw) {
-        try { admins = JSON.parse(raw); } catch { admins = []; }
-      }
-      admins.push(body);
-      await kv.put("admins", JSON.stringify(admins));
-      return new Response("ok", { status: 200, headers: cors });
-    }
-
-    if (request.method === "PUT") {
-      const body = await request.json();
-      let admins = [];
-      const raw = await kv.get("admins");
-      if (raw) {
-        try { admins = JSON.parse(raw); } catch { admins = []; }
-      }
-      admins = admins.map(a => a.id === body.id ? body : a);
-      await kv.put("admins", JSON.stringify(admins));
-      return new Response("updated", { status: 200, headers: cors });
-    }
-
-    if (request.method === "DELETE") {
-      const { id } = await request.json();
-      let admins = [];
-      const raw = await kv.get("admins");
-      if (raw) {
-        try { admins = JSON.parse(raw); } catch { admins = []; }
-      }
-      admins = admins.filter(a => a.id !== id);
-      await kv.put("admins", JSON.stringify(admins));
-      return new Response("deleted", { status: 200, headers: cors });
-    }
-
-    return new Response("Method Not Allowed", { status: 405, headers: cors });
-  } catch (err) {
-    return new Response("Server Error: " + err.message, { status: 500, headers: cors });
   }
+
+  return new Response('Method Not Allowed', { status: 405 });
 }
