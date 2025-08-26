@@ -42,15 +42,12 @@
         </ul>
       </div>
       <div class="nav-right">
-        <select id="langSelect" class="lang-select" aria-label="언어 선택">
-          <option value="ko">한국어</option>
-          <option value="zh">中文</option>
-          <option value="en">English</option>
-        </select>
+  <!-- 언어 선택 드롭다운 제거 -->
         <div id="userArea" class="user-area"></div>
-  <a href="index.html" class="home-icon" aria-label="홈" style="display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;">
+        <a href="index.html" class="home-icon" aria-label="홈" style="display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;">
           <span style="font-size:30px;color:#FFD700;">🏠</span>
         </a>
+        <span id="navProfileBtn" style="display:none;margin-left:12px;"><a href="profile.html" style="color:#FFD700;font-weight:bold;font-size:16px;text-decoration:none;">내정보</a></span>
   <div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴" role="button" tabindex="0"><span></span><span></span><span></span></div>
       </div>
     </div>
@@ -90,6 +87,19 @@
     document.querySelector('.menu-btn').addEventListener('click',()=>{document.querySelector('.menu-btn').classList.toggle('active');document.querySelector('.nav-links').classList.toggle('active');});
   // 관리자 접근 차단: admin은 내 정보 페이지가 없음
   (function(){ try{ const u=window.GSApp && GSApp.currentUser? GSApp.currentUser(): null; if(u && u.role==='admin'){ location.href='admin.html'; return; } }catch(_){} })();
+  // 홈버튼 클릭 시 세션 유지, 내정보 버튼 노출
+  document.querySelector('.home-icon').addEventListener('click',function(e){
+    // 세션 유지: 아무 동작 없음(기본 이동만)
+  });
+  // 로그인 상태에서 내정보 버튼 노출
+  (function(){
+    try {
+      const u = window.GSApp && GSApp.currentUser ? GSApp.currentUser() : null;
+      if(u && u.role!=='admin') {
+        document.getElementById('navProfileBtn').style.display = 'inline-block';
+      }
+    } catch(_){}
+  })();
     function loadProfile(){
       const user = window.GSApp.currentUser();
       if(!user){ if(confirm('로그인 정보가 없습니다. 회원가입 하시겠습니까?')) window.location.href='signup.html'; return; }
