@@ -23,6 +23,9 @@
         body: JSON.stringify({ data: encrypted, adminid })
       });
       if (!res.ok) throw new Error('서버 저장 실패');
+
+      await loadAdmins(); // 저장 후 최신 데이터 다시 로드
+      render();
     } catch (err) {
       alert('관리자 저장 오류: ' + err.message);
     }
@@ -61,6 +64,9 @@
         body: JSON.stringify({ rules: ipRules })
       });
       if (!res.ok) throw new Error('IP 규칙 저장 실패');
+
+      await loadIPRules(); // 저장 후 최신 데이터 다시 로드
+      render();
     } catch (err) {
       alert('IP 규칙 저장 오류: ' + err.message);
     }
@@ -89,8 +95,11 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ manualGoldPrice: price })
       });
-      localStorage.setItem('manualGoldPrice', price);
+      const res = await fetch('/api/security?type=goldprice');
+      const json = await res.json();
+      localStorage.setItem('manualGoldPrice', json.manualGoldPrice || '');
       alert('오늘의 금시세가 저장되었습니다.');
+      render();
     } catch (e) {
       alert('금시세 저장 실패');
     }
@@ -152,13 +161,94 @@
   }
 
   // -----------------------------
-  // 이벤트 핸들러 (관리자/아이피 추가/수정/삭제) → 그대로 유지
-  // (코드 길이 관계로 생략했지만 기존 window.editAdmin, window.deleteAdmin,
-  //  window.changePwAdmin, showAddAdmin, showAdminModal, editIP, deleteIP, showAddIP, showIPModal 모두 그대로 두면 됩니다.)
+  // 기존 이벤트 핸들러 (수정/삭제/추가/비번변경) 동일 유지
+  window.editAdmin = function(idx){
+    const a = admins[idx];
+    showAdminModal('관리자 정보 수정', a, function(data){
+      (async()=>{ admins[idx] = {...a, ...data}; await saveAdmins(); })();
+    });
+  };
+  window.deleteAdmin = function(idx){
+    const a = admins[idx];
+    if(a && a.username === 'admin'){ alert('기본 관리자 계정은 삭제할 수 없습니다.'); return; }
+    if(confirm('정말 삭제하시겠습니까?')){
+      (async()=>{ admins.splice(idx,1); await saveAdmins(); })();
+    }
+  };
+  window.changePwAdmin = function(idx){
+    const a = admins[idx];
+    showAdminModal('비밀번호 변경', a, function(data){
+      (async()=>{ admins[idx].password = data.password; await saveAdmins(); })();
+    }, true);
+  };
+  function showAddAdmin(){
+    if(admins.length>=3){ alert('최대 3개까지 등록 가능합니다.'); return; }
+    showAdminModal('관리자 추가', {}, function(data){
+      (async()=>{ admins.push({...data, status:'active'}); await saveAdmins(); })();
+    });
+  }
+  function showAdminModal(title, admin, onSave, pwOnly){
+    const modal = document.getElementById('adminModal');
+    let html = `<div class="modal-content"><h3>${title}</h3><form id="adminForm">`;
+    if(!pwOnly){
+      html += `<label>아이디<input name="username" value="${admin.username||''}" required></label>`;
+      html += `<label>권한<select name="role"><option value="ADMIN"${admin.role==='ADMIN'?' selected':''}>ADMIN</option><option value="MANAGER"${admin.role==='MANAGER'?' selected':''}>MANAGER</option></select></label>`;
+      html += `<label>상태<select name="status"><option value="active"${admin.status==='active'?' selected':''}>활성</option><option value="disabled"${admin.status==='disabled'?' selected':''}>비활성</option></select></label>`;
+    }
+    html += `<label>비밀번호<input name="password" type="password" value="${admin.password||''}" required></label>`;
+    html += `<div style="margin-top:16px;text-align:right;"><button type="submit" class="btn">저장</button> <button type="button" class="btn" id="btnCancel">취소</button></div>`;
+    html += `</form></div>`;
+    modal.innerHTML = html;
+    modal.style.display = 'block';
+    document.getElementById('btnCancel').onclick = ()=>{ modal.style.display='none'; };
+    document.getElementById('adminForm').onsubmit = function(e){
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      if(onSave) onSave(data);
+      modal.style.display = 'none';
+    };
+  }
+
+  window.editIP = function(idx){
+    const r = ipRules[idx];
+    showIPModal('IP 규칙 수정', r, function(data){
+      (async()=>{ ipRules[idx] = {...r, ...data}; await saveIPRules(); })();
+    });
+  };
+  window.deleteIP = function(idx){
+    if(confirm('정말 삭제하시겠습니까?')){
+      (async()=>{ ipRules.splice(idx,1); await saveIPRules(); })();
+    }
+  };
+  function showAddIP(){
+    showIPModal('IP 규칙 추가', {}, function(data){
+      (async()=>{ ipRules.push({...data, enabled:true}); await saveIPRules(); })();
+    });
+  }
+  function showIPModal(title, rule, onSave){
+    const modal = document.getElementById('ipModal');
+    let html = `<div class="modal-content"><h3>${title}</h3><form id="ipForm">`;
+    html += `<label>타입<select name="type"><option value="allow"${rule.type==='allow'?' selected':''}>허용</option><option value="block"${rule.type==='block'?' selected':''}>차단</option></select></label>`;
+    html += `<label>CIDR<input name="cidr" value="${rule.cidr||''}" required></label>`;
+    html += `<label>라벨<input name="label" value="${rule.label||''}"></label>`;
+    html += `<label>상태<select name="enabled"><option value="true"${rule.enabled?' selected':''}>활성</option><option value="false"${!rule.enabled?' selected':''}>비활성</option></select></label>`;
+    html += `<div style="margin-top:16px;text-align:right;"><button type="submit" class="btn">저장</button> <button type="button" class="btn" id="btnCancel">취소</button></div>`;
+    html += `</form></div>`;
+    modal.innerHTML = html;
+    modal.style.display = 'block';
+    document.getElementById('btnCancel').onclick = ()=>{ modal.style.display='none'; };
+    document.getElementById('ipForm').onsubmit = function(e){
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      data.enabled = data.enabled==='true';
+      if(onSave) onSave(data);
+      modal.style.display = 'none';
+    };
+  }
 
   // -----------------------------
   // 초기 로드
-  document.addEventListener('DOMContentLoaded', async ()=>{
+  document.addEventListener('DOMContentLoaded', async ()=>{ 
     await loadAdmins();
     await loadIPRules();
     render();
