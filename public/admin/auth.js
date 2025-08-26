@@ -88,7 +88,11 @@
     if (!user) throw new Error('존재하지 않는 계정');
     if (!bcryptCheck(pw, user.passwordHash)) throw new Error('비밀번호 오류');
     localStorage.setItem(SESSION_KEY, JSON.stringify({ username: user.username, role: 'user', status: user.status, ts: Date.now() }));
-    return { role: 'user', status: user.status };
+    // 상태값을 명확히 반환
+    if (user.status === 'pending') return { role: 'user', status: 'pending' };
+    if (user.status === 'rejected') return { role: 'user', status: 'rejected' };
+    if (user.status === 'active') return { role: 'user', status: 'active' };
+    return { role: 'user', status: user.status || 'unknown' };
   }
 
   function logout() { localStorage.removeItem(SESSION_KEY); }
