@@ -687,7 +687,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const changeEl = document.getElementById('priceChange');
   const supplyEl = document.querySelector('.supply-price');
   const supplyCh = document.querySelector('.supply-footer .change-line');
-  // 항상 0에서 시작
+  // 항상 0에서 시작 (기본값 0)
   let prevMain = 0;
   let prevSupply = 0;
 
@@ -701,6 +701,7 @@ document.addEventListener('DOMContentLoaded', function() {
       let supplyVal = Number(supplyEl.textContent.replace(/[^0-9]/g, '')) || 0;
       // intro webp가 끝난 뒤에만 애니메이션 실행
       function runEffects(main, supply) {
+        // 항상 0에서 시작해 가격이 올라가는 이펙트
         animateNumber(priceEl, 0, main, 2800, ()=>{
           goldFirework(priceEl);
         });
@@ -740,16 +741,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // intro webp가 끝난 뒤에만 금액 애니메이션 실행
+  // intro webp가 끝난 뒤에만 금액 애니메이션 실행 (종료 1초 후)
   document.addEventListener('DOMContentLoaded', function(){
-    function afterIntro(){
-      setTimeout(renderGoldPrice, 400); // intro 끝나고 0.4초 후 실행
+    let animationStarted = false;
+    function startAnimation() {
+      if (!animationStarted) {
+        animationStarted = true;
+        setTimeout(renderGoldPrice, 1000); // intro 끝나고 1초 후 실행
+      }
     }
     const overlay = document.getElementById('introOverlay');
-    if(overlay && !overlay.classList.contains('hidden')){
-      overlay.addEventListener('transitionend', afterIntro);
-    }else{
-      afterIntro();
+    if (overlay && !overlay.classList.contains('hidden')) {
+      // intro webp 자연 종료(transitionend) 또는 강제 넘김(클릭 등) 모두 1초 후 실행
+      overlay.addEventListener('transitionend', startAnimation);
+      overlay.addEventListener('click', startAnimation);
+    } else {
+      startAnimation();
     }
   });
 
