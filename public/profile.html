@@ -1,386 +1,273 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <script src="/api-rewrite.js" defer></script>
-  <script src="/config.js" defer></script>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>내 정보</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    body{padding-top:100px;}
-    .profile-wrapper{max-width:860px;margin:0 auto;color:#fff;padding:10px 20px 60px;}
-    .profile-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;}
-    .profile-card{background:#102522;border:1px solid #1d4d46;padding:28px 30px;border-radius:18px;margin-bottom:40px;box-shadow:0 0 18px rgba(0,0,0,0.4);}
-    .profile-card h2{font-size:22px;margin-bottom:16px;color:#FFD700;}
-    .profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
-    .field{background:#0c1a18;padding:14px 16px;border-radius:10px;}
-    .field label{display:block;font-size:12px;color:#90a4ae;letter-spacing:.5px;margin-bottom:4px;}
-    .field span{font-weight:600;font-size:15px;}
-    .orders-table{width:100%;border-collapse:collapse;margin-top:10px;}
-    .orders-table th,.orders-table td{border:1px solid #1e4d47;padding:10px 12px;font-size:14px;}
-    .orders-table th{background:#004d40;color:#FFD700;}
-    .orders-empty{color:#bbb;font-size:14px;margin-top:8px;}
-    .actions{display:flex;gap:10px;margin-top:14px;}
-    .btn{background:#00695C;color:#fff;padding:10px 16px;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:.3s;}
-    .btn:hover{background:#00897B;}
-    .danger{background:#b71c1c;}
-    .danger:hover{background:#d32f2f;}
+<script src="app.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const $  = (s,p=document)=>p.querySelector(s);
+  const $$ = (s,p=document)=>Array.from(p.querySelectorAll(s));
 
-    /* 상품 선택 패널 (별도 페이지 느낌) */
-    #orderPanel{
-      position:fixed; inset:0;
-      display:none; z-index:9999;
-      background:rgba(0,0,0,0.65);
-      align-items:stretch; justify-content:flex-end;
-    }
-    #orderSheet{
-      width:min(560px, 96vw);
-      background:linear-gradient(135deg,#102522 80%,#1d4d46 100%);
-      height:100%; overflow:auto;
-      box-shadow:0 0 32px #000; border-left:1px solid #1d4d46;
-      transform:translateX(100%); transition:transform .28s ease;
-    }
-    #orderPanel.show{ display:flex; }
-    #orderPanel.show #orderSheet{ transform:translateX(0); }
-    .sheet-body{ padding:28px 22px 24px 22px; color:#fff; }
-    .sheet-h{ color:#FFD700; font-size:1.4em; margin:6px 0 14px; text-align:left; letter-spacing:.5px; }
-    .row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .kpi{ background:#0c1a18; border-radius:10px; padding:12px 16px; margin:10px 0; }
-    .kpi .lab{ color:#FFD700; font-weight:600; }
-    .kpi .val{ font-size:1.15em; }
-    .pill{ background:#004d40; color:#FFD700; border:2px solid #FFD700; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; }
-    .pill-wrap{ display:flex; gap:10px; flex-wrap:wrap; }
-    .sheet-actions .btn{ width:100%; margin-top:10px; font-size:1.08em; }
-    .sheet-close{ position:sticky; top:0; display:flex; justify-content:flex-end; padding:12px; background:linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,0)); }
-  </style>
-</head>
-<body>
-  <nav id="navbar">
-    <div class="container">
-      <div class="logo"><img src="img/logo.png" data-i18n-alt="alt_logo" alt="logo"/></div>
-      <div class="nav-center">
-        <ul class="nav-links">
-          <li><a href="index.html#section1" data-i18n="nav_intro">소개</a></li>
-          <li><a href="index.html#section2" data-i18n="nav_progress">진행</a></li>
-          <li><a href="index.html#section3" data-i18n="nav_video">영상</a></li>
-          <li><a href="index.html#section4" data-i18n="nav_history">이력</a></li>
-          <li><a href="index.html#section5" data-i18n="nav_contact">문의</a></li>
-        </ul>
-      </div>
-      <div class="nav-right">
-        <div id="userArea" class="user-area"></div>
-        <a href="index.html" class="home-icon" aria-label="홈" style="display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;">
-          <span style="font-size:30px;color:#FFD700;">🏠</span>
-        </a>
-        <span id="navProfileBtn" style="display:none;margin-left:12px;"><a href="profile.html" style="color:#FFD700;font-weight:bold;font-size:16px;text-decoration:none;">내정보</a></span>
-        <div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴" role="button" tabindex="0"><span></span><span></span><span></span></div>
-      </div>
-    </div>
-  </nav>
-
-  <main>
-    <div class="profile-wrapper">
-      <div class="profile-header" id="summaryHeader" style="flex-direction:column;align-items:flex-start;gap:8px;">
-        <h1 style="font-size:30px;color:#4fc3f7;" data-i18n="page_profile_title">내 정보</h1>
-        <div id="summaryLine" style="font-size:15px;color:#eee;font-weight:500;line-height:1.4;"></div>
-        <div class="actions" style="margin-top:4px;">
-          <button class="btn" id="addOrderBtn" data-i18n="btn_order_add">주문 추가</button>
-          <button class="btn" id="mockOrderBtn" data-i18n="btn_mock_order_add" style="display:none;">모의 주문 추가</button>
-          <button class="btn danger" id="logoutBtn" data-i18n="btn_logout">로그아웃</button>
-        </div>
-      </div>
-
-      <div class="profile-card" id="profileCard" hidden>
-        <h2 data-i18n="section_member_info">회원 기본 정보</h2>
-        <div class="profile-grid" id="profileGrid"></div>
-      </div>
-
-      <div class="profile-card">
-        <h2 data-i18n="section_orders">주문 내역</h2>
-        <div id="ordersContainer"></div>
-      </div>
-
-      <div class="profile-card">
-        <h2 data-i18n="section_messages">1:1 문의</h2>
-        <div id="messagesWrap" style="margin-bottom:16px;"></div>
-        <div style="display:flex;gap:8px;align-items:flex-start;">
-          <textarea id="msgInput" data-i18n-ph="placeholder_message" placeholder="문의 내용을 입력하세요" style="flex:1;min-height:70px;background:#0c1a18;color:#fff;border:1px solid #1e4d47;border-radius:8px;padding:10px;font-size:14px;resize:vertical;"></textarea>
-          <button class="btn" id="sendMsgBtn" style="height:70px;min-width:90px;" data-i18n="btn_send">보내기</button>
-        </div>
-        <p style="margin-top:10px;font-size:12px;color:#888;" data-i18n="note_admin_only_reply">관리자만 답변을 남길 수 있습니다.</p>
-      </div>
-    </div>
-  </main>
-
-  <!-- 상품 선택 패널 -->
-  <div id="orderPanel" aria-hidden="true">
-    <div id="orderSheet">
-      <div class="sheet-close"><button id="closeOrderPanel" class="btn danger">닫기</button></div>
-      <div class="sheet-body">
-        <h2 class="sheet-h">상품 주문 선택</h2>
-
-        <div class="pill-wrap" id="productBtns"></div>
-
-        <div class="kpi row">
-          <span class="lab">총 돈수</span>
-          <div class="row" style="gap:10px;">
-            <strong id="totalDon" class="val" style="color:#4fc3f7;">0</strong>
-            <button id="resetDon" class="btn danger">리셋</button>
-          </div>
-        </div>
-
-        <div class="kpi">
-          <div class="row"><span class="lab">공급가(원)</span><strong id="supplyPrice" class="val" style="color:#FFD700;">-</strong></div>
-          <div class="row" style="margin-top:8px;"><span class="lab">총금액(공급가×돈수)</span><strong id="totalPrice" class="val" style="color:#FFD700;">-</strong></div>
-        </div>
-
-        <div class="kpi">
-          <div class="row"><span class="lab" style="color:#4fc3f7;">현재가(원)</span><strong id="currentPrice" class="val" style="color:#4fc3f7;">-</strong></div>
-          <div class="row" style="margin-top:8px;"><span class="lab" style="color:#4fc3f7;">현재가×돈수</span><strong id="currentTotal" class="val" style="color:#4fc3f7;">-</strong></div>
-        </div>
-
-        <div class="kpi">
-          <div class="row"><span class="lab">차액(현재가×돈수 - 공급가×돈수)</span><strong id="priceDiff" class="val" style="color:#FFD700;">-</strong></div>
-        </div>
-
-        <div class="sheet-actions">
-          <button id="orderSubmit" class="btn" style="background:#FFD700;color:#222;font-weight:700;">주문 요청</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="app.js" defer></script>
-  <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const $ = (sel, p=document)=>p.querySelector(sel);
-    const $$ = (sel, p=document)=>Array.from(p.querySelectorAll(sel));
-
-    /* 네비 & 세션 유지 */
-    const menuBtn = $('.menu-btn');
-    menuBtn?.addEventListener('click', ()=>{ menuBtn.classList.toggle('active'); $('.nav-links')?.classList.toggle('active'); });
-
-    const homeIcon = $('.home-icon');
-    homeIcon?.addEventListener('click', ()=>{
-      try{
-        const u = window.GSApp?.currentUser?.();
-        if (u) {
-          localStorage.setItem('gs_user', JSON.stringify(u));
-          localStorage.setItem('gs_user_backup', JSON.stringify(u));
-        }
-      }catch(_){}
-      // 기본 이동
-    });
-
-    // 로그인 상태면 내정보 버튼 노출
-    try {
+  /* ---------------- 세션 도우미 ---------------- */
+  function getSessionUser(){
+    try{
+      // 1) GSApp 세션 우선
       const u = window.GSApp?.currentUser?.();
-      if (u && u.role !== 'admin') $('#navProfileBtn').style.display = 'inline-block';
-    } catch(_){}
-
-    /* 프로필/주문/문의 렌더 */
-    function renderProfileSummary(user){
-      const sum = $('#summaryLine');
-      if (sum && user) sum.innerHTML = `<strong>${user.username}</strong> | ${user.name} | ${user.phone} | ${user.email}`;
-    }
-
-    function renderOrders(list){
-      const container = $('#ordersContainer');
-      if(!container) return;
-      if(!Array.isArray(list) || !list.length){
-        container.innerHTML = '<div class="orders-empty" data-i18n="orders_empty">없음</div>';
-        window.GSApp?.applyLang?.(); return;
+      if (u) {
+        // 항상 로컬에도 복제
+        localStorage.setItem('gs_user', JSON.stringify(u));
+        localStorage.setItem('gs_user_backup', JSON.stringify(u));
+        return u;
       }
-      container.innerHTML =
-        '<table class="orders-table"><thead><tr>' +
-        '<th>주문번호</th><th>상품</th><th>돈수</th><th>공급가</th><th>현재가</th><th>총금액</th><th>차액</th><th>상태</th><th>일시</th>' +
-        '</tr></thead><tbody>' +
-        list.map(o=>`
-          <tr>
-            <td>${o.id}</td>
-            <td>골드바</td>
-            <td style="text-align:right;">${o.don ?? '-'}</td>
-            <td style="text-align:right;">${Number(o.supplyPrice||0).toLocaleString('ko-KR')}</td>
-            <td style="text-align:right;">${Number(o.currentPrice||0).toLocaleString('ko-KR')}</td>
-            <td style="text-align:right;">${Number(o.totalPrice||0).toLocaleString('ko-KR')}</td>
-            <td style="text-align:right;">${Number(o.priceDiff||0).toLocaleString('ko-KR')}</td>
-            <td>${o.status||'-'}</td>
-            <td>${new Date(o.ts||Date.now()).toLocaleString('ko-KR')}</td>
-          </tr>`).join('') +
-        '</tbody></table>';
-    }
+    }catch(_){}
+    // 2) 로컬 복구
+    try {
+      return JSON.parse(localStorage.getItem('gs_user')) ||
+             JSON.parse(localStorage.getItem('gs_user_backup')) || null;
+    }catch(_){ return null; }
+  }
+  function setSessionUser(u){
+    try{
+      if (!u) return;
+      localStorage.setItem('gs_user', JSON.stringify(u));
+      localStorage.setItem('gs_user_backup', JSON.stringify(u));
+    }catch(_){}
+  }
+  function clearSessionUser(){
+    try{ localStorage.removeItem('gs_user'); localStorage.removeItem('gs_user_backup'); }catch(_){}
+  }
 
-    function renderMessages(list){
-      const wrap = $('#messagesWrap');
-      if(!wrap) return;
-      if(!Array.isArray(list) || !list.length){
-        wrap.innerHTML = '<div class="orders-empty" data-i18n="messages_empty">문의가 없습니다.</div>';
-        window.GSApp?.applyLang?.(); return;
-      }
-      wrap.innerHTML = list.slice().reverse().map(m=>{
-        const status = m.answered ? (GSApp.t?.('status_answered')||'답변완료') :
-                       (m.read ? (GSApp.t?.('status_read')||'읽음') : (GSApp.t?.('status_unread')||'미읽음'));
-        return `
-          <div class="msg-item" data-id="${m.id}" style="background:#0c1a18;padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:8px;position:relative;">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-              <div style="flex:1;">${m.fromAdmin?'<strong style="color:#FFD700;">[관리자]</strong> ':''}${m.content}</div>
-              <span class="msg-status" style="font-size:11px;padding:2px 6px;border-radius:10px;background:${m.answered?'#2e7d32':(m.read?'#455a64':'#b71c1c')};color:#fff;white-space:nowrap;">${status}</span>
-            </div>
-            <div style="font-size:11px;color:#888;margin-top:4px;">${new Date(m.ts).toLocaleString('ko-KR')}</div>
-          </div>`;
-      }).join('');
-      try {
-        const user = GSApp.currentUser?.();
-        if (user && Array.isArray(user.messages)) {
-          let changed=false;
-          user.messages.forEach(m=>{ if(!m.read && !m.fromAdmin){ m.read=true; changed=true; } });
-          if (changed) GSApp.saveDB?.();
-        }
-      } catch(_){}
-      window.GSApp?.applyLang?.();
-    }
+  /* ---------------- 네비 & 세션 유지 ---------------- */
+  const menuBtn = $('.menu-btn');
+  menuBtn?.addEventListener('click', ()=>{ menuBtn.classList.toggle('active'); $('.nav-links')?.classList.toggle('active'); });
 
-    function loadProfile(){
-      const user = window.GSApp?.currentUser?.();
-      if(!user){
-        if(confirm('로그인 정보가 없습니다. 회원가입 하시겠습니까?')) location.href='signup.html';
-        return;
-      }
-      // 기본 정보 카드
-      const grid = $('#profileGrid'), card = $('#profileCard');
-      card.hidden = false; grid.innerHTML = '';
-      const fields = [
-        ['이름', user.name],
-        ['아이디', user.username],
-        ['연락처', user.phone],
-        ['이메일', user.email],
-        ['은행', user.bank || '-'],
-        ['계좌번호', user.account || '-'],
-        ['가입일', user.created ? new Date(user.created).toLocaleString('ko-KR') : '-'],
-        ['권한', user.role]
-      ];
-      fields.forEach(([l,v])=>{
-        const div = document.createElement('div');
-        div.className='field';
-        div.innerHTML = `<label>${l}</label><span>${v||'-'}</span>`;
-        grid.appendChild(div);
-      });
-      // 상단 요약
-      renderProfileSummary(user);
-      // 하위 영역
-      renderOrders(user.orders||[]);
-      renderMessages(user.messages||[]);
-    }
-
-    /* 상품 선택 패널 로직 */
-    const productList = [0.5,1,2,3,5,10];
-    let totalDon = 0;
-    let supplyPrice = 520000;   // 기본값 (API/GSApp에서 갱신)
-    let currentPrice = 550000;  // 기본값 (API/GSApp에서 갱신)
-
-    function openOrderPanel(){ $('#orderPanel').classList.add('show'); totalDon=0; updateOrderCalc(); }
-    function closeOrderPanel(){ $('#orderPanel').classList.remove('show'); }
-
-    async function getPrices(){
-      // 1) API 시도
-      try{
-        const r = await fetch('/api/security?type=goldprice', {cache:'no-store'});
-        const j = await r.json().catch(()=>null);
-        const gp = j?.data?.goldprice ?? j?.goldprice ?? null;
-        if (gp) {
-          if (typeof gp.supplyPrice === 'number') supplyPrice = gp.supplyPrice;
-          if (typeof gp.price === 'number')      currentPrice = gp.price;
-        }
-      }catch(_){}
-      // 2) GSApp 폴백
-      try{
-        if (typeof GSApp?.goldPrice === 'number') currentPrice = GSApp.goldPrice;
-      }catch(_){}
-      updateOrderCalc();
-    }
-
-    function updateOrderCalc(){
-      $('#totalDon').textContent      = totalDon;
-      $('#supplyPrice').textContent   = Number(supplyPrice).toLocaleString('ko-KR');
-      $('#currentPrice').textContent  = Number(currentPrice).toLocaleString('ko-KR');
-      const totalPrice   = totalDon * supplyPrice;
-      const currentTotal = totalDon * currentPrice;
-      $('#totalPrice').textContent   = totalPrice.toLocaleString('ko-KR');
-      $('#currentTotal').textContent = currentTotal.toLocaleString('ko-KR');
-      $('#priceDiff').textContent    = (currentTotal - totalPrice).toLocaleString('ko-KR');
-    }
-
-    // 패널 버튼들
-    $('#addOrderBtn')?.addEventListener('click', ()=>{ openOrderPanel(); getPrices(); });
-    $('#closeOrderPanel')?.addEventListener('click', closeOrderPanel);
-    $('#resetDon')?.addEventListener('click', ()=>{ totalDon=0; updateOrderCalc(); });
-
-    // 상품 버튼 렌더
-    const btnWrap = $('#productBtns');
-    btnWrap.innerHTML = '';
-    productList.forEach(don=>{
-      const b = document.createElement('button');
-      b.className = 'pill';
-      b.textContent = `${don}돈`;
-      b.addEventListener('click', ()=>{ totalDon += don; updateOrderCalc(); });
-      btnWrap.appendChild(b);
-    });
-
-    // 주문 요청
-    $('#orderSubmit')?.addEventListener('click', async ()=>{
-      if (totalDon <= 0) return alert('상품을 선택하세요.');
-      const user = window.GSApp?.currentUser?.();
-      if (!user) return alert('로그인 정보가 없습니다.');
-
-      const order = {
-        id:'order_'+Date.now(),
-        username:user.username, name:user.name, phone:user.phone, email:user.email,
-        don: totalDon,
-        supplyPrice, currentPrice,
-        totalPrice: totalDon * supplyPrice,
-        currentTotal: totalDon * currentPrice,
-        priceDiff: (totalDon * currentPrice) - (totalDon * supplyPrice),
-        status: '주문 승인 대기',
-        ts: Date.now()
-      };
-
-      // 서버 저장(있을 때)
-      try{
-        await fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(order) });
-      }catch(e){ console.warn('주문 API 실패(로컬만 반영):', e); }
-
-      // 로컬 DB 반영(백업)
-      try{ await window.GSApp?.addOrder?.(user.email, { item:'골드바', qty: order.don, price: order.totalPrice }); }catch(_){}
-
-      alert('주문이 등록되었습니다.');
-      closeOrderPanel();
-      loadProfile();
-    });
-
-    // 메시지 보내기
-    $('#sendMsgBtn')?.addEventListener('click', async ()=>{
-      const user = window.GSApp?.currentUser?.();
-      if (!user) return alert('로그인이 필요합니다.');
-      const txt = $('#msgInput').value.trim();
-      if (!txt) return;
-      try{ await window.GSApp?.addMessage?.(user.email, txt, false); }catch(_){}
-      $('#msgInput').value = '';
-      loadProfile();
-    });
-
-    // 로그아웃
-    $('#logoutBtn')?.addEventListener('click', ()=>{
-      if (!confirm('로그아웃 하시겠습니까?')) return;
-      try{ window.GSApp?.logout?.(); }catch(_){}
-      try{ localStorage.removeItem('gs_user'); }catch(_){}
-      location.href = 'index.html';
-    });
-
-    // 초기 로드
-    loadProfile();
-    try{ window.GSApp?.applyLang?.(); }catch(_){}
+  const homeIcon = $('.home-icon');
+  homeIcon?.addEventListener('click', ()=>{
+    // 홈으로 갈 때도 세션을 확실히 복제(로그아웃처럼 보이는 문제 방지)
+    const u = getSessionUser();
+    if (u) setSessionUser(u);
+    // 기본 네비게이션 그대로 진행
   });
-  </script>
-</body>
-</html>
+
+  // 로그인 상태면 내정보 버튼 노출
+  (function renderUserNav(){
+    const u = getSessionUser();
+    if (u && u.role !== 'admin') {
+      $('#navProfileBtn').style.display = 'inline-block';
+      // 로그인되어 있으면 userArea에 회원가입/로그인 숨기고 "내정보"만 노출
+      const area = $('#userArea');
+      if (area) area.innerHTML = `<a href="profile.html" class="btn" style="background:#004d40;border:1px solid #00695C;border-radius:8px;padding:8px 12px;color:#FFD700;text-decoration:none;">내정보</a>`;
+    } else {
+      // 비로그인: userArea가 직접 회원가입/로그인을 그리고 있다면 그대로 유지
+      // (필요하면 여기서 area.innerHTML = '회원가입/로그인' 구성)
+    }
+  })();
+
+  /* ---------------- 요약/프로필/주문/문의 렌더 ---------------- */
+  function renderProfileSummary(user){
+    const sum = $('#summaryLine');
+    if (sum && user) sum.innerHTML = `<strong>${user.username}</strong> | ${user.name} | ${user.phone} | ${user.email}`;
+  }
+  function renderOrders(list){
+    const el = $('#ordersContainer');
+    if(!el) return;
+    if(!Array.isArray(list) || !list.length){
+      el.innerHTML = '<div class="orders-empty" data-i18n="orders_empty">없음</div>';
+      window.GSApp?.applyLang?.(); return;
+    }
+    el.innerHTML =
+      '<table class="orders-table"><thead><tr>' +
+      '<th>주문번호</th><th>상품</th><th>돈수</th><th>공급가</th><th>현재가</th><th>총금액</th><th>차액</th><th>상태</th><th>일시</th>' +
+      '</tr></thead><tbody>' +
+      list.map(o=>`
+        <tr>
+          <td>${o.id}</td>
+          <td>골드바</td>
+          <td style="text-align:right;">${o.don ?? '-'}</td>
+          <td style="text-align:right;">${Number(o.supplyPrice||0).toLocaleString('ko-KR')}</td>
+          <td style="text-align:right;">${Number(o.currentPrice||0).toLocaleString('ko-KR')}</td>
+          <td style="text-align:right;">${Number(o.totalPrice||0).toLocaleString('ko-KR')}</td>
+          <td style="text-align:right;">${Number(o.priceDiff||0).toLocaleString('ko-KR')}</td>
+          <td>${o.status||'-'}</td>
+          <td>${new Date(o.ts||Date.now()).toLocaleString('ko-KR')}</td>
+        </tr>`).join('') +
+      '</tbody></table>';
+  }
+  function renderMessages(list){
+    const wrap = $('#messagesWrap');
+    if(!wrap) return;
+    if(!Array.isArray(list) || !list.length){
+      wrap.innerHTML = '<div class="orders-empty" data-i18n="messages_empty">문의가 없습니다.</div>';
+      window.GSApp?.applyLang?.(); return;
+    }
+    wrap.innerHTML = list.slice().reverse().map(m=>{
+      const status = m.answered ? (GSApp.t?.('status_answered')||'답변완료') :
+                     (m.read ? (GSApp.t?.('status_read')||'읽음') : (GSApp.t?.('status_unread')||'미읽음'));
+      return `
+        <div class="msg-item" data-id="${m.id}" style="background:#0c1a18;padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:8px;position:relative;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <div style="flex:1;">${m.fromAdmin?'<strong style="color:#FFD700;">[관리자]</strong> ':''}${m.content}</div>
+            <span class="msg-status" style="font-size:11px;padding:2px 6px;border-radius:10px;background:${m.answered?'#2e7d32':(m.read?'#455a64':'#b71c1c')};color:#fff;white-space:nowrap;">${status}</span>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:4px;">${new Date(m.ts).toLocaleString('ko-KR')}</div>
+        </div>`;
+    }).join('');
+    // 읽음 처리
+    try {
+      const user = getSessionUser();
+      if (user && Array.isArray(user.messages)) {
+        let changed=false;
+        user.messages.forEach(m=>{ if(!m.read && !m.fromAdmin){ m.read=true; changed=true; } });
+        if (changed) window.GSApp?.saveDB?.();
+      }
+    } catch(_){}
+    window.GSApp?.applyLang?.();
+  }
+
+  function loadProfile(){
+    const user = getSessionUser();
+    if(!user){
+      if(confirm('로그인 정보가 없습니다. 회원가입 하시겠습니까?')) location.href='signup.html';
+      return;
+    }
+    // 카드 채우기
+    const grid = $('#profileGrid'), card = $('#profileCard');
+    card.hidden = false; grid.innerHTML = '';
+    const fields = [
+      ['이름', user.name],
+      ['아이디', user.username],
+      ['연락처', user.phone],
+      ['이메일', user.email],
+      ['은행', user.bank || '-'],
+      ['계좌번호', user.account || '-'],
+      ['가입일', user.created ? new Date(user.created).toLocaleString('ko-KR') : '-'],
+      ['권한', user.role]
+    ];
+    fields.forEach(([l,v])=>{
+      const div = document.createElement('div');
+      div.className='field';
+      div.innerHTML = `<label>${l}</label><span>${v||'-'}</span>`;
+      grid.appendChild(div);
+    });
+    // 상단 요약 + 하위 목록
+    renderProfileSummary(user);
+    renderOrders(user.orders||[]);
+    renderMessages(user.messages||[]);
+  }
+
+  /* ---------------- 상품 선택 패널 (오버레이) ---------------- */
+  const productList = [0.5,1,2,3,5,10];
+  let totalDon = 0;
+  let supplyPrice = 520000;   // 기본값
+  let currentPrice = 550000;  // 기본값
+
+  function openOrderPanel(){ $('#orderModal').style.display='flex'; totalDon=0; syncPricesFromIndex(); updateOrderCalc(); }
+  function closeOrderPanel(){ $('#orderModal').style.display='none'; }
+
+  // (요구 3) index.html 섹션1의 표시 금액과 "똑같이" 쓰기
+  // - index.html에서 금액을 localStorage('gs_gold_price')에 저장하도록 해두면 여기서 그대로 사용
+  // - 실패 시 /api/security?type=goldprice 또는 GSApp.goldPrice 로 폴백
+  async function syncPricesFromIndex(){
+    // 1) localStorage 우선
+    const ls = Number(localStorage.getItem('gs_gold_price'));
+    if (!Number.isNaN(ls) && ls>0) currentPrice = ls;
+
+    // 2) API 폴백
+    try{
+      const r = await fetch('/api/security?type=goldprice', {cache:'no-store'});
+      const j = await r.json().catch(()=>null);
+      const gp = j?.data?.goldprice ?? j?.goldprice ?? null;
+      if (gp) {
+        if (typeof gp.supplyPrice === 'number') supplyPrice = gp.supplyPrice;
+        if (typeof gp.price === 'number')      currentPrice = gp.price; // index와 값 맞추기
+      }
+    }catch(_){}
+
+    // 3) GSApp 폴백
+    try{
+      if (typeof window.GSApp?.goldPrice === 'number') currentPrice = GSApp.goldPrice;
+    }catch(_){}
+    updateOrderCalc();
+  }
+
+  function updateOrderCalc(){
+    $('#totalDon').textContent      = totalDon;
+    $('#supplyPrice').textContent   = Number(supplyPrice).toLocaleString('ko-KR');
+    $('#currentPrice').textContent  = Number(currentPrice).toLocaleString('ko-KR');
+    const totalPrice   = totalDon * supplyPrice;
+    const currentTotal = totalDon * currentPrice;
+    $('#totalPrice').textContent   = totalPrice.toLocaleString('ko-KR');
+    $('#currentTotal').textContent = currentTotal.toLocaleString('ko-KR');
+    $('#priceDiff').textContent    = (currentTotal - totalPrice).toLocaleString('ko-KR');
+  }
+
+  // 오버레이 버튼 바인딩
+  $('#addOrderBtn')?.addEventListener('click', openOrderPanel);
+  $('#closeOrderModal')?.addEventListener('click', closeOrderPanel);
+  $('#resetDon')?.addEventListener('click', ()=>{ totalDon=0; updateOrderCalc(); });
+
+  // 상품 버튼 생성
+  const btns = $('#productBtns');
+  btns.innerHTML = '';
+  productList.forEach(don=>{
+    const b = document.createElement('button');
+    b.className = 'btn';
+    b.textContent = `${don}돈`;
+    b.style.background = '#004d40';
+    b.style.color = '#FFD700';
+    b.style.fontWeight = '700';
+    b.style.fontSize = '1.08em';
+    b.style.border = '2px solid #FFD700';
+    b.style.borderRadius = '8px';
+    b.style.marginBottom = '6px';
+    b.addEventListener('click', ()=>{ totalDon += don; updateOrderCalc(); });
+    btns.appendChild(b);
+  });
+
+  // 주문 요청
+  $('#orderSubmit')?.addEventListener('click', async ()=>{
+    if (totalDon <= 0) return alert('상품을 선택하세요.');
+    const user = getSessionUser();
+    if (!user) return alert('로그인 정보가 없습니다.');
+    const order = {
+      id:'order_'+Date.now(),
+      username:user.username, name:user.name, phone:user.phone, email:user.email,
+      don: totalDon,
+      supplyPrice, currentPrice,
+      totalPrice: totalDon * supplyPrice,
+      currentTotal: totalDon * currentPrice,
+      priceDiff: (totalDon * currentPrice) - (totalDon * supplyPrice),
+      status: '주문 승인 대기',
+      ts: Date.now()
+    };
+    // 서버 저장 시도(있을 때)
+    try{
+      await fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(order) });
+    }catch(e){ console.warn('주문 API 실패(로컬만 반영):', e); }
+    // 로컬 백업
+    try{ await window.GSApp?.addOrder?.(user.email, { item:'골드바', qty: order.don, price: order.totalPrice }); }catch(_){}
+    alert('주문이 등록되었습니다.');
+    closeOrderPanel();
+    loadProfile();
+  });
+
+  // 메시지 보내기
+  $('#sendMsgBtn')?.addEventListener('click', async ()=>{
+    const user = getSessionUser();
+    if (!user) return alert('로그인이 필요합니다.');
+    const txt = $('#msgInput').value.trim();
+    if (!txt) return;
+    try{ await window.GSApp?.addMessage?.(user.email, txt, false); }catch(_){}
+    $('#msgInput').value = '';
+    loadProfile();
+  });
+
+  // 로그아웃
+  $('#logoutBtn')?.addEventListener('click', ()=>{
+    if (!confirm('로그아웃 하시겠습니까?')) return;
+    try{ window.GSApp?.logout?.(); }catch(_){}
+    clearSessionUser();
+    location.href = 'index.html';
+  });
+
+  // 초기 로드
+  loadProfile();
+  try{ window.GSApp?.applyLang?.(); }catch(_){}
+});
+</script>
