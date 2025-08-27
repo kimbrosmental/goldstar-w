@@ -58,9 +58,7 @@
         </ul>
       </div>
       <div class="nav-right">
-        <div id="userArea" class="user-area">
-          <!-- app.js 패치가 여기를 채움 -->
-        </div>
+        <div id="userArea" class="user-area"></div>
         <a href="index.html" class="home-icon" aria-label="홈" style="display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;">
           <span style="font-size:30px;color:#FFD700;">🏠</span>
         </a>
@@ -81,7 +79,7 @@
         </div>
       </div>
 
-      <!-- ✅ 기본 정보 카드: 항상 렌더 -->
+      <!-- ✅ 기본 정보 카드(항상 존재) -->
       <div class="profile-card" id="profileCard">
         <h2>회원 기본 정보</h2>
         <div class="profile-grid" id="profileGrid"></div>
@@ -150,59 +148,67 @@
   document.addEventListener('DOMContentLoaded', () => {
     const $  = (s,p=document)=>p.querySelector(s);
 
-    /* ================= 세션/사용자 해석기 ================= */
+    /* ====================== 세션/사용자 해석기(강화) ====================== */
     let CURRENT_USER = null;
 
-    function fromGSApp(){
-      try{ const u = window.GSApp?.currentUser?.(); if(u && u.username){ return u; } }catch(_){}
-      return null;
-    }
-    function fromLocal(){
-      try{ const raw = localStorage.getItem('gs_user'); if(raw){ return JSON.parse(raw); } }catch(_){}
-      return null;
-    }
-    function fromAdminAuth(){
-      try{ const s = window.AdminAuth?.currentSession?.(); if(s && s.username){ return { username:s.username, role:s.role||'user' }; } }catch(_){}
+    // 1) GSApp → 2) localStorage → 3) AdminAuth(관리자) → 4) 서버 세션(whoAmI) 순
+    function fromGSApp(){ try{ const u = window.GSApp?.currentUser?.(); if(u && u.username) return u; }catch(_){ } return null; }
+    function fromLocal(){ try{ const r = localStorage.getItem('gs_user') || localStorage.getItem('gs_user_backup'); if(r) return JSON.parse(r); }catch(_){ } return null; }
+    function fromAdminAuth(){ try{ const s = window.AdminAuth?.currentSession?.(); if(s?.username) return { username:s.username, role:s.role||'admin' }; }catch(_){ } return null; }
+
+    async function whoAmI(){
+      const tryList = ['/api/me','/api/session','/api/login']; // 서버 구현 중 있는 것 하나라도 응답하면 사용
+      for(const url of tryList){
+        try{
+          const r = await fetch(url, {cache:'no-store', credentials:'include'});
+          if(r.ok){
+            const j = await r.json().catch(()=>null);
+            if(j && (j.username || j.email)) return j;
+          }
+        }catch(_){}
+      }
       return null;
     }
 
-    async function fetchKVUser(username){
+    // USERS KV 전체에서 한 명 찾기 (users.js 방식 호환: 평문/암호화 모두 지원)
+    async function fetchKVUser(usernameOrEmail){
       try{
         const r = await fetch('/api/users', {cache:'no-store'});
         const j = await r.json();
         let list = [];
-        if (j && j.data && window.decrypt) {
-          try{ list = await window.decrypt(j.data) || []; }catch(_){ list = []; }
-        } else if (Array.isArray(j)) {
-          list = j;
-        }
-        return list.find(u=>u.username===username) || null;
+        if (j && j.data && window.decrypt) { try{ list = await window.decrypt(j.data) || []; }catch(_){ list = []; } }
+        else if (Array.isArray(j)) { list = j; }
+        return list.find(u => u.username===usernameOrEmail || u.email===usernameOrEmail) || null;
       }catch(_){ return null; }
     }
 
     async function resolveUser(){
-      // 순서: GSApp → localStorage → AdminAuth
       let u = fromGSApp() || fromLocal() || fromAdminAuth();
-      if (!u){ return null; }
-
-      // USERS KV와 병합(있으면)
-      const kv = await fetchKVUser(u.username);
-      if (kv) u = { ...u, ...kv };
-
-      // localStorage에도 보정 저장
-      try{ localStorage.setItem('gs_user', JSON.stringify(u)); }catch(_){}
-      return u;
+      if (!u){
+        const me = await whoAmI(); // 쿠키 기반 세션이면 여기서 식별
+        if (me && (me.username || me.email)) {
+          const kv = await fetchKVUser(me.username || me.email);
+          u = kv ? kv : { username: me.username || (me.email||'').split('@')[0], email: me.email, role: me.role||'user' };
+        }
+      } else {
+        // GSApp/local에서 잡은 경우에도 KV 정보로 보강
+        const kv = await fetchKVUser(u.username || u.email || '');
+        if (kv) u = { ...u, ...kv };
+      }
+      if (u){
+        try{ localStorage.setItem('gs_user', JSON.stringify(u)); localStorage.setItem('gs_user_backup', JSON.stringify(u)); }catch(_){}
+        return u;
+      }
+      return null;
     }
 
-    /* ================= UI 렌더 ================= */
+    /* ====================== UI 렌더 ====================== */
     function renderProfileSummary(user){
       const sum = $('#summaryLine');
       if (sum && user) sum.innerHTML = `<strong>${user.username}</strong> | ${user.name||'-'} | ${user.phone||'-'} | ${user.email||'-'}`;
     }
-
     function renderBaseInfo(user){
-      const grid = $('#profileGrid');
-      grid.innerHTML = '';
+      const grid = $('#profileGrid'); grid.innerHTML='';
       const rows = [
         ['이름',     user.name],
         ['아이디',   user.username],
@@ -213,20 +219,12 @@
         ['가입일',   user.created ? new Date(user.created).toLocaleString('ko-KR') : '-'],
         ['권한',     user.role || 'user'],
       ];
-      rows.forEach(([l,v])=>{
-        const d = document.createElement('div');
-        d.className='field';
-        d.innerHTML = `<label>${l}</label><span>${v||'-'}</span>`;
-        grid.appendChild(d);
-      });
+      rows.forEach(([l,v])=>{ const d=document.createElement('div'); d.className='field'; d.innerHTML=`<label>${l}</label><span>${v||'-'}</span>`; grid.appendChild(d); });
     }
 
     function renderOrders(list){
       const el = $('#ordersContainer');
-      if(!Array.isArray(list) || !list.length){
-        el.innerHTML = '<div class="orders-empty">없음</div>';
-        return;
-      }
+      if(!Array.isArray(list) || !list.length){ el.innerHTML='<div class="orders-empty">없음</div>'; return; }
       el.innerHTML =
         '<table class="orders-table"><thead><tr>' +
         '<th>주문번호</th><th>상품</th><th>돈수</th><th>공급가</th><th>현재가</th><th>총금액</th><th>차액</th><th>상태</th><th>일시</th>' +
@@ -242,16 +240,12 @@
             <td style="text-align:right;">${Number(o.priceDiff||0).toLocaleString('ko-KR')}</td>
             <td>${o.status||'-'}</td>
             <td>${new Date(o.ts||o.date||Date.now()).toLocaleString('ko-KR')}</td>
-          </tr>
-        `).join('') + '</tbody></table>';
+          </tr>`).join('') + '</tbody></table>';
     }
 
     function renderMessages(list){
       const el = $('#messagesWrap');
-      if(!Array.isArray(list) || !list.length){
-        el.innerHTML = '<div class="orders-empty">문의가 없습니다.</div>';
-        return;
-      }
+      if(!Array.isArray(list) || !list.length){ el.innerHTML='<div class="orders-empty">문의가 없습니다.</div>'; return; }
       el.innerHTML = list.slice().reverse().map(m=>`
         <div class="msg-item" style="background:#0c1a18;padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:8px;">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
@@ -265,19 +259,17 @@
             </span>
           </div>
           <div style="font-size:11px;color:#888;margin-top:4px;">${new Date(m.ts||m.date||Date.now()).toLocaleString('ko-KR')}</div>
-        </div>
-      `).join('');
+        </div>`).join('');
     }
 
-    /* ================= 데이터 로드 ================= */
+    /* ====================== 서버 데이터 로드 ====================== */
     async function loadOrdersForUser(username, email){
       try{
         const r = await fetch('/api/orders', {cache:'no-store'});
         const j = await r.json();
         let arr = [];
-        if (j?.data && window.decrypt) {
-          try{ arr = await window.decrypt(j.data) || []; }catch(_){ arr = []; }
-        } else if (Array.isArray(j)) { arr = j; }
+        if (j?.data && window.decrypt) { try{ arr = await window.decrypt(j.data) || []; }catch(_){ arr=[]; } }
+        else if (Array.isArray(j)) { arr = j; }
         return arr.filter(o => (o.username===username) || (o.user===username) || (o.email && o.email===email));
       }catch(_){ return []; }
     }
@@ -286,16 +278,15 @@
         const r = await fetch('/api/inquiries', {cache:'no-store'});
         const j = await r.json();
         let arr = [];
-        if (j?.data && window.decrypt) {
-          try{ arr = await window.decrypt(j.data) || []; }catch(_){ arr = []; }
-        } else if (Array.isArray(j)) { arr = j; }
+        if (j?.data && window.decrypt) { try{ arr = await window.decrypt(j.data) || []; }catch(_){ arr=[]; } }
+        else if (Array.isArray(j)) { arr = j; }
         return arr
           .filter(q => (q.user===username || q.user===email))
           .map(q => ({ id:q.id, content:q.content, title:q.title, answer:q.answer, read:!!q.answer, fromAdmin:false, ts:q.date }));
       }catch(_){ return []; }
     }
 
-    /* ================= 금 시세(섹션1과 동일 소스) ================= */
+    /* ====================== 금 시세(섹션1과 동일 소스) ====================== */
     async function getCurrentGoldPrice(){
       const manual = Number(localStorage.getItem('manualGoldPrice')||'0');
       if (manual>0) return manual;
@@ -308,7 +299,7 @@
       return 0;
     }
 
-    /* ================= 주문 시트 ================= */
+    /* ====================== 주문 시트 ====================== */
     const productList = [0.5,1,2,3,5,10];
     let totalDon = 0;
     let supplyPrice = 520000;
@@ -338,26 +329,27 @@
       });
     })();
 
-    // 현재 사용자 확보(클릭 시에도 재검증)
+    // 현재 사용자 확보 + 네비 표시
     async function ensureUser(){
       if (CURRENT_USER) return CURRENT_USER;
       const u = await resolveUser();
       if (u){
         CURRENT_USER = u;
-        $('#navProfileBtn').style.display = 'inline-block';
+        // 네비에 "내정보" 강제 노출
+        const navProf = $('#navProfileBtn'); if(navProf) navProf.style.display='inline-block';
+        const userArea = $('#userArea');
+        if (userArea) userArea.innerHTML = `<a href="profile.html" class="btn">내정보</a>`;
         return CURRENT_USER;
       }
       return null;
     }
 
-    // 주문 저장
+    // 주문 저장(단건 POST 우선, 실패시 배열 암호화 방식 폴백)
     async function saveOrder(order){
-      // 단건 POST 우선
       try{
         const r = await fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ userOrder: order }) });
         if (r.ok) return true;
       }catch(_){}
-      // 관리자 구조 폴백(전체 배열 암호화)
       try{
         const r1 = await fetch('/api/orders'); const j1 = await r1.json();
         let arr = [];
@@ -373,7 +365,7 @@
       return false;
     }
 
-    // 문의 저장
+    // 문의 저장(단건 POST → 폴백)
     async function saveInquiry(rec){
       try{
         const r = await fetch('/api/inquiries', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ userInquiry: rec }) });
@@ -394,15 +386,26 @@
       return false;
     }
 
-    /* ================= 이벤트 ================= */
-    // 메뉴 드로어
-    $('.menu-btn')?.addEventListener('click', ()=>{ $('.menu-btn').classList.toggle('active'); document.querySelector('.nav-links')?.classList.toggle('active'); });
+    /* ====================== 이벤트 ====================== */
+    // 메뉴 토글
+    document.querySelector('.menu-btn')?.addEventListener('click', ()=>{
+      document.querySelector('.menu-btn')?.classList.toggle('active');
+      document.querySelector('.nav-links')?.classList.toggle('active');
+    });
 
-    // “주문 추가” 클릭
+    // 홈(🏠) 클릭 시 세션 백업 유지
+    document.querySelector('.home-icon')?.addEventListener('click', ()=>{
+      if (CURRENT_USER) {
+        try{ localStorage.setItem('gs_user', JSON.stringify(CURRENT_USER)); localStorage.setItem('gs_user_backup', JSON.stringify(CURRENT_USER)); }catch(_){}
+      }
+    });
+
+    // “주문 추가”
     $('#addOrderBtn')?.addEventListener('click', async ()=>{
       const u = await ensureUser();
       if (!u){ alert('로그인이 필요합니다.'); location.href='login.html'; return; }
       currentPrice = await getCurrentGoldPrice();
+      if (!currentPrice || currentPrice<=0) currentPrice = 550000; // 안전값
       openOrderPanel();
       updateOrderCalc();
     });
@@ -431,7 +434,7 @@
       alert('주문이 등록되었습니다.');
       closeOrderPanel();
 
-      // 새 목록 로드
+      // 최신 주문 목록 반영
       const list = await loadOrdersForUser(u.username, u.email);
       renderOrders(list);
     });
@@ -459,23 +462,27 @@
       if (!confirm('로그아웃 하시겠습니까?')) return;
       try{ window.AdminAuth?.logout?.(); }catch(_){}
       try{ window.GSApp?.logout?.(); }catch(_){}
-      try{ localStorage.removeItem('gs_user'); }catch(_){}
+      try{ localStorage.removeItem('gs_user'); localStorage.removeItem('gs_user_backup'); }catch(_){}
       location.href='index.html';
     });
 
-    /* ================= 시작: 사용자 로드 후 즉시 렌더 ================= */
+    // 페이지 벗어날 때도 세션 백업 유지(네비 홈 이동 등)
+    window.addEventListener('pagehide', ()=>{ if(CURRENT_USER){ try{ localStorage.setItem('gs_user', JSON.stringify(CURRENT_USER)); localStorage.setItem('gs_user_backup', JSON.stringify(CURRENT_USER)); }catch(_){}} });
+
+    /* ====================== 부팅: 사용자/주문/문의 로드 ====================== */
     (async function boot(){
       const u = await resolveUser();
-      if (!u){
-        // 로그인 안되어 있으면 안내만, 이상한 경고 안띄움
+      if (!u){ 
+        // 로그인 안되어 있어도 경고창은 띄우지 않음(요청 시에만 안내)
         return;
       }
       CURRENT_USER = u;
-      $('#navProfileBtn').style.display = 'inline-block';
+      document.getElementById('navProfileBtn').style.display = 'inline-block';
+      const userArea = document.getElementById('userArea');
+      if (userArea) userArea.innerHTML = `<a href="profile.html" class="btn">내정보</a>`;
       renderProfileSummary(u);
       renderBaseInfo(u);
 
-      // 서버에서 최신 주문/문의 반영
       const orders = await loadOrdersForUser(u.username, u.email);
       renderOrders(orders);
       const inq = await loadInquiriesForUser(u.username, u.email);
