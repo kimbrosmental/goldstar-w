@@ -55,6 +55,11 @@
 
     /* 이 페이지: 좌측 섹션 링크 유지, 우측엔 홈 버튼만 */
     #navbar #userArea, #navbar #navProfileBtn, #navbar .menu-btn { display:none !important; }
+
+    /* 우편번호 로딩 오버레이 */
+    #zipLoading{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:10000;}
+    #zipLoading.show{display:flex;}
+    #zipLoading .box{background:#0c1a18;border:1px solid #1e4d47;border-radius:12px;padding:18px 22px;color:#fff;min-width:280px;text-align:center;}
   </style>
 </head>
 <body>
@@ -169,6 +174,9 @@
     </div>
   </div>
 
+  <!-- 우편번호 로딩 -->
+  <div id="zipLoading"><div class="box">우편번호 서비스 연결 중…</div></div>
+
   <script src="/admin/auth.js" defer></script>
   <script src="app.js" defer></script>
 
@@ -178,6 +186,7 @@
     const $$ = (s,p=document)=>Array.from(p.querySelectorAll(s));
     const LS_KEYS = ['gs_user','gs_user_backup','user','user_session','session_user'];
 
+    // 로고/홈 클릭 시 세션 백업
     $('#logoClickable')?.addEventListener('click', (e)=>{
       e.preventDefault();
       if (window.__CURRENT_USER) {
@@ -198,28 +207,22 @@
     function fromGSApp(){ try{ const u = window.GSApp?.currentUser?.(); if(u && (u.username||u.email)) return u; }catch(_){ } return null; }
     function fromLocal(){
       for(const k of LS_KEYS){ const u = readJSON(k); if(u && (u.username||u.email)) return u; }
-      const a = readJSON('admin_session_v1'); // AdminAuth
+      const a = readJSON('admin_session_v1');
       if(a && (a.username||a.email)) return {username:a.username, email:a.email, role:a.role||'user'};
       return null;
     }
     function mergeUser(base, extra){ if(!extra) return base; const out={...base}; for(const k of Object.keys(extra)){ if(out[k]==null || out[k]==='') out[k]=extra[k]; } return out; }
-
-    async function fetchKVUser(usernameOrEmail){
+    async function fetchKVUsers(){
       try{
-        const res = await fetch('/api/users?ts='+Date.now(),{cache:'no-store'});
-        const json = await res.json();
-        let list=[];
-        if (json?.data && Array.isArray(json.data)){
-          if (window.decrypt){
-            try{ list = await window.decrypt(json.data) || []; }catch(_){ list=[]; }
-          }
-        } else if (Array.isArray(json)){
-          list=json;
-        }
-        return list.find(u => u.username===usernameOrEmail || u.email===usernameOrEmail) || null;
-      }catch(_){ return null; }
+        const res = await fetch('/api/users?ts='+Date.now(),{cache:'no-store',credentials:'include'});
+        const j = await res.json();
+        return await pickArrayDecrypt(j);
+      }catch(_){ return []; }
     }
-
+    async function fetchKVUser(usernameOrEmail){
+      const list = await fetchKVUsers();
+      return list.find(u => u.username===usernameOrEmail || u.email===usernameOrEmail) || null;
+    }
     async function resolveUser(){
       let u = fromGSApp() || fromLocal();
       if (!u){
@@ -239,6 +242,31 @@
         return u;
       }
       return null;
+    }
+    async function getUser(){
+      if (window.__CURRENT_USER) return window.__CURRENT_USER;
+      const local = fromGSApp() || fromLocal();
+      if (local){ window.__CURRENT_USER = local; return local; }
+      const resolved = await resolveUser();
+      if (resolved) { window.__CURRENT_USER = resolved; }
+      return resolved;
+    }
+
+    // ── 응답 파서 (KV 호환)
+    async function pickArrayDecrypt(j){
+      try{
+        if (!j) return [];
+        if (Array.isArray(j)) return j;
+        // {data: 'encrypted' | []}
+        if (j.data){
+          if (Array.isArray(j.data)) return j.data;
+          if (typeof j.data === 'string' && window.decrypt){ try{ return await window.decrypt(j.data) || []; }catch(_){ return []; } }
+        }
+        if (Array.isArray(j.items)) return j.items;
+        if (Array.isArray(j.list)) return j.list;
+        if (j.result && Array.isArray(j.result)) return j.result;
+      }catch(_){}
+      return [];
     }
 
     // ── 렌더
@@ -300,34 +328,33 @@
         </div>`).join('');
     }
 
-    // ── 데이터 로드
+    // ── 데이터 로드 (KV에서)
     async function loadOrdersForUser(username,email){
       try{
-        const r=await fetch('/api/orders?ts='+Date.now(),{cache:'no-store'});
+        const r=await fetch('/api/orders?ts='+Date.now(),{cache:'no-store',credentials:'include'});
         const j=await r.json();
-        let arr=[];
-        if (j?.data && window.decrypt){ try{ arr=await window.decrypt(j.data)||[]; }catch(_){ arr=[]; } }
-        else if (Array.isArray(j)){ arr=j; }
-        return arr.filter(o =>
+        let arr = await pickArrayDecrypt(j);
+        // 일부 구현은 객체 map으로 저장될 수 있어 values() 처리
+        if (!Array.isArray(arr) && typeof arr==='object'){ arr = Object.values(arr); }
+        return (arr||[]).filter(o =>
           o.username===username || o.user===username ||
-          o.email===email || o.user===email
+          o.email===email   || o.user===email
         );
       }catch(_){ return []; }
     }
     async function loadInquiriesForUser(username,email){
       try{
-        const r=await fetch('/api/inquiries?ts='+Date.now(),{cache:'no-store'});
+        const r=await fetch('/api/inquiries?ts='+Date.now(),{cache:'no-store',credentials:'include'});
         const j=await r.json();
-        let arr=[];
-        if (j?.data && window.decrypt){ try{ arr=await window.decrypt(j.data)||[]; }catch(_){ arr=[]; } }
-        else if (Array.isArray(j)){ arr=j; }
-        return arr
+        let arr = await pickArrayDecrypt(j);
+        if (!Array.isArray(arr) && typeof arr==='object'){ arr = Object.values(arr); }
+        return (arr||[])
           .filter(q => (q.user===username || q.user===email))
           .map(q => ({ id:q.id, content:q.content||q.message, title:q.title, answer:q.answer, read:!!q.answer, fromAdmin:!!q.fromAdmin, ts:q.date||q.ts }));
       }catch(_){ return []; }
     }
 
-    // ── 금시세(섹션1과 동일 소스)
+    // ── 금시세(섹션1과 동일 소스 우선)
     async function getCurrentGoldPrice(){
       try{
         const r = await fetch('/api/security?type=goldprice&ts='+Date.now(),{cache:'no-store'});
@@ -337,6 +364,8 @@
         const price = Number(j?.price||0);
         if (price>0) return price;
       }catch(_){}
+      // GSApp 폴백
+      try{ if (typeof GSApp?.goldPrice === 'number') return GSApp.goldPrice; }catch(_){}
       return 0;
     }
 
@@ -365,8 +394,8 @@
       });
     })();
 
-    // ── 우편번호 서비스 로더(우회 시도)
-    async function loadScript(url, timeout=5000){
+    // ── 우편번호 서비스 로더(재시도/수동입력 안내 포함)
+    async function loadScript(url, timeout=8000){
       return new Promise((res, rej)=>{
         const s=document.createElement('script');
         s.src=url; s.async=true; s.crossOrigin='anonymous';
@@ -378,31 +407,42 @@
       });
     }
     async function ensurePostcode(){
-      if (window.daum && window.daum.Postcode) return true;
+      if (window.daum && window.daum.Postcode) {
+        try{ new window.daum.Postcode({oncomplete:()=>{}}); return true; }catch(_){}
+      }
       const candidates = [
         'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js',
         'https://ssl.daumcdn.net/dmaps/map_js_init/postcode.v2.js',
-        // 로컬/프록시 경로(있다면 사용)
         '/postcode.v2.js',
         '/assets/postcode.v2.js'
       ];
       for (const u of candidates){
-        try{ await loadScript(u, 5000); if (window.daum && window.daum.Postcode) return true; }catch(_){}
+        try{
+          await loadScript(u, 8000);
+          if (window.daum && window.daum.Postcode) {
+            try{ new window.daum.Postcode({oncomplete:()=>{}}); return true; }catch(_){}
+          }
+        }catch(_){}
       }
       return false;
     }
-
     function enableManualAddress(){
       ['zipcode','roadAddress','jibunAddress','detailAddress','extraAddress'].forEach(id=>{
         const el = $('#'+id);
         if (el){ el.readOnly = false; el.classList.remove('muted'); }
       });
-      alert('우편번호 서비스에 접근할 수 없어 수동 입력 모드로 전환합니다.\n우편번호/주소를 직접 입력해 주세요.');
     }
-
     async function openZipSearch(){
-      const ok = await ensurePostcode();
-      if (!ok){ enableManualAddress(); return; }
+      const loader = $('#zipLoading'); loader.classList.add('show');
+      let ok=false;
+      try{ ok = await ensurePostcode(); }finally{ loader.classList.remove('show'); }
+      if (!ok){
+        const retry = confirm('우편번호 서비스에 접속을 시도했으나 연결되지 않았습니다.\n(해외/VPN 환경일 수 있습니다)\n\n다시 시도하시겠습니까?');
+        if (retry) return openZipSearch();
+        alert('수동 입력 모드로 전환합니다. 우편번호/주소를 직접 입력해 주세요.');
+        enableManualAddress();
+        return;
+      }
       new daum.Postcode({
         oncomplete: function(data){
           const roadAddr = data.roadAddress; // 도로명
@@ -420,7 +460,10 @@
       }).open();
     }
     $('#btnFindZip')?.addEventListener('click', openZipSearch);
-    $('#btnManualZip')?.addEventListener('click', enableManualAddress);
+    $('#btnManualZip')?.addEventListener('click', ()=>{
+      enableManualAddress();
+      alert('직접 입력 모드입니다. 우편번호/주소를 직접 입력해 주세요.');
+    });
 
     function validateAddress(){
       const zip = $('#zipcode').value.trim();
@@ -434,20 +477,25 @@
     }
 
     // ── KV 저장 (배열 암호화 저장 우선)
+    async function pickArrayForSave(getUrl){
+      try{
+        const r=await fetch(getUrl,{cache:'no-store',credentials:'include'});
+        const j=await r.json();
+        let arr = await pickArrayDecrypt(j);
+        if (!Array.isArray(arr) && typeof arr==='object'){ arr = Object.values(arr); }
+        return Array.isArray(arr) ? arr : [];
+      }catch(_){ return []; }
+    }
     async function saveOrderToKV(order){
       try{
-        const r1=await fetch('/api/orders?ts='+Date.now(),{cache:'no-store'});
-        const j1=await r1.json();
-        let arr=[];
-        if (j1?.data && window.decrypt){ try{ arr=await window.decrypt(j1.data)||[]; }catch(_){ arr=[]; } }
-        else if (Array.isArray(j1)){ arr=j1; }
+        const arr = await pickArrayForSave('/api/orders');
         arr.push({
           ...order,
           user: order.username,
           amount: order.totalPrice,
           date: new Date(order.ts).toISOString()
         });
-        if (!window.encrypt) throw new Error('encrypt 함수 없음');
+        if (!window.encrypt) throw new Error('encrypt 없음');
         const enc = await window.encrypt(arr);
         const r2=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:enc})});
         return r2.ok;
@@ -461,13 +509,9 @@
     }
     async function saveInquiryToKV(rec){
       try{
-        const r1=await fetch('/api/inquiries?ts='+Date.now(),{cache:'no-store'});
-        const j1=await r1.json();
-        let arr=[];
-        if (j1?.data && window.decrypt){ try{ arr=await window.decrypt(j1.data)||[]; }catch(_){ arr=[]; } }
-        else if (Array.isArray(j1)){ arr=j1; }
+        const arr = await pickArrayForSave('/api/inquiries');
         arr.push(rec);
-        if (!window.encrypt) throw new Error('encrypt 함수 없음');
+        if (!window.encrypt) throw new Error('encrypt 없음');
         const enc = await window.encrypt(arr);
         const r2=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:enc})});
         return r2.ok;
@@ -482,16 +526,17 @@
 
     // ── 이벤트
     $('#addOrderBtn')?.addEventListener('click', async ()=>{
-      if (!window.__CURRENT_USER){ window.__CURRENT_USER = await resolveUser(); }
-      if (!window.__CURRENT_USER){ alert('로그인이 필요합니다.'); location.href='login.html'; return; }
+      const u = await getUser();
+      if (!u){ alert('로그인이 필요합니다.'); location.href='login.html'; return; }
+      window.__CURRENT_USER = u;
       currentPrice = await getCurrentGoldPrice();
       if (!currentPrice) currentPrice = 550000; // 안전값
       openOrderPanel(); updateOrderCalc();
     });
 
     $('#orderSubmit')?.addEventListener('click', async ()=>{
-      if (!window.__CURRENT_USER){ window.__CURRENT_USER = await resolveUser(); }
-      if (!window.__CURRENT_USER){ alert('로그인이 필요합니다.'); return; }
+      const u = await getUser();
+      if (!u){ alert('로그인이 필요합니다.'); return; }
       if (totalDon <= 0) return alert('상품을 선택하세요.');
       if (!validateAddress()) return;
 
@@ -505,7 +550,7 @@
 
       const order = {
         id:'O'+Date.now(),
-        username:window.__CURRENT_USER.username, name:window.__CURRENT_USER.name, phone:window.__CURRENT_USER.phone, email:window.__CURRENT_USER.email,
+        username:u.username, name:u.name, phone:u.phone, email:u.email,
         item:'골드바',
         don: totalDon, supplyPrice, currentPrice,
         totalPrice: totalDon*supplyPrice, currentTotal: totalDon*currentPrice,
@@ -520,19 +565,17 @@
       alert('주문이 등록되었습니다.');
       closeOrderPanel();
 
-      // 즉시 갱신(낙관적 업데이트 + 재조회)
-      window.__ORDERS_CACHE = window.__ORDERS_CACHE || [];
-      window.__ORDERS_CACHE.push(order);
-      renderOrders(await loadOrdersForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email));
+      // 즉시 갱신 + 재조회
+      renderOrders(await loadOrdersForUser(u.username, u.email));
     });
 
     $('#sendMsgBtn')?.addEventListener('click', async ()=>{
-      if (!window.__CURRENT_USER){ window.__CURRENT_USER = await resolveUser(); }
-      if (!window.__CURRENT_USER){ alert('로그인이 필요합니다.'); return; }
+      const u = await getUser();
+      if (!u){ alert('로그인이 필요합니다.'); return; }
       const txt = $('#msgInput').value.trim(); if(!txt) return;
       const rec = {
         id:'Q'+Date.now(),
-        user: window.__CURRENT_USER.username||window.__CURRENT_USER.email,
+        user: u.username||u.email,
         title:'사용자 문의',
         content:txt,
         date:new Date().toISOString(),
@@ -541,11 +584,7 @@
       const ok = await saveInquiryToKV(rec);
       if (!ok){ alert('문의 저장에 실패했습니다.'); return; }
       $('#msgInput').value='';
-
-      // 즉시 반영(낙관적) + 재조회
-      window.__INQUIRIES_CACHE = window.__INQUIRIES_CACHE || [];
-      window.__INQUIRIES_CACHE.push(rec);
-      renderMessages(await loadInquiriesForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email));
+      renderMessages(await loadInquiriesForUser(u.username, u.email));
     });
 
     $('#closeOrderPanel')?.addEventListener('click', ()=> closeOrderPanel());
@@ -561,33 +600,29 @@
       location.href='index.html';
     });
 
-    // ── 부팅
+    // ── 부팅: 사용자/주문/문의 로드
     (async function boot(){
-      window.__CURRENT_USER = await resolveUser();
-      if (!window.__CURRENT_USER) return;
+      // 먼저 로컬/GSApp로 빠르게 표시 → 이후 KV 병합
+      window.__CURRENT_USER = fromGSApp() || fromLocal();
+      if (window.__CURRENT_USER) { renderBase(window.__CURRENT_USER); }
 
-      renderBase(window.__CURRENT_USER);
-      renderOrders(await loadOrdersForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email));
-      renderMessages(await loadInquiriesForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email));
+      const u = await resolveUser();
+      if (u){
+        window.__CURRENT_USER = u;
+        renderBase(u);
+        renderOrders(await loadOrdersForUser(u.username, u.email));
+        renderMessages(await loadInquiriesForUser(u.username, u.email));
 
-      // 관리자 승인/입금확인 및 문의 답변 폴링
-      setInterval(async ()=>{
-        if (!window.__CURRENT_USER) return;
-        const [orders, inquiries] = await Promise.all([
-          loadOrdersForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email),
-          loadInquiriesForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email)
-        ]);
-        renderOrders(orders);
-        renderMessages(inquiries);
-      }, 15000);
-
-      // 페이지 이탈 시 세션 백업
-      window.addEventListener('pagehide', ()=>{
-        if (window.__CURRENT_USER){
-          localStorage.setItem('gs_user', JSON.stringify(window.__CURRENT_USER));
-          localStorage.setItem('gs_user_backup', JSON.stringify(window.__CURRENT_USER));
-        }
-      });
+        // 관리자 승인/입금확인 및 문의 답변 폴링
+        setInterval(async ()=>{
+          const [orders, inquiries] = await Promise.all([
+            loadOrdersForUser(u.username, u.email),
+            loadInquiriesForUser(u.username, u.email)
+          ]);
+          renderOrders(orders);
+          renderMessages(inquiries);
+        }, 15000);
+      }
     })();
   });
   </script>
