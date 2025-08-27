@@ -331,9 +331,13 @@
 
     // 현재 사용자 확보 + 네비 표시
     async function ensureUser(){
-      if (CURRENT_USER) return CURRENT_USER;
-      const u = await resolveUser();
-      if (u){
+      // 세션 복원 우선
+      if (CURRENT_USER && CURRENT_USER.username) return CURRENT_USER;
+      let u = fromGSApp() || fromLocal() || fromAdminAuth();
+      if (!u || !u.username) {
+        u = await resolveUser();
+      }
+      if (u && u.username) {
         CURRENT_USER = u;
         // 네비에 "내정보" 강제 노출
         const navProf = $('#navProfileBtn'); if(navProf) navProf.style.display='inline-block';
