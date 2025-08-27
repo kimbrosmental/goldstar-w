@@ -188,33 +188,28 @@ window.GSApp.loginId = async function(id, pw){
     throw new Error('서버 응답 오류');
   }
 }
-// ===== 공통 세션 도우미 =====
-window.AppSession = {
-  user(){
-    try { const u = window.GSApp?.currentUser?.(); if (u && u.username) return u; } catch(_){}
-    try { const raw = localStorage.getItem('gs_user'); if (raw) return JSON.parse(raw); } catch(_){}
-    try { const s = window.AdminAuth?.currentSession?.(); if (s?.username) return { username:s.username, role:s.role||'user' }; } catch(_){}
+// ===== 공통 세션 도우미 & 네비 구성 =====
+(function(){
+  function pickUser(){
+    try{ const u = window.GSApp?.currentUser?.(); if (u && (u.username||u.email)) return u; }catch(_){}
+    const keys = ['gs_user','gs_user_backup','user','user_session','session_user','admin_session_v1'];
+    for(const k of keys){
+      try{ const r = localStorage.getItem(k); if (r){ const o=JSON.parse(r); if (o && (o.username||o.email)) return o; } }catch(_){}
+    }
     return null;
   }
-};
-
-// ===== 네비게이션 사용자 영역 구성 =====
-window.GSApp = window.GSApp || {};
-window.GSApp.buildUserNav = function(){
-  const area = document.querySelector('#navbar .user-area') || document.getElementById('userArea');
-  if (!area) return;
-  const u = window.AppSession.user();
-  if (u && u.role !== 'admin') {
-    area.innerHTML = '<a href="profile.html" class="btn">내정보</a>';
-  } else if (u && u.role === 'admin') {
-    area.innerHTML = '<a href="admin/index.html" class="btn">관리</a>';
-  } else {
-    area.innerHTML = '<a href="signup.html" class="btn user-link" id="signupBtn">회원가입</a> ' +
-                     '<a href="login.html" class="btn user-link" id="loginBtn">로그인</a>';
+  function buildUserNav(){
+    const area = document.querySelector('#navbar .user-area') || document.getElementById('userArea');
+    if (!area) return;
+    const u = pickUser();
+    if (u){
+      area.innerHTML = '<a href="profile.html" class="btn">내정보</a>';
+      const np = document.getElementById('navProfileBtn'); if (np) np.style.display='inline-block';
+    }else{
+      area.innerHTML = '<a href="signup.html" class="btn user-link">회원가입</a> <a href="login.html" class="btn user-link">로그인</a>';
+      const np = document.getElementById('navProfileBtn'); if (np) np.style.display='none';
+    }
   }
-};
-// 첫 로드와 약간의 지연 후 두 번 호출(지연 초기화 대비)
-document.addEventListener('DOMContentLoaded', ()=> {
-  window.GSApp.buildUserNav();
-  setTimeout(window.GSApp.buildUserNav, 200);
-});
+  document.addEventListener('DOMContentLoaded', buildUserNav);
+  setInterval(buildUserNav, 1000); // 초기 로드 타이밍 차이 대비 (짧게만 유지)
+})();
