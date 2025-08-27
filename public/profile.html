@@ -185,7 +185,10 @@ function updateOrderCalc() {
   document.getElementById('currentTotal').textContent = currentTotal.toLocaleString('ko-KR');
   document.getElementById('priceDiff').textContent = (currentTotal - totalPrice).toLocaleString('ko-KR');
 }
-document.getElementById('addOrderBtn').onclick = openOrderModal;
+const addOrderBtn = document.getElementById('addOrderBtn');
+if (addOrderBtn) {
+  addOrderBtn.onclick = openOrderModal;
+}
 document.getElementById('closeOrderModal').onclick = closeOrderModal;
 document.getElementById('resetDon').onclick = function() { totalDon = 0; updateOrderCalc(); };
 document.getElementById('orderSubmit').onclick = async function() {
@@ -258,7 +261,30 @@ function renderOrders(list){
       const user=GSApp.currentUser(); if(user){ let changed=false; user.messages.forEach(m=>{ if(!m.read && !m.fromAdmin){ m.read=true; changed=true;} }); if(changed) GSApp.saveDB(); }
       GSApp.applyLang();
     }
-    document.getElementById('logoutBtn').addEventListener('click',()=>{ if(confirm('로그아웃 하시겠습니까?')) { window.GSApp.logout(); window.location.href='index.html'; } });
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click',()=>{
+        if(confirm('로그아웃 하시겠습니까?')) {
+          window.GSApp.logout();
+          localStorage.removeItem('gs_user');
+          window.location.href='index.html';
+        }
+      });
+    }
+function renderProfileSummary() {
+  const user = window.GSApp.currentUser && window.GSApp.currentUser();
+  const infoDiv = document.getElementById('profileInfo');
+  if (user && infoDiv) {
+    infoDiv.innerHTML = `<div class="profile-summary" style="background:#0c1a18;padding:12px 16px;border-radius:10px;margin-bottom:16px;">
+      <strong style="color:#FFD700;">아이디:</strong> ${user.username}<br>
+      <strong style="color:#FFD700;">이름:</strong> ${user.name}<br>
+      <strong style="color:#FFD700;">연락처:</strong> ${user.phone}<br>
+      <strong style="color:#FFD700;">이메일:</strong> ${user.email}
+    </div>`;
+  }
+}
+renderProfileSummary();
+// 홈 버튼 세션 유지: index.html 진입 시 localStorage의 gs_user로 세션 복원 필요
   document.getElementById('addOrderBtn').addEventListener('click',async()=>{ const user=window.GSApp.currentUser(); if(!user) return; const item=prompt('상품명','골드바 3.75g'); if(!item) return; const qty=parseFloat(prompt('수량(g)','3.75')||''); if(!qty) return; const price=parseInt(prompt('가격','500000')||''); if(!price) return; await GSApp.addOrder(user.email,{item,qty,price}); loadProfile(); });
   document.getElementById('mockOrderBtn').addEventListener('click',async()=>{ const user=window.GSApp.currentUser(); if(!user){alert('회원 정보 없음');return;} await window.GSApp.addOrder(user.email,{item:'골드바 3.75g',qty:3.75,price:Math.round(500000+Math.random()*50000)}); loadProfile(); });
     document.getElementById('sendMsgBtn').addEventListener('click',async()=>{ const user=window.GSApp.currentUser(); if(!user) return; const txt=document.getElementById('msgInput').value.trim(); if(!txt) return; await window.GSApp.addMessage(user.email,txt,false); document.getElementById('msgInput').value=''; loadProfile(); });
