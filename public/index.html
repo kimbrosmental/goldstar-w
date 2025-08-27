@@ -5,22 +5,24 @@
   <script src="/config.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gold-Star World</title>
+    <title>Gold-Star World</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <meta http-equiv="Referrer-Policy" content="no-referrer">
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
-/* ====== 고급 호버 이펙트 ====== */
+/* ====== 고급 호버 이펙트: 검정색 제외, 구별선 제외, 섹션별 적용 ====== */
+/* 박스류만 금빛 테두리, 텍스트/아이콘은 살짝 올라가는 이펙트만 */
+/* 박스류 금빛 테두리, 텍스트/아이콘은 살짝 올라가는 이펙트 */
 .price-box:hover, .carousel-item:hover, .achievement-item:hover, .trade-card:hover,
 .story-item:hover, .video-wrap:hover, .supply-box:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 0 32px 8px rgba(255, 215, 0, 0.18), 0 0 0 4px rgba(255, 215, 0, 0.12);
   position: relative;
 }
-.price-box:hover::before, .carousel-item:hover::before, .achievement-item:hover::before, .trade-card:hover::before,
-.story-item:hover::before, .video-wrap:hover::before, .supply-box:hover::before {
+ .price-box:hover::before, .carousel-item:hover::before, .achievement-item:hover::before, .trade-card:hover::before,
+ .story-item:hover::before, .video-wrap:hover::before, .supply-box:hover::before {
   content: '';
   position: absolute;
   left: -8px; right: -8px; top: -8px; bottom: -8px;
@@ -30,6 +32,7 @@
   z-index: 2;
   animation: shineGlow 1.2s cubic-bezier(.22,1,.36,1);
 }
+/* 텍스트/아이콘 살짝 올라가는 이펙트 */
 .section5-title:hover, .section5-text:hover, .kakao-link:hover, .fixed-social-icons a:hover,
 .section5 .telegram-link:hover, .section4 .achievement-content h2:hover, .section4 .trade-history-title:hover,
 .section2 .story-content h2:hover, .hook .line:hover {
@@ -41,79 +44,207 @@
   40% { opacity: 1; box-shadow: 0 0 32px 8px rgba(255,215,0,0.25), 0 0 0 4px rgba(255,215,0,0.18); }
   100% { opacity: 0.7; box-shadow: 0 0 24px 4px rgba(255,215,0,0.12), 0 0 0 2px rgba(255,215,0,0.10); }
 }
-/* 페이드인 */
-.fadein { opacity: 0; transform: translateY(30px);
-  transition: opacity 1.2s cubic-bezier(.4,0,.2,1), transform 1.2s cubic-bezier(.4,0,.2,1); }
-.fadein.visible { opacity: 1; transform: none; }
+  /* 페이드인 디졸브 효과 */
+  .fadein {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1.2s cubic-bezier(.4,0,.2,1), transform 1.2s cubic-bezier(.4,0,.2,1);
+    will-change: opacity, transform;
+  }
+  .fadein.visible {
+  opacity: 1;
+  transform: none;
+  }
+    /* Intro Fullscreen */
+    #introOverlay{position:fixed;inset:0;z-index:99999;background:#000;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity .5s ease;}
+    #introOverlay.hidden{opacity:0;pointer-events:none;}
+    #introOverlay img{
+      width:100vw;
+      height:auto;
+      max-width:100vw;
+      max-height:100vh;
+      object-fit:contain;
+      display:block;
+      margin:0 auto;
+      will-change:transform;
+      transform:translateZ(0);
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      image-rendering:-webkit-optimize-contrast;
+      image-rendering:-moz-crisp-edges;
+      image-rendering:crisp-edges;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    @media (max-width: 900px) {
+      #introOverlay img {
+        width:100vw;
+        max-width:100vw;
+        max-height:60vh;
+        height:auto;
+      }
+    }
+    @media (max-width: 600px) {
+      #introOverlay img {
+        width:100vw;
+        max-width:100vw;
+        max-height:40vh;
+        height:auto;
+      }
+    }
+    /* 반응형 하단 회사정보 바 */
+    .footer-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: center;
+      align-items: flex-start;
+      background: #222;
+      color: #fff;
+      padding: 32px 16px;
+      font-size: 16px;
+    }
+    @media (max-width: 700px) {
+      .footer-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        font-size: 15px;
+      }
+      .footer-bar > div {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+    }
+    /* ---------------- Section2 레이아웃 조정 ---------------- */
+    #section2 .content {
+      padding-top: 20px;
+      padding-bottom: 20px;
+      height: auto;
+    }
+    #section2 .story-content h2 {
+      margin-bottom: 16px;
+    }
+    #section2 .story-grid {
+      margin-bottom: 24px;
+    }
 
-/* Intro Fullscreen */
-#introOverlay{position:fixed;inset:0;z-index:99999;background:#000;display:flex;align-items:center;justify-content:center;opacity:1;transition:opacity .5s ease;}
-#introOverlay.hidden{opacity:0;pointer-events:none;}
-#introOverlay img{
-  width:100vw;height:auto;max-width:100vw;max-height:100vh;object-fit:contain;display:block;margin:0 auto;
-  transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden;
-  image-rendering:-webkit-optimize-contrast;image-rendering:-moz-crisp-edges;image-rendering:crisp-edges;
-  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
-}
-@media (max-width: 900px) { #introOverlay img { max-height:60vh; } }
-@media (max-width: 600px) { #introOverlay img { max-height:40vh; } }
+    /* ---------------- Carousel 스타일 ---------------- */
+    .carousel-wrapper {
+      overflow: hidden;
+      width: 100%;
+      margin-top: 16px;
+    }
+    .carousel-track {
+      display: flex;
+      gap: 20px;
+      /* ↓ 속도 조절: 5s → 원하는 값으로 변경 */
+      animation: scroll 40s linear infinite;
+    }
+    .carousel-item {
+      flex: 0 0 auto;
+      width: 400px;
+      max-width: 400px;
+    }
+    .carousel-item img {
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      object-fit: contain;
+      display: block;
+    }
+    .carousel-item p {
+      text-align: center;
+      margin-top: 8px;
+      color: #fff;
+      font-size: 16px;
+    }
+    @keyframes scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-6760px); } /* 500×13 + 20×13 */
+    }
 
-/* Footer bar */
-.footer-bar { display:flex;flex-wrap:wrap;gap:24px;justify-content:center;align-items:flex-start;background:#222;color:#fff;padding:32px 16px;font-size:16px; }
-@media (max-width: 700px) {
-  .footer-bar { flex-direction:column;align-items:stretch;gap:12px;font-size:15px; }
-  .footer-bar > div { width:100%;margin-bottom:8px; }
-}
-
-/* Section2 */
-#section2 .content { padding-top:20px;padding-bottom:20px;height:auto; }
-#section2 .story-content h2 { margin-bottom:16px; }
-#section2 .story-grid { margin-bottom:24px; }
-
-/* Carousel */
-.carousel-wrapper { overflow:hidden;width:100%;margin-top:16px; }
-.carousel-track { display:flex;gap:20px;animation: scroll 40s linear infinite; }
-.carousel-item { flex:0 0 auto; width:400px;max-width:400px; }
-.carousel-item img { width:100%;height:auto;max-height:400px;object-fit:contain;display:block; }
-.carousel-item p { text-align:center;margin-top:8px;color:#fff;font-size:16px; }
-@keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-6760px); } }
-
-/* Section1 gold-bar 반응형 */
-@media (max-width:1024px) {
+    /* ---- Section1 gold-bar 이미지 반응형 숨김 ---- */
+    @media (max-width:1024px) {
   #section1 .price-image { display: none !important; }
   #section1 .gold-content { justify-content: center; }
-  #section1 .main-price, #section1 .supply-price { text-align:center!important;margin:0 auto!important;display:block!important; }
-}
-@media (max-width:768px) {
+  #section1 .main-price, #section1 .supply-price { text-align: center !important; margin-left: auto !important; margin-right: auto !important; display: block !important; }
+    }
+    @media (max-width:768px) {
   #section1 .price-image { display: none !important; }
   #section1 .gold-content { justify-content: center; flex-direction: column; }
-  #section1 .main-price, #section1 .supply-price { text-align:center!important;margin:0 auto!important;display:block!important; }
-}
+  #section1 .main-price, #section1 .supply-price { text-align: center !important; margin-left: auto !important; margin-right: auto !important; display: block !important; }
+    }
 
-/* 버튼 */
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 24px;font-size:16px;font-weight:bold;color:#fff;background:#d4af37;border:none;border-radius:8px;text-decoration:none;transition:.3s;cursor:pointer;position:relative;overflow:hidden;}
-.btn-icon{margin-right:8px;font-size:18px;}
-.btn:before{content:'';position:absolute;top:50%;left:50%;width:300%;height:300%;background:rgba(255,255,255,.2);border-radius:50%;transition:transform .3s;z-index:0;transform:translate(-50%,-50%) scale(0);}
-.btn:hover:before{transform:translate(-50%,-50%) scale(1);}
-.btn:hover{background:#b5942b;transform:translateY(-2px);}
-.btn:active{transform:translateY(0);}
+    /* 버튼 스타일 추가 */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #d4af37;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color 0.3s, transform 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-icon {
+      margin-right: 8px;
+      font-size: 18px;
+    }
+    .btn:before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 300%;
+      height: 300%;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transition: transform 0.3s;
+      z-index: 0;
+      transform: translate(-50%, -50%) scale(0);
+    }
+    .btn:hover:before {
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .btn:hover {
+      background-color: #b5942b;
+      transform: translateY(-2px);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
 
-/* Intro overlay fallback */
-#introOverlay { position: fixed; left:0; top:0; width:100vw; height:100vh; z-index:9999; background:#000; display:flex; align-items:center; justify-content:center; transition: opacity 1s; }
-#introOverlay.hidden{ opacity:0; pointer-events:none; }
+    /* Intro overlay (5초 1회만 보여주고, 페이드아웃 디졸브) */
+    #introOverlay {
+      position: fixed; left:0; top:0; width:100vw; height:100vh; z-index:9999; background:#000;
+      display:flex; align-items:center; justify-content:center;
+      transition: opacity 1s;
+    }
+    #introOverlay.hidden {
+      opacity:0;
+      pointer-events:none;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Intro overlay -->
+  <!-- Intro overlay (5초 1회만 보여주고, 페이드아웃 디졸브) -->
   <div id="introOverlay" aria-hidden="true" role="dialog">
-    <img id="introGif" src="img/gold-intro.webp" alt="Intro" style="width:100vw;height:100vh;object-fit:cover;" />
+  <img id="introGif" src="img/gold-intro.webp" alt="Intro" style="width:100vw;height:100vh;object-fit:cover;" />
   </div>
 
   <nav id="navbar">
     <div class="container">
-      <div class="logo"><a href="index.html" id="homeLogo"><img src="img/logo.png" alt="골드스타 로고"></a></div>
-      <div class="nav-center">
+  <div class="logo"><a href="index.html" id="homeLogo"><img src="img/logo.png" alt="골드스타 로고"></a></div>
+  <div class="nav-center">
         <ul class="nav-links">
           <li><a href="#section1">소개</a></li>
           <li><a href="#section2">진행</a></li>
@@ -123,12 +254,12 @@
         </ul>
       </div>
       <div class="nav-right">
-        <div class="user-area" id="userArea">
-          <a href="signup.html" class="btn user-link" id="signupBtn">회원가입</a>
-          <a href="login.html" class="btn user-link" id="loginBtn">로그인</a>
-          <button id="adminReturnBtn" class="btn" style="display:none;margin-left:8px;"><i class="fas fa-cog"></i></button>
-        </div>
-        <div class="menu-btn" aria-label="메뉴 열기" role="button" tabindex="0">
+        <div class="user-area">
+  <a href="signup.html" class="btn user-link" id="signupBtn">회원가입</a>
+  <a href="login.html" class="btn user-link" id="loginBtn">로그인</a>
+  <button id="adminReturnBtn" class="btn" style="display:none;margin-left:8px;"><i class="fas fa-cog"></i></button>
+</div>
+        <div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴 열기" role="button" tabindex="0">
           <span></span><span></span><span></span>
         </div>
       </div>
@@ -149,12 +280,12 @@
   <main class="fadein" id="mainFadein">
     <!-- Section1 -->
     <section id="section1" class="section">
-      <div class="content fadein">
+  <div class="content fadein">
         <h2 class="hook">
-          <span class="line line1">“금은 결국 오른다.”</span>
-          <span class="line line2">“다만, 합리적 금액에 살 수 있는 순간은 짧다.”</span>
-          <span class="line line3">지금이 바로 그 순간입니다,</span>
-          <span class="line line4"><strong>준비되셨나요?</strong></span>
+          <span class="line line1" data-i18n="hook_line1">“금은 결국 오른다.”</span>
+          <span class="line line2" data-i18n="hook_line2">“다만, 합리적 금액에 살 수 있는 순간은 짧다.”</span>
+          <span class="line line3" data-i18n="hook_line3">지금이 바로 그 순간입니다,</span>
+          <span class="line line4"><strong data-i18n="hook_line4">준비되셨나요?</strong></span>
           <span class="shine-bar" aria-hidden="true"></span>
         </h2>
         <div class="price-box gold-box" id="priceBox">
@@ -179,9 +310,9 @@
       </div>
     </section>
 
-    <!-- Section2 -->
+    <!-- Section2: 진행 (이전 상태로 복원) -->
     <section id="section2" class="section">
-      <div class="content fadein">
+  <div class="content fadein">
         <div class="story-content">
           <h2>주요 이슈</h2>
           <div class="story-grid">
@@ -198,23 +329,27 @@
 
     <!-- Section3 -->
     <section id="section3" class="section">
-      <div class="content fadein">
+  <div class="content fadein">
         <div class="process-content">
           <h2></h2>
+          <!-- 상단 행: 좌측 설명, 우측 영상 -->
           <div class="video-row top">
             <div class="desc">우간다 황금 금맥,<br>그 속에 담긴 이야기를 담다.</div>
             <div class="video-wrap">
+              <!-- 섹션3 영상: 600x350 고정, poster로 첫 프레임 이미지 지정 -->
               <video controls width="600" height="350" playsinline preload="metadata" poster="img/poster-1.png" controlsList="nodownload noplaybackrate" disablePictureInPicture>
                 <source src="https://www.dropbox.com/scl/fi/efoo333ngirzngmdrurd4/movie-1.mp4?rlkey=v24nt37cux82nn9aazn261rhv&raw=1" type="video/mp4" />
                 <span>브라우저가 동영상을 지원하지 않습니다.</span>
               </video>
             </div>
           </div>
+          <!-- 하단 행: 좌측 영상, 우측 설명 -->
           <div class="video-row bottom">
             <div class="video-wrap">
+              <!-- 섹션3 영상: poster 속성으로 첫 프레임 썸네일 이미지 지정 -->
               <video controls width="600" height="350" playsinline preload="metadata" poster="img/poster-2.png" controlsList="nodownload noplaybackrate" disablePictureInPicture>
                 <source src="https://www.dropbox.com/scl/fi/71q6v1ntaebtudq2ttpwq/movie-2.mp4?rlkey=7xw94d6yho2bcf3b6l4wsarse&raw=1" type="video/mp4" />
-                <span>브라우저가 동영상을 지원하지 않습니다.</span>
+                <span data-i18n="video_not_supported">브라우저가 동영상을 지원하지 않습니다.</span>
               </video>
             </div>
             <div class="desc">우간다 아프리카의 희망,<br>세계가 주목하다.</div>
@@ -225,7 +360,7 @@
 
     <!-- Section4 -->
     <section id="section4" class="section">
-      <div class="content fadein">
+  <div class="content fadein">
         <div class="achievement-content">
           <h2>실제 공급 성과</h2>
           <div class="achievement-grid">
@@ -280,11 +415,11 @@
 
     <!-- Section5 -->
     <section id="section5" class="section">
-      <div class="content center fadein">
-        <h2 class="section5-title">지금 바로 문의하세요</h2>
-        <h2 class="section5-title">회원가입 후 직접 주문 가능합니다.</h2>
-        <h2 class="section5-title">궁금하신 사항은 텔레그램 으로 문의 주세요.</h2>
-        <p class="section5-text">골드스타와 함께 새로운 투자의 기회를 시작하세요</p>
+  <div class="content center fadein">
+  <h2 class="section5-title">지금 바로 문의하세요</h2>
+  <h2 class="section5-title">회원가입 후 직접 주문 가능합니다.</h2>
+  <h2 class="section5-title"> 궁금하신 사항은 텔레그램 으로 문의 주세요.</h2>
+  <p class="section5-text">골드스타와 함께 새로운 투자의 기회를 시작하세요</p>
         <div class="contact-buttons">
           <a href="#" class="kakao-link"><img src="img/카카오톡 문의.gif" alt="카카오톡 문의"/></a>
           <a href="https://t.me/Goldstar_Korea" target="_blank" rel="noopener"><img src="img/텔레그램 문의.gif" alt="텔레그램 문의"/></a>
@@ -308,7 +443,7 @@
             <p>운영시간: 평일 09:00 - 18:00</p>
             <p>점심시간: 12:00 - 13:00</p>
             <p>토/일/공휴일 휴무</p>
-            <p>&lt;카카오톡, 텔레그램 문의는 휴무 관계없이 문의 가능합니다.&gt;</p>
+            <p><카카오톡, 텔레그램 문의는 휴무 관계없이 문의 가능합니다.></p>
           </div>
         </div>
       </div>
@@ -317,357 +452,492 @@
 
   <script src="/hover-gif.js"></script>
   <script src="/app.js"></script>
-
   <script>
-/* ===== 공통 유저 세션 유틸 ===== */
-function getStoredUser(){
-  try {
-    const u = window.GSApp?.currentUser?.();
-    if (u) { setStoredUser(u); return u; }
-  } catch(_){}
-  try {
-    return JSON.parse(localStorage.getItem('gs_user')) ||
-           JSON.parse(localStorage.getItem('gs_user_backup')) || null;
-  } catch(_){ return null; }
-}
-function setStoredUser(u){
-  try {
-    if (!u) return;
-    localStorage.setItem('gs_user', JSON.stringify(u));
-    localStorage.setItem('gs_user_backup', JSON.stringify(u));
-  } catch(_){}
-}
-function clearStoredUser(){
-  try {
-    localStorage.removeItem('gs_user');
-    localStorage.removeItem('gs_user_backup');
-  } catch(_){}
-}
-
-/* ===== 카카오톡 문의 알림 ===== */
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.kakao-link').forEach(el => {
-    el.addEventListener('click', function(e) {
-      e.preventDefault();
-      alert('준비중입니다.');
+     
+  // 카카오톡 문의 클릭 시 "준비중입니다." 알림
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.kakao-link').forEach(el => {
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('준비중입니다.');
+      });
     });
   });
-});
-
-/* ===== 페이드인 ===== */
+// 모든 fadein 요소에 Intersection Observer로 디졸브 효과 적용
 document.addEventListener('DOMContentLoaded', function(){
   const fadeEls = document.querySelectorAll('.fadein');
   const mainFade = document.getElementById('mainFadein');
-  if(mainFade) setTimeout(()=>mainFade.classList.add('visible'), 400);
-  const observer = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{ if(entry.isIntersecting){ entry.target.classList.add('visible'); } });
-  }, { threshold: 0.3 });
-  fadeEls.forEach(el=> observer.observe(el));
-});
-
-/* ===== 네비게이션: 관리자/사용자 표시 ===== */
-function rebuildUserArea(){
-  const area   = document.getElementById('userArea');
-  const signup = document.getElementById('signupBtn');
-  const login  = document.getElementById('loginBtn');
-  const adminBtn = document.getElementById('adminReturnBtn');
-
-  const adminSession = !!localStorage.getItem('admin_session_v1');
-  const user = getStoredUser();
-
-  // 관리자 버튼
-  if (adminBtn) adminBtn.style.display = adminSession ? 'inline-flex' : 'none';
-
-  if (user && user.role !== 'admin') {
-    // 로그인 상태: 회원가입/로그인 숨김 + 내정보 버튼만
-    if (signup) signup.style.display = 'none';
-    if (login)  login.style.display  = 'none';
-    if (area) {
-      area.innerHTML = '<a href="profile.html" class="btn user-link" id="profileLink">내정보</a>' +
-                       (adminSession ? ' <button id="adminReturnBtn" class="btn" style="margin-left:8px;"><i class="fas fa-cog"></i></button>' : '');
-    }
-    // 자동 이동 (요구사항): 관리자 아닐 때만
-    if (!adminSession) {
-      setTimeout(()=>{ location.replace('profile.html'); }, 150);
-    }
-  } else {
-    // 비로그인: 기본 회원가입/로그인 노출
-    if (area && (!area.querySelector('#signupBtn') || !area.querySelector('#loginBtn'))) {
-      area.innerHTML = '<a href="signup.html" class="btn user-link" id="signupBtn">회원가입</a> '+
-                       '<a href="login.html" class="btn user-link" id="loginBtn">로그인</a>' +
-                       (adminSession ? ' <button id="adminReturnBtn" class="btn" style="margin-left:8px;"><i class="fas fa-cog"></i></button>' : '');
-    }
+  if(mainFade) {
+    setTimeout(()=>mainFade.classList.add('visible'), 400); // 인트로 오버레이 이후 페이드인
   }
-}
-document.addEventListener('DOMContentLoaded', function(){
-  rebuildUserArea();
-  const adminBtn = document.getElementById('adminReturnBtn');
-  adminBtn?.addEventListener('click', ()=>{ location.href = 'admin/index.html'; });
-  // 홈 로고 클릭 시에도 세션 복제 유지
-  const homeLogo = document.getElementById('homeLogo');
-  homeLogo?.addEventListener('click', (e)=>{ const u = getStoredUser(); if (u) setStoredUser(u); });
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.3 });
+  fadeEls.forEach(el=>{
+    observer.observe(el);
+  });
+});
+    // 로그인 상태에 따라 네비게이션 바 버튼 제어
+    function updateNavForAdmin() {
+      var isAdmin = !!localStorage.getItem('admin_session_v1');
+      var signupBtn = document.getElementById('signupBtn');
+      var loginBtn = document.getElementById('loginBtn');
+      var adminBtn = document.getElementById('adminReturnBtn');
+      if (isAdmin) {
+        if (signupBtn) signupBtn.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (adminBtn) adminBtn.style.display = 'inline-flex';
+      } else {
+        if (signupBtn) signupBtn.style.display = '';
+        if (loginBtn) loginBtn.style.display = '';
+        if (adminBtn) adminBtn.style.display = 'none';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      updateNavForAdmin();
+      var adminBtn = document.getElementById('adminReturnBtn');
+      if (adminBtn) {
+        adminBtn.addEventListener('click', function() {
+          window.location.href = 'admin/index.html';
+        });
+      }
+    });
+    // 로그인/로그아웃 시에도 updateNavForAdmin()을 호출해야 함 (app.js에서 처리 가능)
+  </script>
+  <script>
+// Intro overlay: GIF 1회만 보여주고 2초 후 ESC 효과 및 마지막 1초에 페이드아웃 디졸브 (총 3초만 재생)
+// 네비게이션 로고 클릭 시 항상 홈(index.html)으로 이동
+document.addEventListener('DOMContentLoaded', function() {
+  var homeLogo = document.getElementById('homeLogo');
+  if(homeLogo) {
+    homeLogo.addEventListener('click', function(e) {
+      e.preventDefault();
+      window.location.href = 'index.html';
+    });
+  }
 });
 
-/* ===== Intro overlay ===== */
+// Intro overlay: GIF 1회만 보여주고 4초 후 페이드아웃, 새로고침 없이 사라짐
 (function(){
   const overlay=document.getElementById('introOverlay');
   const img=document.getElementById('introGif');
   if(!overlay||!img) return;
+  // 세션 기준 1회만 보여주고, 이후엔 바로 숨김
   const played=sessionStorage.getItem('intro_played_v10');
   if(played){ overlay.style.display='none'; document.body.style.overflow=''; document.documentElement.style.overflow=''; return; }
   function hideIntro(){
     overlay.classList.add('hidden');
     setTimeout(()=>{
-      img.remove(); overlay.style.display='none';
-      document.body.style.overflow=''; document.documentElement.style.overflow='';
+      if(img) img.remove();
+      overlay.style.display='none';
+      document.body.style.overflow='';
+      document.documentElement.style.overflow='';
       sessionStorage.setItem('intro_played_v10','1');
-    }, 1000);
+    }, 1000); // 디졸브 효과 1초
   }
   document.documentElement.style.overflow='hidden';
   document.body.style.overflow='hidden';
-  setTimeout(hideIntro, 4000);
+  setTimeout(hideIntro, 4000); // 4초 후 자동 페이드아웃
   overlay.addEventListener('click', hideIntro);
 })();
+  </script>
+  <script>
+    // Extra best-effort content protection for this page
+    document.addEventListener('contextmenu', e=> e.preventDefault());
+    document.addEventListener('dragstart', e=> e.preventDefault());
+    document.addEventListener('copy', e=> { e.clipboardData?.setData('text/plain',''); e.preventDefault(); });
+    document.addEventListener('keydown', e=>{
+      if((e.ctrlKey||e.metaKey) && ['s','p','u','c'].includes(e.key.toLowerCase())) e.preventDefault();
+      if(e.key==='F12' || (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c'].includes(e.key))) e.preventDefault();
+    });
+    document.addEventListener('DOMContentLoaded',()=>{ document.querySelectorAll('img,video').forEach(el=>{ el.setAttribute('draggable','false'); el.setAttribute('oncontextmenu','return false'); }); });
+    // ===== 네비게이션 스크롤 페이드 (아래 스크롤시 위로 디졸브 사라짐, 맨 위 복귀시 페이드 인) =====
+    (function(){
+      let lastY = window.scrollY;
+      const nav = document.getElementById('navbar');
+      const thresholdHide = 40; // 조금만 내려도 숨김 시작
+      let forcedShow = false;
+      function handleScroll(){
+        if(forcedShow){return;} // 마우스 최상단 강제 표시 상태
+        const y = window.scrollY;
+        if (y > thresholdHide) {
+          if (y > lastY) { // 아래로
+            nav.classList.add('nav-hidden');
+          } else { // 위로 올림
+            nav.classList.remove('nav-hidden');
+          }
+        } else {
+          nav.classList.remove('nav-hidden');
+        }
+        lastY = y;
+      }
+      window.addEventListener('scroll', handleScroll);
+      // 마우스가 화면 최상단(예: 24px) 영역에 들어오면 네비게이션 표시
+      window.addEventListener('mousemove', e => {
+        if (e.clientY <= 24) {
+          forcedShow = true;
+          nav.classList.remove('nav-hidden');
+          // 1.5초 후 스크롤 방향 다시 적용
+          clearTimeout(window.__navForceTimer);
+          window.__navForceTimer = setTimeout(()=>{ forcedShow=false; handleScroll(); },1500);
+        }
+      });
+    })();
 
-/* ===== 보안/UX ===== */
-document.addEventListener('contextmenu', e=> e.preventDefault());
-document.addEventListener('dragstart', e=> e.preventDefault());
-document.addEventListener('copy', e=> { e.clipboardData?.setData('text/plain',''); e.preventDefault(); });
-
-/* ===== 네비 스크롤 페이드 ===== */
-(function(){
-  let lastY = window.scrollY;
-  const nav = document.getElementById('navbar');
-  const thresholdHide = 40;
-  let forcedShow = false;
-  function handleScroll(){
-    if(forcedShow){return;}
-    const y = window.scrollY;
-    if (y > thresholdHide) {
-      if (y > lastY) nav.classList.add('nav-hidden');
-      else nav.classList.remove('nav-hidden');
-    } else nav.classList.remove('nav-hidden');
-    lastY = y;
-  }
-  window.addEventListener('scroll', handleScroll);
-  window.addEventListener('mousemove', e => {
-    if (e.clientY <= 24) {
-      forcedShow = true; nav.classList.remove('nav-hidden');
-      clearTimeout(window.__navForceTimer);
-      window.__navForceTimer = setTimeout(()=>{ forcedShow=false; handleScroll(); },1500);
-    }
-  });
-})();
-
-/* ===== 메뉴 토글/앵커 스크롤 ===== */
-document.addEventListener('DOMContentLoaded', ()=>{
+    // 메뉴 토글
   const menuBtn = document.querySelector('.menu-btn');
   const navLinks = document.querySelector('.nav-links');
-  menuBtn?.addEventListener('click', ()=>{ menuBtn.classList.toggle('active'); navLinks?.classList.toggle('active'); });
-  document.querySelectorAll('a[href^="#"]').forEach(a=>{
-    a.addEventListener('click', e=>{
-      const t = document.querySelector(a.getAttribute('href'));
-      if (t) { e.preventDefault(); t.scrollIntoView({ behavior:'smooth', block:'start' }); }
+    menuBtn.addEventListener('click', () => {
+      menuBtn.classList.toggle('active');
+      navLinks.classList.toggle('active');
     });
-  });
-  document.querySelectorAll('.nav-links a').forEach(l=>{
-    l.addEventListener('click', ()=>{ menuBtn?.classList.remove('active'); navLinks?.classList.remove('active'); });
-  });
-  document.getElementById('scrollToTop')?.addEventListener('click', ()=>{ window.scrollTo({ top:0, behavior:'smooth' }); });
-});
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) {
+          e.preventDefault();
+          t.scrollIntoView({ behavior:'smooth', block:'start' });
+        }
+      });
+    });
+    document.querySelectorAll('.nav-links a').forEach(l => {
+      l.addEventListener('click', () => {
+        menuBtn.classList.remove('active');
+        navLinks.classList.remove('active');
+      });
+    });
 
-/* ===== 스크롤 진행률 ===== */
-const bar = document.getElementById('scroll-progress');
-function updateBar() {
-  const s = window.pageYOffset || document.documentElement.scrollTop;
-  const dh = document.documentElement.scrollHeight - window.innerHeight;
-  if (bar) bar.style.width = dh ? (s/dh*100)+'%' : '0%';
-}
-window.addEventListener('scroll', updateBar);
-window.addEventListener('resize', updateBar);
-document.addEventListener('DOMContentLoaded', updateBar);
+  // 스크롤탑
+  document.getElementById('scrollToTop').addEventListener('click', () => {
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
 
-/* ===== 금 시세 API & 렌더 ===== */
-const API_URL = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
-const fmt = n => Number(n).toLocaleString('ko-KR');
+  // 테마 제거됨
 
-function animateNumber(el, from, to, duration = 2800, onComplete){
-  from = Number(from)||0; to = Number(to)||0;
-  if (!el) { onComplete&&onComplete(); return; }
-  if (from === to) { el.textContent = fmt(to)+'원'; onComplete&&onComplete(); return; }
-  const start = performance.now();
-  function step(now){
-    const p = Math.min((now-start)/duration, 1);
-    const cur = Math.floor(from + (to-from)*p);
-    el.textContent = fmt(cur) + '원';
-    if (p < 1) requestAnimationFrame(step);
-    else { el.textContent = fmt(to)+'원'; onComplete&&onComplete(); }
-  }
-  requestAnimationFrame(step);
-}
-
-function goldFirework(targetEl){
-  if (!targetEl) return;
-  const rect = targetEl.getBoundingClientRect();
-  const canvas = document.createElement('canvas');
-  canvas.style.position='fixed';
-  canvas.style.left=(rect.left + window.scrollX - rect.width*0.5)+'px';
-  canvas.style.top=(rect.top + window.scrollY - rect.height*0.5)+'px';
-  canvas.width=rect.width*2; canvas.height=rect.height*2;
-  canvas.style.pointerEvents='none'; canvas.style.zIndex=9999;
-  document.body.appendChild(canvas);
-  const ctx=canvas.getContext('2d'); const particles=[];
-  const colors=['#FFD700','#FFF8DC','#FFEC8B','#FFFACD','#F5DEB3'];
-  for(let i=0;i<48;i++){
-    const angle=(Math.PI*2*i)/48; const speed=3+Math.random()*5;
-    particles.push({ x:canvas.width/2,y:canvas.height/2,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,r:4+Math.random()*5,color:colors[Math.floor(Math.random()*colors.length)],alpha:1 });
-  }
-  let frame=0;
-  (function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p=>{ ctx.globalAlpha=p.alpha; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=p.color; ctx.fill();
-      p.x+=p.vx; p.y+=p.vy; p.alpha-=0.012; });
-    frame++; if(frame<90) requestAnimationFrame(draw); else canvas.remove();
-  })();
-}
-
-async function renderGoldPrice(){
-  const priceEl  = document.getElementById('mainPrice');
-  const changeEl = document.getElementById('priceChange');
-  const supplyEl = document.querySelector('.supply-price');
-  const supplyCh = document.querySelector('.supply-footer .change-line');
-
-  if (priceEl) { priceEl.textContent='0원'; priceEl.style.textAlign='center'; priceEl.style.margin='0 auto'; priceEl.style.display='block'; }
-  if (supplyEl){ supplyEl.textContent='0원'; supplyEl.style.textAlign='center'; supplyEl.style.margin='0 auto'; supplyEl.style.display='block'; }
-
-  let basePrice = 0;
-  let supplyVal = 520000; // 공급가 고정(필요 시 /api에서 가져오도록 변경 가능)
-
-  const runEffects = (main, supply) => {
-    animateNumber(priceEl, 0, main, 2800, ()=>goldFirework(priceEl));
-    animateNumber(supplyEl,0, supply, 2800, ()=>goldFirework(supplyEl));
-  };
-
-  try {
-    // 1) KV(/api/security?type=goldprice)
-    const kvRes = await fetch('/api/security?type=goldprice', {cache:'no-store'});
-    const kvJson = await kvRes.json().catch(()=>null);
-    const gp = kvJson?.data?.goldprice ?? kvJson?.goldprice ?? null;
-    if (gp) {
-      if (typeof gp.supplyPrice === 'number') supplyVal = gp.supplyPrice;
-      if (typeof gp.price === 'number') basePrice = gp.price;
+    // 스크롤 진행률
+    const bar = document.getElementById('scroll-progress');
+    function updateBar() {
+      const s = window.pageYOffset || document.documentElement.scrollTop;
+      const dh = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = dh ? (s/dh*100)+'%' : '0%';
     }
-  } catch(_) {}
+    window.addEventListener('scroll', updateBar);
+    window.addEventListener('resize', updateBar);
+    document.addEventListener('DOMContentLoaded', updateBar);
 
-  if (!basePrice) {
-    // 2) 외부 API 폴백
-    try {
-      const d = await fetch(API_URL).then(r=>r.json());
-      if (d && d.price) {
-        basePrice = d.price;
-        const arrow = d.trend==='up' ? '▲' : d.trend==='down' ? '▼' : '';
-        const pct   = d.percent || '';
-        const chg   = d.change ? fmt(d.change)+'원' : '';
-        if (changeEl) {
-          changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
-          changeEl.className = 'change-line' + (d.trend==='up'?' up':d.trend==='down'?' down':'');
+    // 금 시세 API & 렌더링
+  const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
+
+  // 슬롯머신 숫자 애니메이션 함수
+  // 고급 Elastic/EaseOut + 폭죽 효과
+  // 슬롯머신 스타일: 느리게→빠르게→한자리씩 정지
+  // 슬롯머신 스타일: 느리게→빠르게→한자리씩 정지 (더 느리게)
+  function animateNumber(el, from, to, duration = 5200, onComplete) {
+    from = Number(from) || 0;
+    to = Number(to) || 0;
+    if (from === to) {
+      el.textContent = fmt(to) + '원';
+      if (onComplete) onComplete();
+      return;
+    }
+    const start = performance.now();
+    const toStr = fmt(to);
+    const digits = toStr.replace(/[^0-9]/g, '').split('');
+    const len = digits.length;
+    let lastFrame = false;
+    function slotEase(t) {
+      // 0~0.25: 매우 느림, 0.25~0.7: 5배 빠름, 0.7~1: 한자리씩 정지 (전체적으로 더 느리게)
+      if (t < 0.25) return t * 0.15;
+      if (t < 0.7) return 0.0375 + (t-0.25)*1.1;
+      return 0.45 + (t-0.7)*0.8;
+    }
+    function step(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = slotEase(progress);
+      let curVal = Math.floor(from + (to - from) * eased);
+      let curStr = fmt(curVal);
+      // 마지막 0.3구간: 한자리씩 정지
+      if (progress > 0.7) {
+        let arr = curStr.replace(/[^0-9]/g, '').split('');
+        for (let i = 0; i < len; i++) {
+          if (progress < 0.75 + i*0.05) arr[i] = Math.floor(Math.random()*10).toString();
+          else arr[i] = digits[i];
+        }
+        curStr = arr.join('').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+      }
+      el.textContent = curStr + '원';
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = toStr + '원';
+        if (!lastFrame) {
+          lastFrame = true;
+          if (onComplete) onComplete();
         }
       }
-    } catch(_) {}
+    }
+    requestAnimationFrame(step);
   }
 
-  // 최후 폴백: GSApp.goldPrice
-  try { if (!basePrice && typeof GSApp?.goldPrice === 'number') basePrice = GSApp.goldPrice; } catch(_){}
-
-  // 렌더 + 비교 표시
-  runEffects(basePrice, supplyVal);
-  if (supplyCh && basePrice > 0 && supplyVal > 0) {
-    const rate = (basePrice - supplyVal)/basePrice*100;
-    const sign = rate > 0 ? '▼' : '▲';
-    const abs  = Math.abs(rate).toFixed(2) + '%';
-    supplyCh.textContent = `${sign} ${abs}`;
-    supplyCh.className = 'change-line ' + (rate > 0 ? 'down' : 'up');
-  }
-
-  // ✅ 프로필 주문 패널에서 동일 값 쓰도록 저장
-  try {
-    localStorage.setItem('gs_gold_price', String(basePrice));
-    localStorage.setItem('gs_supply_price', String(supplyVal));
-  } catch(_) {}
-}
-
-/* Intro 종료 후 시세 렌더 시작 */
-document.addEventListener('DOMContentLoaded', function(){
-  let started = false;
-  function start(){ if (!started){ started=true; setTimeout(renderGoldPrice, 300); } }
-  const overlay = document.getElementById('introOverlay');
-  if (overlay) {
-    let ended = false;
-    function trigger(){ if (!ended){ ended=true; start(); } }
-    overlay.addEventListener('transitionend', trigger);
-    overlay.addEventListener('click', trigger);
-    setTimeout(trigger, 6000);
-  } else start();
-});
-
-/* ===== Section2 Carousel ===== */
-const MAX_ITEMS = 20, VISIBLE_COUNT = 13;
-document.addEventListener('DOMContentLoaded', () => {
-  const items = [
-    { img: 'section_1.jpg',  desc: '우간다 황금의 첫 걸음 — 땅속에서 피어나는 기회의 빛' },
-    { img: 'section_2.jpg',  desc: '지하 암석 속 황금의 길 — 끝없는 도전' },
-    { img: 'section_3.jpg',  desc: '대지 위에 펼쳐진 생명의 광맥 — 공동의 땀과 노력' },
-    { img: 'section_4.jpg',  desc: '노동의 힘이 계약이 되고, 희망이 된다 1' },
-    { img: 'section_5.jpg',  desc: '노동의 힘이 계약이 되고, 희망이 된다 2' },
-    { img: 'section_6.jpg',  desc: '붉은 대지에서 피어나는 황금의 열정' },
-    { img: 'section_7.jpg',  desc: '황토빛 물에서 캐내는 삶의 원천' },
-    { img: 'section_8.jpg',  desc: '함께하는 손길이 만드는 황금의 미래' },
-    { img: 'section_9.jpg',  desc: '첨단 기술이 더하는 가치 — 금의 새로운 시대' },
-    { img: 'section_10.jpg', desc: '노력의 황금의 결실에 대한 섬세한 성분 검사' },
-    { img: 'section_11.jpg', desc: '황금의 결실 — 우간다 땅에서 피어난 부와 가치' },
-    { img: 'section_12.jpg', desc: '안전 속에서 지켜낸 자원 — 책임 있는 채굴' },
-    { img: 'section_13.jpg', desc: '공식적인 계약과 약속 — 신뢰로 세워가는 황금의 미래' },
-    { img: 'section_14.jpg', desc: '사진14' },{ img: 'section_15.jpg', desc: '사진15' },
-    { img: 'section_16.jpg', desc: '사진16' },{ img: 'section_17.jpg', desc: '사진17' },
-    { img: 'section_18.jpg', desc: '사진18' },{ img: 'section_19.jpg', desc: '사진19' },
-    { img: 'section_20.jpg', desc: '사진20' }
-  ];
-  const track = document.getElementById('carousel-track');
-  const count = Math.min(VISIBLE_COUNT, MAX_ITEMS, items.length);
-  if (track) {
-    items.slice(0, count).forEach(item=>{
-      if (item.img) {
-        const div = document.createElement('div'); div.className='carousel-item';
-        const imgEl = document.createElement('img'); imgEl.src = `img/${item.img}`; imgEl.alt = item.desc;
-        const p = document.createElement('p'); p.textContent = item.desc;
-        div.append(imgEl, p); track.append(div);
+  // 금색 폭죽 효과 (canvas)
+  function goldFirework(targetEl) {
+    const rect = targetEl.getBoundingClientRect();
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'fixed';
+    canvas.style.left = (rect.left + window.scrollX - rect.width*0.5) + 'px';
+    canvas.style.top = (rect.top + window.scrollY - rect.height*0.5) + 'px';
+    canvas.width = rect.width*2;
+    canvas.height = rect.height*2;
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = 9999;
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const particles = [];
+    const colors = ['#FFD700','#FFF8DC','#FFEC8B','#FFFACD','#F5DEB3'];
+    for(let i=0;i<48;i++){
+      const angle = (Math.PI*2*i)/48;
+      const speed = 3+Math.random()*5;
+      particles.push({
+        x: canvas.width/2,
+        y: canvas.height/2,
+        vx: Math.cos(angle)*speed,
+        vy: Math.sin(angle)*speed,
+        r: 4+Math.random()*5,
+        color: colors[Math.floor(Math.random()*colors.length)],
+        alpha: 1
+      });
+    }
+    let frame=0;
+    function draw(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      particles.forEach(p=>{
+        ctx.globalAlpha = p.alpha;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.012;
+      });
+      frame++;
+      if(frame<90){
+        requestAnimationFrame(draw);
+      }else{
+        canvas.remove();
       }
-    });
-    track.innerHTML += track.innerHTML; // 루프
+    }
+    draw();
   }
-});
+  const fmt = n => Number(n).toLocaleString('ko-KR');
 
-/* ===== 보조: app.js 초기화 후 보장 ===== */
-document.addEventListener('DOMContentLoaded', ()=>{
-  function safeBuild(){ if(window.GSApp && typeof window.GSApp.buildUserNav === 'function'){ window.GSApp.buildUserNav(); } }
-  safeBuild(); setTimeout(safeBuild, 300); setTimeout(safeBuild, 1000);
-});
+  async function renderGoldPrice(){
+    const priceEl  = document.getElementById('mainPrice');
+    const changeEl = document.getElementById('priceChange');
+    const supplyEl = document.querySelector('.supply-price');
+    const supplyCh = document.querySelector('.supply-footer .change-line');
+    // DOM 준비 후, 초기값을 0으로 세팅 (시작전 - 대신 0)
+    if (priceEl) priceEl.textContent = '0원';
+    if (supplyEl) supplyEl.textContent = '0원';
+    let prevMain = 0;
+    let prevSupply = 0;
 
-/* ===== 텔레그램/이미지 호버 ===== */
+    try {
+      // 1) KV에서 goldprice 값 확인
+      const kvRes = await fetch('/api/security?type=goldprice');
+      const kvJson = await kvRes.json();
+      const manual = kvJson && kvJson.manualGoldPrice ? Number(kvJson.manualGoldPrice) : 0;
+
+      let basePrice = 0;
+      let supplyVal = 520000; // 공급가격을 항상 520,000원으로 고정
+      // intro webp가 끝난 뒤에만 애니메이션 실행
+      function runEffects(main, supply) {
+        // 항상 0에서 시작해 가격이 올라가는 이펙트
+        if (priceEl) animateNumber(priceEl, 0, main, 2800, ()=>{
+          goldFirework(priceEl);
+        });
+        if (supplyEl) animateNumber(supplyEl, 0, supply, 2800, ()=>{
+          goldFirework(supplyEl);
+        });
+      }
+      if (manual > 0) {
+        basePrice = manual;
+        runEffects(manual, supplyVal);
+      } else {
+        const d = await fetch(API_URL).then(r=>r.json());
+        if (d && d.price) {
+          basePrice = d.price;
+          runEffects(d.price, supplyVal);
+          const arrow = d.trend==='up' ? '▲' : d.trend==='down' ? '▼' : '';
+          const pct   = d.percent || '';
+          const chg   = d.change ? fmt(d.change)+'원' : '';
+          changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
+          changeEl.className = 'change-line' + (d.trend==='up'? ' up': d.trend==='down'? ' down':'');
+        }
+      }
+      // 공급가 대비 퍼센트만 표시
+      if (supplyEl && supplyCh && basePrice > 0) {
+        const supplyVal2 = supplyVal;
+        if (supplyVal2 > 0) {
+          const rate = (basePrice - supplyVal2)/basePrice*100;
+          const sign = rate > 0 ? '▼' : '▲';
+          const absPct = Math.abs(rate).toFixed(2) + '%';
+          supplyCh.textContent = `${sign} ${absPct}`;
+          supplyCh.className = 'change-line ' + (rate > 0 ? 'down' : 'up');
+        }
+      }
+    } catch (e) {
+      priceEl.textContent = '–';
+      changeEl.textContent = '';
+    }
+  }
+
+  // intro webp가 끝난 뒤에 금액 애니메이션 항상 실행 (transitionend, click 모두 1초 후)
+  document.addEventListener('DOMContentLoaded', function(){
+    // 금시세, 공급가격 모두 0원으로 초기화 및 가운데 정렬
+    const priceEl = document.getElementById('mainPrice');
+    const supplyEl = document.querySelector('.supply-price');
+    if (priceEl) {
+      priceEl.textContent = '0원';
+      priceEl.style.textAlign = 'center';
+      priceEl.style.marginLeft = 'auto';
+      priceEl.style.marginRight = 'auto';
+      priceEl.style.display = 'block';
+    }
+    if (supplyEl) {
+      supplyEl.textContent = '0원';
+      supplyEl.style.textAlign = 'center';
+      supplyEl.style.marginLeft = 'auto';
+      supplyEl.style.marginRight = 'auto';
+      supplyEl.style.display = 'block';
+    }
+    let animationStarted = false;
+    function startAnimation() {
+      if (!animationStarted) {
+        animationStarted = true;
+        setTimeout(renderGoldPrice, 300); // intro 끝나고 0.5초 후 실행
+      }
+    }
+    const overlay = document.getElementById('introOverlay');
+    if (overlay) {
+      let ended = false;
+      function trigger() {
+        if (!ended) {
+          ended = true;
+          startAnimation();
+        }
+      }
+      overlay.addEventListener('transitionend', trigger);
+      overlay.addEventListener('click', trigger);
+      setTimeout(trigger, 6000);
+    } else {
+      startAnimation();
+    }
+  });
+
+    // Section2: Carousel + 설명글 자동 생성
+    // — 최대 20개, VISIBLE_COUNT만큼만 표시
+    const MAX_ITEMS = 20;
+    const VISIBLE_COUNT = 13; // 1~MAX_ITEMS 사이의 값으로 조정하세요
+
+  document.addEventListener('DOMContentLoaded', () => {
+      const items = [
+        { img: 'section_1.jpg',  desc: '우간다 황금의 첫 걸음 — 땅속에서 피어나는 기회의 빛' },
+        { img: 'section_2.jpg',  desc: '지하 암석 속 황금의 길 — 끝없는 도전' },
+        { img: 'section_3.jpg',  desc: '대지 위에 펼쳐진 생명의 광맥 — 공동의 땀과 노력' },
+        { img: 'section_4.jpg',  desc: '노동의 힘이 계약이 되고, 희망이 된다 1' },
+        { img: 'section_5.jpg',  desc: '노동의 힘이 계약이 되고, 희망이 된다 2' },
+        { img: 'section_6.jpg',  desc: '붉은 대지에서 피어나는 황금의 열정' },
+        { img: 'section_7.jpg',  desc: '황토빛 물에서 캐내는 삶의 원천' },
+        { img: 'section_8.jpg',  desc: '함께하는 손길이 만드는 황금의 미래' },
+        { img: 'section_9.jpg',  desc: '첨단 기술이 더하는 가치 — 금의 새로운 시대' },
+        { img: 'section_10.jpg', desc: '노력의 황금의 결실에 대한 섬세한 성분 검사' },
+        { img: 'section_11.jpg', desc: '황금의 결실 — 우간다 땅에서 피어난 부와 가치' },
+        { img: 'section_12.jpg', desc: '안전 속에서 지켜낸 자원 — 책임 있는 채굴' },
+        { img: 'section_13.jpg', desc: '공식적인 계약과 약속 — 신뢰로 세워가는 황금의 미래' },
+        { img: 'section_14.jpg', desc: '사진14' },
+        { img: 'section_15.jpg', desc: '사진15' },
+        { img: 'section_16.jpg', desc: '사진16' },
+        { img: 'section_17.jpg', desc: '사진17' },
+        { img: 'section_18.jpg', desc: '사진18' },
+        { img: 'section_19.jpg', desc: '사진19' },
+        { img: 'section_20.jpg', desc: '사진20' }
+      ];
+
+      const track = document.getElementById('carousel-track');
+      const count = Math.min(VISIBLE_COUNT, MAX_ITEMS, items.length);
+
+      items.slice(0, count).forEach(item => {
+        // 이미지와 설명 모두 있을 때만 렌더링
+        if (item.img) {
+          const div = document.createElement('div');
+          div.className = 'carousel-item';
+          const imgEl = document.createElement('img');
+          imgEl.src = `img/${item.img}`;
+          imgEl.alt = item.desc;
+          const p = document.createElement('p');
+          p.textContent = item.desc;
+          div.append(imgEl, p);
+          track.append(div);
+        }
+      });
+
+  // 무한 루프를 위해 복제
+  track.innerHTML += track.innerHTML;
+    });
+
+    // (i18n & user nav handled by app.js) — 보조 보장 로직
+    document.addEventListener('DOMContentLoaded', () => {
+      // app.js 비동기 초기화 후 사용자 버튼 강제 재구성 (지연 보장)
+      function safeBuild(){
+        if(window.GSApp && typeof window.GSApp.buildUserNav === 'function'){
+          window.GSApp.buildUserNav();
+        }
+      }
+      safeBuild();
+      setTimeout(safeBuild, 300);
+      setTimeout(safeBuild, 1000);
+  // 테마 기능 삭제됨
+    });
+  </script>
+  <script>
+// 섹션5 텔레그램 문의.gif에 호버 이펙트가 적용되도록 JS 보장
+
 document.addEventListener('DOMContentLoaded', function(){
+  // 텔레그램 문의.gif 이미지에 호버 이벤트 추가
   document.querySelectorAll('.contact-buttons img, .fixed-social-icons img').forEach(function(img){
-    img.addEventListener('mouseenter', function(){ img.style.transform = 'translateY(-8px) scale(1.03)'; });
-    img.addEventListener('mouseleave', function(){ img.style.transform = ''; });
+    img.addEventListener('mouseenter', function(){
+      img.style.transform = 'translateY(-8px) scale(1.03)';
+    });
+    img.addEventListener('mouseleave', function(){
+      img.style.transform = '';
+    });
   });
 });
+  </script>
+  <script>
+// 맨위로 버튼 아이콘을 올바른 위쪽 화살표로 직접 수정
+// (FontAwesome 사용 시 <i class="fas fa-arrow-up"></i> 또는 유니코드 ↑)
 
-/* ===== 스크롤탑 아이콘 보정 ===== */
 document.addEventListener('DOMContentLoaded', function(){
   var scrollBtn = document.getElementById('scrollToTop');
   if(scrollBtn) {
+    // 아이콘이 잘못된 경우 교체
     var icon = scrollBtn.querySelector('i');
-    if(icon) { icon.className = 'fas fa-arrow-up'; icon.textContent = ''; }
-    else { var newIcon = document.createElement('i'); newIcon.className = 'fas fa-arrow-up'; scrollBtn.innerHTML=''; scrollBtn.appendChild(newIcon); }
+    if(icon) {
+      icon.className = 'fas fa-arrow-up'; // FontAwesome 위쪽 화살표
+      icon.textContent = '';
+    } else {
+      // 아이콘이 없으면 직접 추가
+      var newIcon = document.createElement('i');
+      newIcon.className = 'fas fa-arrow-up';
+      scrollBtn.innerHTML = '';
+      scrollBtn.appendChild(newIcon);
+    }
   }
 });
   </script>
