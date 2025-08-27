@@ -19,7 +19,11 @@
       body: method === "GET" ? null : JSON.stringify(payload ?? {}),
     });
     const js = await res.json().catch(()=>({}));
-    if (!res.ok || !js?.ok) throw new Error(js?.error || `HTTP ${res.status}`);
+    if (!res.ok || !js?.ok) {
+      console.error("API 오류:", js?.error || res.statusText);
+      alert("API 오류: " + (js?.error || res.statusText));
+      throw new Error(js?.error || res.statusText);
+    }
     return js.data;
   }
 
