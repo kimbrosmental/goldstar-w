@@ -28,4 +28,19 @@
   });
   // 기본: 대시보드
   showView('dashboard');
+  window.renderDashboard = function() {
+    const el = document.getElementById('view-dashboard');
+    el.innerHTML = `
+      <h2>관리자 대시보드</h2>
+      <div class="dashboard-widgets">
+        <div class="widget">회원 수: <span id="userCount">-</span></div>
+        <div class="widget">주문 수: <span id="orderCount">-</span></div>
+        <div class="widget">문의 수: <span id="inquiryCount">-</span></div>
+      </div>
+    `;
+    // 실제 데이터는 AJAX 등으로 불러와서 채워넣기
+    document.getElementById('userCount').textContent = '123';
+    document.getElementById('orderCount').textContent = '45';
+    document.getElementById('inquiryCount').textContent = '7';
+  };
 })();
