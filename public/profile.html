@@ -1,73 +1,72 @@
 <script src="app.js" defer></script>
 <script>
+/* 안전 장치: 전역 에러가 나도 화면이 비지 않게 */
+window.addEventListener('error', (e)=>{ console.error('[profile] runtime error:', e.error || e.message); });
+
 document.addEventListener('DOMContentLoaded', () => {
   const $  = (s,p=document)=>p.querySelector(s);
   const $$ = (s,p=document)=>Array.from(p.querySelectorAll(s));
 
-  /* ---------------- 세션 도우미 ---------------- */
+  /* ---------- 세션 유틸 ---------- */
   function getSessionUser(){
-    try{
-      // 1) GSApp 세션 우선
+    try {
       const u = window.GSApp?.currentUser?.();
-      if (u) {
-        // 항상 로컬에도 복제
-        localStorage.setItem('gs_user', JSON.stringify(u));
-        localStorage.setItem('gs_user_backup', JSON.stringify(u));
-        return u;
-      }
-    }catch(_){}
-    // 2) 로컬 복구
+      if (u) { setSessionUser(u); return u; }
+    } catch(_) {}
     try {
       return JSON.parse(localStorage.getItem('gs_user')) ||
              JSON.parse(localStorage.getItem('gs_user_backup')) || null;
-    }catch(_){ return null; }
+    } catch(_) { return null; }
   }
   function setSessionUser(u){
-    try{
+    try {
       if (!u) return;
       localStorage.setItem('gs_user', JSON.stringify(u));
       localStorage.setItem('gs_user_backup', JSON.stringify(u));
-    }catch(_){}
+    } catch(_) {}
   }
   function clearSessionUser(){
-    try{ localStorage.removeItem('gs_user'); localStorage.removeItem('gs_user_backup'); }catch(_){}
+    try {
+      localStorage.removeItem('gs_user');
+      localStorage.removeItem('gs_user_backup');
+    } catch(_) {}
   }
 
-  /* ---------------- 네비 & 세션 유지 ---------------- */
+  /* ---------- 네비: 메뉴/홈/내정보 노출 ---------- */
   const menuBtn = $('.menu-btn');
   menuBtn?.addEventListener('click', ()=>{ menuBtn.classList.toggle('active'); $('.nav-links')?.classList.toggle('active'); });
 
   const homeIcon = $('.home-icon');
   homeIcon?.addEventListener('click', ()=>{
-    // 홈으로 갈 때도 세션을 확실히 복제(로그아웃처럼 보이는 문제 방지)
+    // 홈 이동 전 세션을 로컬에 확실히 유지(로그아웃처럼 보이는 현상 방지)
     const u = getSessionUser();
     if (u) setSessionUser(u);
-    // 기본 네비게이션 그대로 진행
+    // 기본 이동 그대로
   });
 
-  // 로그인 상태면 내정보 버튼 노출
-  (function renderUserNav(){
+  (function setupUserNav(){
     const u = getSessionUser();
+    const area = $('#userArea');
+    if (!area) return;
     if (u && u.role !== 'admin') {
-      $('#navProfileBtn').style.display = 'inline-block';
-      // 로그인되어 있으면 userArea에 회원가입/로그인 숨기고 "내정보"만 노출
-      const area = $('#userArea');
-      if (area) area.innerHTML = `<a href="profile.html" class="btn" style="background:#004d40;border:1px solid #00695C;border-radius:8px;padding:8px 12px;color:#FFD700;text-decoration:none;">내정보</a>`;
+      // 로그인 상태: 회원가입/로그인 버튼 숨기고 "내정보"만 노출
+      area.innerHTML = '<a href="profile.html" class="btn" style="background:#004d40;border:1px solid #00695C;border-radius:8px;padding:8px 12px;color:#FFD700;text-decoration:none;">내정보</a>';
+      const navProfileBtn = $('#navProfileBtn');
+      if (navProfileBtn) navProfileBtn.style.display = 'inline-block';
     } else {
-      // 비로그인: userArea가 직접 회원가입/로그인을 그리고 있다면 그대로 유지
-      // (필요하면 여기서 area.innerHTML = '회원가입/로그인' 구성)
+      // 비로그인: 기존 영역 유지(사이트 원래 마크업 사용)
     }
   })();
 
-  /* ---------------- 요약/프로필/주문/문의 렌더 ---------------- */
-  function renderProfileSummary(user){
+  /* ---------- 기본 정보/주문/문의 렌더 ---------- */
+  function renderProfileSummary(u){
     const sum = $('#summaryLine');
-    if (sum && user) sum.innerHTML = `<strong>${user.username}</strong> | ${user.name} | ${user.phone} | ${user.email}`;
+    if (sum && u) sum.innerHTML = `<strong>${u.username||'-'}</strong> | ${u.name||'-'} | ${u.phone||'-'} | ${u.email||'-'}`;
   }
   function renderOrders(list){
     const el = $('#ordersContainer');
-    if(!el) return;
-    if(!Array.isArray(list) || !list.length){
+    if (!el) return;
+    if (!Array.isArray(list) || !list.length) {
       el.innerHTML = '<div class="orders-empty" data-i18n="orders_empty">없음</div>';
       window.GSApp?.applyLang?.(); return;
     }
@@ -75,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
       '<table class="orders-table"><thead><tr>' +
       '<th>주문번호</th><th>상품</th><th>돈수</th><th>공급가</th><th>현재가</th><th>총금액</th><th>차액</th><th>상태</th><th>일시</th>' +
       '</tr></thead><tbody>' +
-      list.map(o=>`
+      list.map(o => `
         <tr>
           <td>${o.id}</td>
           <td>골드바</td>
@@ -84,150 +83,148 @@ document.addEventListener('DOMContentLoaded', () => {
           <td style="text-align:right;">${Number(o.currentPrice||0).toLocaleString('ko-KR')}</td>
           <td style="text-align:right;">${Number(o.totalPrice||0).toLocaleString('ko-KR')}</td>
           <td style="text-align:right;">${Number(o.priceDiff||0).toLocaleString('ko-KR')}</td>
-          <td>${o.status||'-'}</td>
-          <td>${new Date(o.ts||Date.now()).toLocaleString('ko-KR')}</td>
+          <td>${o.status || '-'}</td>
+          <td>${new Date(o.ts || Date.now()).toLocaleString('ko-KR')}</td>
         </tr>`).join('') +
       '</tbody></table>';
   }
   function renderMessages(list){
     const wrap = $('#messagesWrap');
-    if(!wrap) return;
-    if(!Array.isArray(list) || !list.length){
+    if (!wrap) return;
+    if (!Array.isArray(list) || !list.length) {
       wrap.innerHTML = '<div class="orders-empty" data-i18n="messages_empty">문의가 없습니다.</div>';
       window.GSApp?.applyLang?.(); return;
     }
     wrap.innerHTML = list.slice().reverse().map(m=>{
-      const status = m.answered ? (GSApp.t?.('status_answered')||'답변완료') :
-                     (m.read ? (GSApp.t?.('status_read')||'읽음') : (GSApp.t?.('status_unread')||'미읽음'));
+      const status = m.answered ? (GSApp.t?.('status_answered')||'답변완료')
+                   : (m.read     ? (GSApp.t?.('status_read')    ||'읽음')
+                                 : (GSApp.t?.('status_unread')  ||'미읽음'));
       return `
-        <div class="msg-item" data-id="${m.id}" style="background:#0c1a18;padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:8px;position:relative;">
+        <div class="msg-item" data-id="${m.id}" style="background:#0c1a18;padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:8px;">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
             <div style="flex:1;">${m.fromAdmin?'<strong style="color:#FFD700;">[관리자]</strong> ':''}${m.content}</div>
-            <span class="msg-status" style="font-size:11px;padding:2px 6px;border-radius:10px;background:${m.answered?'#2e7d32':(m.read?'#455a64':'#b71c1c')};color:#fff;white-space:nowrap;">${status}</span>
+            <span class="msg-status" style="font-size:11px;padding:2px 6px;border-radius:10px;background:${m.answered?'#2e7d32':(m.read?'#455a64':'#b71c1c')};color:#fff;">${status}</span>
           </div>
           <div style="font-size:11px;color:#888;margin-top:4px;">${new Date(m.ts).toLocaleString('ko-KR')}</div>
         </div>`;
     }).join('');
-    // 읽음 처리
     try {
-      const user = getSessionUser();
-      if (user && Array.isArray(user.messages)) {
-        let changed=false;
-        user.messages.forEach(m=>{ if(!m.read && !m.fromAdmin){ m.read=true; changed=true; } });
+      const u = getSessionUser();
+      if (u && Array.isArray(u.messages)) {
+        let changed = false;
+        u.messages.forEach(m=>{ if(!m.read && !m.fromAdmin){ m.read = true; changed = true; }});
         if (changed) window.GSApp?.saveDB?.();
       }
-    } catch(_){}
+    } catch(_) {}
     window.GSApp?.applyLang?.();
   }
 
   function loadProfile(){
-    const user = getSessionUser();
-    if(!user){
-      if(confirm('로그인 정보가 없습니다. 회원가입 하시겠습니까?')) location.href='signup.html';
-      return;
-    }
-    // 카드 채우기
+    const u = getSessionUser();
+    if (!u) { if (confirm('로그인 정보가 없습니다. 회원가입 하시겠습니까?')) location.href='signup.html'; return; }
+
     const grid = $('#profileGrid'), card = $('#profileCard');
-    card.hidden = false; grid.innerHTML = '';
-    const fields = [
-      ['이름', user.name],
-      ['아이디', user.username],
-      ['연락처', user.phone],
-      ['이메일', user.email],
-      ['은행', user.bank || '-'],
-      ['계좌번호', user.account || '-'],
-      ['가입일', user.created ? new Date(user.created).toLocaleString('ko-KR') : '-'],
-      ['권한', user.role]
-    ];
-    fields.forEach(([l,v])=>{
-      const div = document.createElement('div');
-      div.className='field';
-      div.innerHTML = `<label>${l}</label><span>${v||'-'}</span>`;
-      grid.appendChild(div);
-    });
-    // 상단 요약 + 하위 목록
-    renderProfileSummary(user);
-    renderOrders(user.orders||[]);
-    renderMessages(user.messages||[]);
+    if (card) card.hidden = false;
+    if (grid) {
+      grid.innerHTML = '';
+      [
+        ['이름',     u.name],
+        ['아이디',   u.username],
+        ['연락처',   u.phone],
+        ['이메일',   u.email],
+        ['은행',     u.bank || '-'],
+        ['계좌번호', u.account || '-'],
+        ['가입일',   u.created ? new Date(u.created).toLocaleString('ko-KR') : '-'],
+        ['권한',     u.role]
+      ].forEach(([l,v])=>{
+        const div = document.createElement('div');
+        div.className = 'field';
+        div.innerHTML = `<label>${l}</label><span>${v||'-'}</span>`;
+        grid.appendChild(div);
+      });
+    }
+    renderProfileSummary(u);
+    renderOrders(u.orders || []);
+    renderMessages(u.messages || []);
   }
 
-  /* ---------------- 상품 선택 패널 (오버레이) ---------------- */
-  const productList = [0.5,1,2,3,5,10];
+  /* ---------- 주문 오버레이(모달) ---------- */
+  const productList = [0.5, 1, 2, 3, 5, 10];
   let totalDon = 0;
-  let supplyPrice = 520000;   // 기본값
-  let currentPrice = 550000;  // 기본값
+  let supplyPrice = 520000;   // 기본값(폴백)
+  let currentPrice = 550000;  // 기본값(폴백)
 
-  function openOrderPanel(){ $('#orderModal').style.display='flex'; totalDon=0; syncPricesFromIndex(); updateOrderCalc(); }
-  function closeOrderPanel(){ $('#orderModal').style.display='none'; }
+  function openOrderModal(){
+    $('#orderModal')?.style && ($('#orderModal').style.display = 'flex');
+    totalDon = 0;
+    syncPricesFromIndex().finally(updateOrderCalc);
+  }
+  function closeOrderModal(){ $('#orderModal')?.style && ($('#orderModal').style.display = 'none'); }
+  function updateOrderCalc(){
+    $('#totalDon')      && ($('#totalDon').textContent     = totalDon);
+    $('#supplyPrice')   && ($('#supplyPrice').textContent  = Number(supplyPrice).toLocaleString('ko-KR'));
+    $('#currentPrice')  && ($('#currentPrice').textContent = Number(currentPrice).toLocaleString('ko-KR'));
+    const totalPrice   = totalDon * supplyPrice;
+    const currentTotal = totalDon * currentPrice;
+    $('#totalPrice')    && ($('#totalPrice').textContent   = totalPrice.toLocaleString('ko-KR'));
+    $('#currentTotal')  && ($('#currentTotal').textContent = currentTotal.toLocaleString('ko-KR'));
+    $('#priceDiff')     && ($('#priceDiff').textContent    = (currentTotal - totalPrice).toLocaleString('ko-KR'));
+  }
 
-  // (요구 3) index.html 섹션1의 표시 금액과 "똑같이" 쓰기
-  // - index.html에서 금액을 localStorage('gs_gold_price')에 저장하도록 해두면 여기서 그대로 사용
-  // - 실패 시 /api/security?type=goldprice 또는 GSApp.goldPrice 로 폴백
+  // (요구 3) index.html 섹션1의 "현재 시세" 값과 동일하게 사용
   async function syncPricesFromIndex(){
-    // 1) localStorage 우선
-    const ls = Number(localStorage.getItem('gs_gold_price'));
-    if (!Number.isNaN(ls) && ls>0) currentPrice = ls;
-
-    // 2) API 폴백
-    try{
-      const r = await fetch('/api/security?type=goldprice', {cache:'no-store'});
+    // 1) localStorage에서 먼저
+    try {
+      const ls = Number(localStorage.getItem('gs_gold_price'));
+      if (!Number.isNaN(ls) && ls > 0) currentPrice = ls;
+    } catch(_) {}
+    // 2) /api/security?type=goldprice 폴백
+    try {
+      const r = await fetch('/api/security?type=goldprice', { cache:'no-store' });
       const j = await r.json().catch(()=>null);
       const gp = j?.data?.goldprice ?? j?.goldprice ?? null;
       if (gp) {
         if (typeof gp.supplyPrice === 'number') supplyPrice = gp.supplyPrice;
-        if (typeof gp.price === 'number')      currentPrice = gp.price; // index와 값 맞추기
+        if (typeof gp.price === 'number')      currentPrice = gp.price;
       }
-    }catch(_){}
-
-    // 3) GSApp 폴백
-    try{
+    } catch(_) {}
+    // 3) GSApp.goldPrice 최후 폴백
+    try {
       if (typeof window.GSApp?.goldPrice === 'number') currentPrice = GSApp.goldPrice;
-    }catch(_){}
-    updateOrderCalc();
+    } catch(_) {}
   }
 
-  function updateOrderCalc(){
-    $('#totalDon').textContent      = totalDon;
-    $('#supplyPrice').textContent   = Number(supplyPrice).toLocaleString('ko-KR');
-    $('#currentPrice').textContent  = Number(currentPrice).toLocaleString('ko-KR');
-    const totalPrice   = totalDon * supplyPrice;
-    const currentTotal = totalDon * currentPrice;
-    $('#totalPrice').textContent   = totalPrice.toLocaleString('ko-KR');
-    $('#currentTotal').textContent = currentTotal.toLocaleString('ko-KR');
-    $('#priceDiff').textContent    = (currentTotal - totalPrice).toLocaleString('ko-KR');
-  }
+  // 오버레이 컨트롤 및 상품 버튼
+  $('#addOrderBtn')?.addEventListener('click', openOrderModal);
+  $('#closeOrderModal')?.addEventListener('click', closeOrderModal);
+  $('#resetDon')?.addEventListener('click', ()=>{ totalDon = 0; updateOrderCalc(); });
 
-  // 오버레이 버튼 바인딩
-  $('#addOrderBtn')?.addEventListener('click', openOrderPanel);
-  $('#closeOrderModal')?.addEventListener('click', closeOrderPanel);
-  $('#resetDon')?.addEventListener('click', ()=>{ totalDon=0; updateOrderCalc(); });
-
-  // 상품 버튼 생성
-  const btns = $('#productBtns');
-  btns.innerHTML = '';
-  productList.forEach(don=>{
-    const b = document.createElement('button');
-    b.className = 'btn';
-    b.textContent = `${don}돈`;
-    b.style.background = '#004d40';
-    b.style.color = '#FFD700';
-    b.style.fontWeight = '700';
-    b.style.fontSize = '1.08em';
-    b.style.border = '2px solid #FFD700';
-    b.style.borderRadius = '8px';
-    b.style.marginBottom = '6px';
-    b.addEventListener('click', ()=>{ totalDon += don; updateOrderCalc(); });
-    btns.appendChild(b);
-  });
+  (function buildProductButtons(){
+    const wrap = $('#productBtns');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    productList.forEach(don=>{
+      const b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = `${don}돈`;
+      Object.assign(b.style, {
+        background:'#004d40', color:'#FFD700', fontWeight:'700',
+        fontSize:'1.08em', border:'2px solid #FFD700', borderRadius:'8px', marginBottom:'6px'
+      });
+      b.addEventListener('click', ()=>{ totalDon += don; updateOrderCalc(); });
+      wrap.appendChild(b);
+    });
+  })();
 
   // 주문 요청
   $('#orderSubmit')?.addEventListener('click', async ()=>{
     if (totalDon <= 0) return alert('상품을 선택하세요.');
-    const user = getSessionUser();
-    if (!user) return alert('로그인 정보가 없습니다.');
+    const u = getSessionUser();
+    if (!u) return alert('로그인 정보가 없습니다.');
+
     const order = {
       id:'order_'+Date.now(),
-      username:user.username, name:user.name, phone:user.phone, email:user.email,
+      username:u.username, name:u.name, phone:u.phone, email:u.email,
       don: totalDon,
       supplyPrice, currentPrice,
       totalPrice: totalDon * supplyPrice,
@@ -236,38 +233,44 @@ document.addEventListener('DOMContentLoaded', () => {
       status: '주문 승인 대기',
       ts: Date.now()
     };
-    // 서버 저장 시도(있을 때)
-    try{
-      await fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(order) });
-    }catch(e){ console.warn('주문 API 실패(로컬만 반영):', e); }
-    // 로컬 백업
-    try{ await window.GSApp?.addOrder?.(user.email, { item:'골드바', qty: order.don, price: order.totalPrice }); }catch(_){}
+
+    // 서버 저장(있으면)
+    try {
+      await fetch('/api/orders', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(order)
+      });
+    } catch(e) { console.warn('주문 API 실패(로컬만 반영):', e); }
+
+    // 로컬 DB 백업
+    try { await window.GSApp?.addOrder?.(u.email, { item:'골드바', qty: order.don, price: order.totalPrice }); } catch(_){}
+
     alert('주문이 등록되었습니다.');
-    closeOrderPanel();
+    closeOrderModal();
     loadProfile();
   });
 
-  // 메시지 보내기
+  // 메시지 전송
   $('#sendMsgBtn')?.addEventListener('click', async ()=>{
-    const user = getSessionUser();
-    if (!user) return alert('로그인이 필요합니다.');
-    const txt = $('#msgInput').value.trim();
+    const u = getSessionUser();
+    if (!u) return alert('로그인이 필요합니다.');
+    const txt = $('#msgInput')?.value?.trim();
     if (!txt) return;
-    try{ await window.GSApp?.addMessage?.(user.email, txt, false); }catch(_){}
-    $('#msgInput').value = '';
+    try { await window.GSApp?.addMessage?.(u.email, txt, false); } catch(_){}
+    if ($('#msgInput')) $('#msgInput').value = '';
     loadProfile();
   });
 
   // 로그아웃
   $('#logoutBtn')?.addEventListener('click', ()=>{
     if (!confirm('로그아웃 하시겠습니까?')) return;
-    try{ window.GSApp?.logout?.(); }catch(_){}
+    try { window.GSApp?.logout?.(); } catch(_){}
     clearSessionUser();
     location.href = 'index.html';
   });
 
   // 초기 로드
   loadProfile();
-  try{ window.GSApp?.applyLang?.(); }catch(_){}
+  try { window.GSApp?.applyLang?.(); } catch(_) {}
 });
 </script>

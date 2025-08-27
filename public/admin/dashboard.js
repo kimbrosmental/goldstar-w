@@ -28,4 +28,13 @@
   });
   // 기본: 대시보드
   showView('dashboard');
+  // 대시보드 진입 시점에 대시보드 렌더링 보장
+  if (typeof window.renderDashboard === 'function') {
+    window.renderDashboard();
+  } else {
+    // Chart.js 로드 후에도 렌더링이 안될 경우 재시도
+    setTimeout(function(){
+      if (typeof window.renderDashboard === 'function') window.renderDashboard();
+    }, 500);
+  }
 })();
