@@ -188,3 +188,33 @@ window.GSApp.loginId = async function(id, pw){
     throw new Error('서버 응답 오류');
   }
 }
+// ===== 공통 세션 도우미 =====
+window.AppSession = {
+  user(){
+    try { const u = window.GSApp?.currentUser?.(); if (u && u.username) return u; } catch(_){}
+    try { const raw = localStorage.getItem('gs_user'); if (raw) return JSON.parse(raw); } catch(_){}
+    try { const s = window.AdminAuth?.currentSession?.(); if (s?.username) return { username:s.username, role:s.role||'user' }; } catch(_){}
+    return null;
+  }
+};
+
+// ===== 네비게이션 사용자 영역 구성 =====
+window.GSApp = window.GSApp || {};
+window.GSApp.buildUserNav = function(){
+  const area = document.querySelector('#navbar .user-area') || document.getElementById('userArea');
+  if (!area) return;
+  const u = window.AppSession.user();
+  if (u && u.role !== 'admin') {
+    area.innerHTML = '<a href="profile.html" class="btn">내정보</a>';
+  } else if (u && u.role === 'admin') {
+    area.innerHTML = '<a href="admin/index.html" class="btn">관리</a>';
+  } else {
+    area.innerHTML = '<a href="signup.html" class="btn user-link" id="signupBtn">회원가입</a> ' +
+                     '<a href="login.html" class="btn user-link" id="loginBtn">로그인</a>';
+  }
+};
+// 첫 로드와 약간의 지연 후 두 번 호출(지연 초기화 대비)
+document.addEventListener('DOMContentLoaded', ()=> {
+  window.GSApp.buildUserNav();
+  setTimeout(window.GSApp.buildUserNav, 200);
+});
