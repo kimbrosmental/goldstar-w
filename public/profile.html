@@ -82,6 +82,27 @@
       </div>
     </div>
   </main>
+  <!-- 상품 선택 모달 -->
+<div id="orderModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#102522;padding:36px 32px;border-radius:18px;max-width:420px;width:90vw;margin:0 auto;box-shadow:0 0 24px #000;">
+    <h2 style="color:#FFD700;">상품 선택</h2>
+    <div id="productBtns" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;"></div>
+    <div style="margin-bottom:12px;">
+      <span>총 돈수: <strong id="totalDon">0</strong></span>
+      <button id="resetDon" class="btn" style="margin-left:12px;">리셋</button>
+    </div>
+    <div style="margin-bottom:12px;">
+      <span>공급가(원): <strong id="supplyPrice">-</strong></span>
+      <span style="margin-left:12px;">총금액(원): <strong id="totalPrice">-</strong></span>
+    </div>
+    <div style="margin-bottom:12px;">
+      <span>현재가(원): <strong id="currentPrice">-</strong></span>
+      <span style="margin-left:12px;">차액(원): <strong id="priceDiff">-</strong></span>
+    </div>
+    <button id="orderSubmit" class="btn" style="width:100%;margin-top:18px;">주문 요청</button>
+    <button id="closeOrderModal" class="btn danger" style="width:100%;margin-top:8px;">닫기</button>
+  </div>
+</div>
   <script src="app.js"></script>
   <script>
     document.querySelector('.menu-btn').addEventListener('click',()=>{document.querySelector('.menu-btn').classList.toggle('active');document.querySelector('.nav-links').classList.toggle('active');});
@@ -137,6 +158,45 @@
   document.getElementById('addOrderBtn').addEventListener('click',async()=>{ const user=window.GSApp.currentUser(); if(!user) return; const item=prompt('상품명','골드바 3.75g'); if(!item) return; const qty=parseFloat(prompt('수량(g)','3.75')||''); if(!qty) return; const price=parseInt(prompt('가격','500000')||''); if(!price) return; await GSApp.addOrder(user.email,{item,qty,price}); loadProfile(); });
   document.getElementById('mockOrderBtn').addEventListener('click',async()=>{ const user=window.GSApp.currentUser(); if(!user){alert('회원 정보 없음');return;} await window.GSApp.addOrder(user.email,{item:'골드바 3.75g',qty:3.75,price:Math.round(500000+Math.random()*50000)}); loadProfile(); });
     document.getElementById('sendMsgBtn').addEventListener('click',async()=>{ const user=window.GSApp.currentUser(); if(!user) return; const txt=document.getElementById('msgInput').value.trim(); if(!txt) return; await window.GSApp.addMessage(user.email,txt,false); document.getElementById('msgInput').value=''; loadProfile(); });
+  const productList = [0.5, 1, 2, 3, 5, 10];
+let totalDon = 0;
+let supplyPrice = 520000; // 실제 공급가 API에서 받아와야 함
+let currentPrice = 550000; // 실제 금시세 API에서 받아와야 함
+function openOrderModal() {
+  document.getElementById('orderModal').style.display = 'flex';
+  totalDon = 0;
+  updateOrderCalc();
+}
+function closeOrderModal() {
+  document.getElementById('orderModal').style.display = 'none';
+}
+function updateOrderCalc() {
+  document.getElementById('totalDon').textContent = totalDon;
+  document.getElementById('supplyPrice').textContent = supplyPrice.toLocaleString('ko-KR');
+  document.getElementById('currentPrice').textContent = currentPrice.toLocaleString('ko-KR');
+  const totalPrice = totalDon * supplyPrice;
+  document.getElementById('totalPrice').textContent = totalPrice.toLocaleString('ko-KR');
+  const currentTotal = totalDon * currentPrice;
+  document.getElementById('priceDiff').textContent = (currentTotal - totalPrice).toLocaleString('ko-KR');
+}
+document.getElementById('addOrderBtn').onclick = openOrderModal;
+document.getElementById('closeOrderModal').onclick = closeOrderModal;
+document.getElementById('resetDon').onclick = function() { totalDon = 0; updateOrderCalc(); };
+document.getElementById('orderSubmit').onclick = function() {
+  if (totalDon <= 0) return alert('상품을 선택하세요.');
+  alert(`주문 요청: ${totalDon}돈, 공급가 ${supplyPrice}원, 총금액 ${(totalDon*supplyPrice).toLocaleString('ko-KR')}원`);
+  closeOrderModal();
+};
+const btns = document.getElementById('productBtns');
+btns.innerHTML = '';
+productList.forEach(don => {
+  const btn = document.createElement('button');
+  btn.className = 'btn';
+  btn.textContent = `${don}돈`;
+  btn.onclick = function() { totalDon += don; updateOrderCalc(); };
+  btns.appendChild(btn);
+});
+updateOrderCalc();
   loadProfile();
   document.addEventListener('DOMContentLoaded',()=>{ if(window.GSApp){ GSApp.applyLang(); } });
   </script>
