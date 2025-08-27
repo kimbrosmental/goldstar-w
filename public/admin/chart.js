@@ -33,7 +33,7 @@
     // 상단 버튼/날짜/로그아웃/홈
     var today = new Date();
     var dateStr = today.toLocaleDateString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit', weekday:'short' });
-    var topHtml = `
+        var html = `
       <div class="dashboard-date-row">
         <span class="dashboard-date-big">${dateStr}</span>
       </div>
@@ -52,6 +52,15 @@
         </div>
       </div>
     `;
+        html += `<div class="chart-labels-row">
+          <div class="chart-label-item"><span class="chart-label-title">전체 회원</span><span class="chart-label-value" id="statTotalUsers">${stats.totalUsers}</span></div>
+          <div class="chart-label-item"><span class="chart-label-title">신규 회원</span><span class="chart-label-value" id="statNewUsers">${stats.newUsers}</span></div>
+          <div class="chart-label-item"><span class="chart-label-title">전체 주문</span><span class="chart-label-value" id="statTotalOrders">${stats.totalOrders}</span></div>
+          <div class="chart-label-item"><span class="chart-label-title">미처리 주문</span><span class="chart-label-value" id="statPendingOrders">${stats.pendingOrders}</span></div>
+          <div class="chart-label-item"><span class="chart-label-title">전체 문의</span><span class="chart-label-value" id="statTotalInquiries">${stats.totalInquiries}</span></div>
+          <div class="chart-label-item"><span class="chart-label-title">미답변 문의</span><span class="chart-label-value" id="statUnansweredInquiries">${stats.unansweredInquiries}</span></div>
+        </div>`;
+        document.getElementById('view-dashboard').innerHTML = html;
     // 카드 영역
     var cardHtml = `
       <div class="dashboard-card-row" style="display:flex;gap:28px;margin-bottom:0;flex-wrap:wrap;">
