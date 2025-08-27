@@ -42,12 +42,15 @@
     .pill-wrap{display:flex;gap:10px;flex-wrap:wrap;}
     .sheet-actions .btn{width:100%;margin-top:10px;font-size:1.08em;}
     .sheet-close{position:sticky;top:0;display:flex;justify-content:flex-end;padding:12px;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,0));}
+
+    /* ── 프로필 페이지 네비: 홈 버튼만 표시 ── */
+    #navbar .nav-center, #navbar #userArea, #navbar #navProfileBtn, #navbar .menu-btn { display:none !important; }
   </style>
 </head>
 <body>
   <nav id="navbar">
     <div class="container">
-      <div class="logo"><img src="img/logo.png" alt="logo"/></div>
+      <div class="logo" id="logoClickable" style="cursor:pointer;"><img src="img/logo.png" alt="logo"/></div>
       <div class="nav-center">
         <ul class="nav-links">
           <li><a href="index.html#section1">소개</a></li>
@@ -72,7 +75,7 @@
     <div class="profile-wrapper">
       <div class="profile-header" id="summaryHeader" style="flex-direction:column;align-items:flex-start;gap:8px;">
         <h1 style="font-size:30px;color:#4fc3f7;">내 정보</h1>
-        <div id="summaryLine" style="font-size:15px;color:#eee;font-weight:500;line-height:1.4;">-</div>
+        <!-- 요약 한 줄(하얀 텍스트) 제거: summaryLine 삭제 -->
         <div class="actions" style="margin-top:4px;">
           <button class="btn" id="addOrderBtn">주문 추가</button>
           <button class="btn danger" id="logoutBtn">로그아웃</button>
@@ -83,11 +86,7 @@
       <div class="profile-card" id="profileCard">
         <h2>회원 기본 정보</h2>
         <div class="profile-grid" id="profileGrid">
-          <!-- 첫 렌더링 전에 빈화면처럼 보이지 않도록 자리표시자 -->
-          <div class="field"><label>이름</label><span>-</span></div>
-          <div class="field"><label>아이디</label><span>-</span></div>
-          <div class="field"><label>연락처</label><span>-</span></div>
-          <div class="field"><label>이메일</label><span>-</span></div>
+          <!-- 자리표시자 없이 바로 채움 -->
         </div>
       </div>
 
@@ -146,20 +145,36 @@
     </div>
   </div>
 
-  <!-- 관리자/유저 세션 모듈이 있으면 먼저 로드 -->
+  <!-- 관리자/유저 세션 모듈(있으면) -->
   <script src="/admin/auth.js" defer></script>
   <script src="app.js" defer></script>
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const $  = (s,p=document)=>p.querySelector(s);
-
-    /* ====================== 강력한 세션 해석기 ====================== */
-    let CURRENT_USER = null;
     const LS_KEYS = ['gs_user','gs_user_backup','user','user_session','session_user'];
 
-    const readJSON = k => { try{ const r=localStorage.getItem(k); return r?JSON.parse(r):null; }catch(_){ return null; } };
+    // ── 프로필 페이지 네비: 홈만 남기고 전부 숨김 (보조 보장)
+    try{
+      const center=document.querySelector('#navbar .nav-center');
+      const area=document.querySelector('#navbar #userArea');
+      const prof=document.querySelector('#navbar #navProfileBtn');
+      const menu=document.querySelector('#navbar .menu-btn');
+      [center,area,prof,menu].forEach(el=>{ if(el) el.style.display='none'; });
+    }catch(_){}
 
+    // 로고 클릭도 홈 이동 + 세션 유지
+    $('#logoClickable')?.addEventListener('click', (e)=>{
+      e.preventDefault();
+      if (window.__CURRENT_USER) {
+        localStorage.setItem('gs_user', JSON.stringify(window.__CURRENT_USER));
+        localStorage.setItem('gs_user_backup', JSON.stringify(window.__CURRENT_USER));
+      }
+      location.href='index.html';
+    });
+
+    // ── 유틸
+    const readJSON = k => { try{ const r=localStorage.getItem(k); return r?JSON.parse(r):null; }catch(_){ return null; } };
     function fromGSApp(){ try{ const u = window.GSApp?.currentUser?.(); if(u && (u.username||u.email)) return u; }catch(_){ } return null; }
     function fromLocal(){
       for(const k of LS_KEYS){ const u = readJSON(k); if(u && (u.username||u.email)) return u; }
@@ -171,19 +186,15 @@
 
     async function fetchKVUser(usernameOrEmail){
       try{
-        const r = await fetch('/api/users', {cache:'no-store'});
-        const j = await r.json();
-        // users.js와 호환: 평문 배열 또는 {data:[암호문들]}
+        const res = await fetch('/api/users',{cache:'no-store'});
+        const json = await res.json();
         let list=[];
-        if (j?.data && Array.isArray(j.data)){
+        if (json?.data && Array.isArray(json.data)){
           if (window.decrypt){
-            try{ list = await window.decrypt(j.data) || []; }catch(_){ list=[]; }
-          } else {
-            // decrypt가 없으면 data를 그대로 사용 가능한 형태가 아니므로 빈 배열
-            list=[];
+            try{ list = await window.decrypt(json.data) || []; }catch(_){ list=[]; }
           }
-        } else if (Array.isArray(j)){
-          list=j;
+        } else if (Array.isArray(json)){
+          list=json;
         }
         return list.find(u => u.username===usernameOrEmail || u.email===usernameOrEmail) || null;
       }catch(_){ return null; }
@@ -191,31 +202,28 @@
 
     async function resolveUser(){
       let u = fromGSApp() || fromLocal();
-      // 서버 세션이 따로 있을 경우(쿠키) — 선택적
       if (!u){
-        const tryList=['/api/me','/api/session','/api/login'];
-        for(const url of tryList){
+        const candidates=['/api/me','/api/session','/api/login'];
+        for(const url of candidates){
           try{
             const r = await fetch(url,{cache:'no-store',credentials:'include'});
             if(r.ok){ const me = await r.json().catch(()=>null); if(me && (me.username||me.email)){ u=me; break; } }
           }catch(_){}
         }
       }
-      // KV 병합
       if (u && (u.username||u.email)){
         const kv = await fetchKVUser(u.username||u.email);
         if (kv) u = mergeUser(u, kv);
-        try{ localStorage.setItem('gs_user', JSON.stringify(u)); localStorage.setItem('gs_user_backup', JSON.stringify(u)); }catch(_){}
+        try{
+          localStorage.setItem('gs_user', JSON.stringify(u));
+          localStorage.setItem('gs_user_backup', JSON.stringify(u));
+        }catch(_){}
         return u;
       }
       return null;
     }
 
-    /* ====================== 렌더 ====================== */
-    function renderSummary(u){
-      const s=$('#summaryLine'); if(!s) return;
-      s.innerHTML = `<strong>${u.username||'-'}</strong> | ${u.name||'-'} | ${u.phone||'-'} | ${u.email||'-'}`;
-    }
+    // ── 렌더
     function renderBase(u){
       const grid=$('#profileGrid'); grid.innerHTML='';
       [
@@ -264,7 +272,7 @@
         </div>`).join('');
     }
 
-    /* ====================== 데이터 로드 ====================== */
+    // ── 데이터 로드
     async function loadOrdersForUser(username,email){
       try{
         const r=await fetch('/api/orders',{cache:'no-store'});
@@ -288,20 +296,20 @@
       }catch(_){ return []; }
     }
 
-    /* ====================== 금시세(섹션1과 동일 소스 사용) ====================== */
+    // ── 금시세(섹션1과 동일 소스 사용)
     async function getCurrentGoldPrice(){
       try{
         const r = await fetch('/api/security?type=goldprice',{cache:'no-store'});
         const j = await r.json();
         const manual = Number(j?.manualGoldPrice||0);
         if (manual>0) return manual;
-        const p = Number(j?.price||0);
-        if (p>0) return p;
+        const price = Number(j?.price||0);
+        if (price>0) return price;
       }catch(_){}
       return 0;
     }
 
-    /* ====================== 주문 시트 ====================== */
+    // ── 주문 시트
     const productList=[0.5,1,2,3,5,10];
     let totalDon=0, supplyPrice=520000, currentPrice=0;
 
@@ -326,134 +334,135 @@
       });
     })();
 
-    // 저장(POST 단건 → 실패 시 배열 암호화 폴백)
-    async function saveOrder(order){
+    // ── ORDERS에 "배열 암호화 저장" 방식으로 추가 (admin/orders.js와 동일)
+    async function saveOrderToKV(order){
       try{
-        const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userOrder:order})});
-        if (r.ok) return true;
-      }catch(_){}
-      try{
-        const r1=await fetch('/api/orders'); const j1=await r1.json();
-        let arr=[]; if (j1?.data && window.decrypt){ try{ arr=await window.decrypt(j1.data)||[]; }catch(_){ arr=[]; } } else if (Array.isArray(j1)){ arr=j1; }
+        // 1) 현재 목록 로드
+        const r1=await fetch('/api/orders',{cache:'no-store'});
+        const j1=await r1.json();
+        let arr=[];
+        if (j1?.data && window.decrypt){ try{ arr=await window.decrypt(j1.data)||[]; }catch(_){ arr=[]; } }
+        else if (Array.isArray(j1)){ arr=j1; }
+
+        // 2) 추가
         arr.push({ ...order, user:order.username, amount:order.totalPrice, date:new Date(order.ts).toISOString() });
-        const enc = window.encrypt ? await window.encrypt(arr) : null;
-        if (enc){
-          const r2=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:enc})});
-          return r2.ok;
-        }
-      }catch(_){}
-      return false;
-    }
-    async function saveInquiry(rec){
-      try{
-        const r=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userInquiry:rec})});
-        if (r.ok) return true;
-      }catch(_){}
-      try{
-        const r1=await fetch('/api/inquiries'); const j1=await r1.json();
-        let arr=[]; if (j1?.data && window.decrypt){ try{ arr=await window.decrypt(j1.data)||[]; }catch(_){ arr=[]; } } else if (Array.isArray(j1)){ arr=j1; }
-        arr.push(rec);
-        const enc = window.encrypt ? await window.encrypt(arr) : null;
-        if (enc){
-          const r2=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:enc})});
-          return r2.ok;
-        }
-      }catch(_){}
-      return false;
-    }
 
-    /* ====================== 이벤트 ====================== */
-    document.querySelector('.menu-btn')?.addEventListener('click', ()=>{
-      document.querySelector('.menu-btn')?.classList.toggle('active');
-      document.querySelector('.nav-links')?.classList.toggle('active');
-    });
+        // 3) 암호화하여 저장
+        if (!window.encrypt) throw new Error('encrypt 함수 없음');
+        const enc = await window.encrypt(arr);
 
-    // 홈(🏠) 클릭 시 세션 백업 보강
-    document.querySelector('.home-icon')?.addEventListener('click', ()=>{
-      if (CURRENT_USER){
+        const r2=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:enc})});
+        return r2.ok;
+      }catch(e){
+        console.warn('ORDERS 저장 실패:', e);
+        // 폴백(서버가 단건 추가를 지원할 때)
         try{
-          localStorage.setItem('gs_user', JSON.stringify(CURRENT_USER));
-          localStorage.setItem('gs_user_backup', JSON.stringify(CURRENT_USER));
-        }catch(_){}
+          const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userOrder:order})});
+          return r.ok;
+        }catch(_){ return false; }
+      }
+    }
+
+    // ── INQUIRIES도 동일 패턴
+    async function saveInquiryToKV(rec){
+      try{
+        const r1=await fetch('/api/inquiries',{cache:'no-store'});
+        const j1=await r1.json();
+        let arr=[];
+        if (j1?.data && window.decrypt){ try{ arr=await window.decrypt(j1.data)||[]; }catch(_){ arr=[]; } }
+        else if (Array.isArray(j1)){ arr=j1; }
+
+        arr.push(rec);
+
+        if (!window.encrypt) throw new Error('encrypt 함수 없음');
+        const enc = await window.encrypt(arr);
+
+        const r2=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:enc})});
+        return r2.ok;
+      }catch(e){
+        console.warn('INQUIRIES 저장 실패:', e);
+        try{
+          const r=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userInquiry:rec})});
+          return r.ok;
+        }catch(_){ return false; }
+      }
+    }
+
+    // ── 이벤트
+    document.querySelector('.home-icon')?.addEventListener('click', ()=>{
+      if (window.__CURRENT_USER){
+        localStorage.setItem('gs_user', JSON.stringify(window.__CURRENT_USER));
+        localStorage.setItem('gs_user_backup', JSON.stringify(window.__CURRENT_USER));
       }
     });
 
-    // “주문 추가”
     $('#addOrderBtn')?.addEventListener('click', async ()=>{
-      if (!CURRENT_USER){ CURRENT_USER = await resolveUser(); }
-      if (!CURRENT_USER){ alert('로그인이 필요합니다.'); location.href='login.html'; return; }
+      if (!window.__CURRENT_USER){ window.__CURRENT_USER = await resolveUser(); }
+      if (!window.__CURRENT_USER){ alert('로그인이 필요합니다.'); location.href='login.html'; return; }
       currentPrice = await getCurrentGoldPrice();
       if (!currentPrice) currentPrice = 550000; // 안전값
       openOrderPanel(); updateOrderCalc();
     });
 
-    // 주문 제출
     $('#orderSubmit')?.addEventListener('click', async ()=>{
-      if (!CURRENT_USER){ CURRENT_USER = await resolveUser(); }
-      if (!CURRENT_USER){ alert('로그인이 필요합니다.'); return; }
+      if (!window.__CURRENT_USER){ window.__CURRENT_USER = await resolveUser(); }
+      if (!window.__CURRENT_USER){ alert('로그인이 필요합니다.'); return; }
       if (totalDon <= 0) return alert('상품을 선택하세요.');
+
       const order = {
         id:'O'+Date.now(),
-        username:CURRENT_USER.username, name:CURRENT_USER.name, phone:CURRENT_USER.phone, email:CURRENT_USER.email,
+        username:window.__CURRENT_USER.username, name:window.__CURRENT_USER.name, phone:window.__CURRENT_USER.phone, email:window.__CURRENT_USER.email,
         don: totalDon, supplyPrice, currentPrice,
         totalPrice: totalDon*supplyPrice, currentTotal: totalDon*currentPrice,
         priceDiff: (totalDon*currentPrice)-(totalDon*supplyPrice),
         status:'주문 승인 대기', ts:Date.now()
       };
-      const ok = await saveOrder(order);
+      const ok = await saveOrderToKV(order);
       if (!ok){ alert('주문 저장에 실패했습니다. 잠시 후 다시 시도해주세요.'); return; }
       alert('주문이 등록되었습니다.');
       closeOrderPanel();
-      renderOrders(await loadOrdersForUser(CURRENT_USER.username, CURRENT_USER.email));
+      renderOrders(await loadOrdersForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email));
     });
 
-    // 1:1 문의
     $('#sendMsgBtn')?.addEventListener('click', async ()=>{
-      if (!CURRENT_USER){ CURRENT_USER = await resolveUser(); }
-      if (!CURRENT_USER){ alert('로그인이 필요합니다.'); return; }
-      const txt = $('#msgInput').value.trim(); if(!txt) return;
-      const rec = { id:'Q'+Date.now(), user: CURRENT_USER.username||CURRENT_USER.email, title:'사용자 문의', content:txt, date:new Date().toISOString(), status:'미답변' };
-      const ok = await saveInquiry(rec);
+      if (!window.__CURRENT_USER){ window.__CURRENT_USER = await resolveUser(); }
+      if (!window.__CURRENT_USER){ alert('로그인이 필요합니다.'); return; }
+      const txt = document.getElementById('msgInput').value.trim(); if(!txt) return;
+      const rec = { id:'Q'+Date.now(), user: window.__CURRENT_USER.username||window.__CURRENT_USER.email, title:'사용자 문의', content:txt, date:new Date().toISOString(), status:'미답변' };
+      const ok = await saveInquiryToKV(rec);
       if (!ok){ alert('문의 저장에 실패했습니다.'); return; }
-      $('#msgInput').value='';
-      renderMessages(await loadInquiriesForUser(CURRENT_USER.username, CURRENT_USER.email));
+      document.getElementById('msgInput').value='';
+      renderMessages(await loadInquiriesForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email));
     });
 
-    // 닫기/리셋/로그아웃
     $('#closeOrderPanel')?.addEventListener('click', ()=> closeOrderPanel());
     $('#resetDon')?.addEventListener('click', ()=>{ totalDon=0; updateOrderCalc(); });
     $('#logoutBtn')?.addEventListener('click', ()=>{
       if (!confirm('로그아웃 하시겠습니까?')) return;
       try{ window.AdminAuth?.logout?.(); }catch(_){}
       try{ window.GSApp?.logout?.(); }catch(_){}
-      try{ LS_KEYS.concat(['admin_session_v1']).forEach(k=>localStorage.removeItem(k)); }catch(_){}
+      try{
+        [...LS_KEYS,'admin_session_v1'].forEach(k=>localStorage.removeItem(k));
+      }catch(_){}
       location.href='index.html';
     });
 
-    // 페이지 떠날 때 백업
-    window.addEventListener('pagehide', ()=>{
-      if (CURRENT_USER){
-        try{
-          localStorage.setItem('gs_user', JSON.stringify(CURRENT_USER));
-          localStorage.setItem('gs_user_backup', JSON.stringify(CURRENT_USER));
-        }catch(_){}
-      }
-    });
-
-    /* ====================== 부팅: 사용자/주문/문의 로드 ====================== */
+    // ── 부팅
     (async function boot(){
-      CURRENT_USER = await resolveUser();
-      // 로그인 안돼있으면 조용히 기본 화면만 — 버튼 클릭 시 안내
-      if (!CURRENT_USER) return;
+      window.__CURRENT_USER = await resolveUser();
+      if (!window.__CURRENT_USER) return; // 미로그인: 버튼 클릭 시 안내
 
-      // 네비 “내정보” 강제 노출
-      const np=$('#navProfileBtn'); if(np) np.style.display='inline-block';
-      const ua=$('#userArea'); if(ua) ua.innerHTML='<a href="profile.html" class="btn">내정보</a>';
+      renderBase(window.__CURRENT_USER);
+      renderOrders(await loadOrdersForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email));
+      renderMessages(await loadInquiriesForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email));
 
-      renderSummary(CURRENT_USER);
-      renderBase(CURRENT_USER);
-      renderOrders(await loadOrdersForUser(CURRENT_USER.username, CURRENT_USER.email));
-      renderMessages(await loadInquiriesForUser(CURRENT_USER.username, CURRENT_USER.email));
+      // 페이지 이탈 시 세션 백업
+      window.addEventListener('pagehide', ()=>{
+        if (window.__CURRENT_USER){
+          localStorage.setItem('gs_user', JSON.stringify(window.__CURRENT_USER));
+          localStorage.setItem('gs_user_backup', JSON.stringify(window.__CURRENT_USER));
+        }
+      });
     })();
   });
   </script>

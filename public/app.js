@@ -188,7 +188,6 @@ window.GSApp.loginId = async function(id, pw){
     throw new Error('서버 응답 오류');
   }
 }
-// ===== 공통 세션 도우미 & 네비 구성 =====
 (function(){
   function pickUser(){
     try{ const u = window.GSApp?.currentUser?.(); if (u && (u.username||u.email)) return u; }catch(_){}
@@ -211,5 +210,5 @@ window.GSApp.loginId = async function(id, pw){
     }
   }
   document.addEventListener('DOMContentLoaded', buildUserNav);
-  setInterval(buildUserNav, 1000); // 초기 로드 타이밍 차이 대비 (짧게만 유지)
+  setInterval(buildUserNav, 800); // 초기 로드 타이밍 편차 보정
 })();
