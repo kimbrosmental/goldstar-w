@@ -475,7 +475,7 @@
 
     /* ====================== 부팅: 사용자/주문/문의 로드 ====================== */
     (async function boot(){
-      const u = await resolveUser();
+          const u = await ensureUser();
       if (!u){ 
         // 로그인 안되어 있어도 경고창은 띄우지 않음(요청 시에만 안내)
         return;
