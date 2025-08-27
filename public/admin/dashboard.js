@@ -5,7 +5,8 @@
     users: document.getElementById('view-users'),
     orders: document.getElementById('view-orders'),
     inquiries: document.getElementById('view-inquiries'),
-    security: document.getElementById('view-security')
+    security: document.getElementById('view-security'),
+    logs: document.getElementById('view-logs')
   };
   function showView(view){
     Object.values(views).forEach(v=>v.style.display='none');
@@ -17,6 +18,7 @@
       if(view==='orders' && typeof window.renderOrders==='function') window.renderOrders();
       if(view==='inquiries' && typeof window.renderInquiries==='function') window.renderInquiries();
       if(view==='security' && typeof window.renderSecurity==='function') window.renderSecurity();
+      if(view==='logs' && typeof window.renderLogs==='function') window.renderLogs();
     }
   }
   document.querySelectorAll('.admin-sidebar nav a').forEach(a=>{
