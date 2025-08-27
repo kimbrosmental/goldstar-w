@@ -7,6 +7,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>내 정보</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- 카카오(다음) 우편번호 서비스 -->
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js" defer></script>
   <style>
     body{padding-top:100px;}
     .profile-wrapper{max-width:860px;margin:0 auto;color:#fff;padding:10px 20px 60px;}
@@ -30,7 +32,7 @@
     /* 주문 시트(옆 슬라이드) */
     #orderPanel{position:fixed;inset:0;display:none;z-index:9999;background:rgba(0,0,0,.65);align-items:stretch;justify-content:flex-end;}
     #orderPanel.show{display:flex;}
-    #orderSheet{width:min(560px,96vw);background:linear-gradient(135deg,#102522 80%,#1d4d46 100%);height:100%;overflow:auto;box-shadow:0 0 32px #000;border-left:1px solid #1d4d46;transform:translateX(100%);transition:transform .28s ease;}
+    #orderSheet{width:min(600px,96vw);background:linear-gradient(135deg,#102522 80%,#1d4d46 100%);height:100%;overflow:auto;box-shadow:0 0 32px #000;border-left:1px solid #1d4d46;transform:translateX(100%);transition:transform .28s ease;}
     #orderPanel.show #orderSheet{transform:translateX(0);}
     .sheet-body{padding:28px 22px 24px 22px;color:#fff;}
     .sheet-h{color:#FFD700;font-size:1.4em;margin:6px 0 14px;text-align:left;letter-spacing:.5px;}
@@ -42,9 +44,15 @@
     .pill-wrap{display:flex;gap:10px;flex-wrap:wrap;}
     .sheet-actions .btn{width:100%;margin-top:10px;font-size:1.08em;}
     .sheet-close{position:sticky;top:0;display:flex;justify-content:flex-end;padding:12px;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,0));}
+    .addr-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .addr-input{width:100%;background:#0c1a18;color:#fff;border:1px solid #1e4d47;border-radius:8px;padding:10px;font-size:14px;}
+    .addr-half{flex:1 1 48%}
+    .addr-zip{max-width:180px}
+    .addr-btn{background:#455a64}
+    .addr-btn:hover{background:#607d8b}
 
-    /* ── 프로필 페이지 네비: 홈 버튼만 표시 ── */
-    #navbar .nav-center, #navbar #userArea, #navbar #navProfileBtn, #navbar .menu-btn { display:none !important; }
+    /* 이 페이지에서는 좌측 섹션 링크 유지, 우측엔 홈 버튼만 */
+    #navbar #userArea, #navbar #navProfileBtn, #navbar .menu-btn { display:none !important; }
   </style>
 </head>
 <body>
@@ -75,7 +83,6 @@
     <div class="profile-wrapper">
       <div class="profile-header" id="summaryHeader" style="flex-direction:column;align-items:flex-start;gap:8px;">
         <h1 style="font-size:30px;color:#4fc3f7;">내 정보</h1>
-        <!-- 요약 한 줄(하얀 텍스트) 제거: summaryLine 삭제 -->
         <div class="actions" style="margin-top:4px;">
           <button class="btn" id="addOrderBtn">주문 추가</button>
           <button class="btn danger" id="logoutBtn">로그아웃</button>
@@ -85,9 +92,7 @@
       <!-- 기본 정보 -->
       <div class="profile-card" id="profileCard">
         <h2>회원 기본 정보</h2>
-        <div class="profile-grid" id="profileGrid">
-          <!-- 자리표시자 없이 바로 채움 -->
-        </div>
+        <div class="profile-grid" id="profileGrid"></div>
       </div>
 
       <div class="profile-card">
@@ -99,8 +104,8 @@
         <h2>1:1 문의</h2>
         <div id="messagesWrap" style="margin-bottom:16px;"><div class="orders-empty">문의가 없습니다.</div></div>
         <div style="display:flex;gap:8px;align-items:flex-start;">
-          <textarea id="msgInput" placeholder="문의 내용을 입력하세요" style="flex:1;min-height:70px;background:#0c1a18;color:#fff;border:1px solid #1e4d47;border-radius:8px;padding:10px;font-size:14px;resize:vertical;"></textarea>
-          <button class="btn" id="sendMsgBtn" style="height:70px;min-width:90px;">보내기</button>
+          <textarea id="msgInput" placeholder="문의 내용을 입력하세요" class="addr-input"></textarea>
+          <button class="btn" id="sendMsgBtn" style="height:48px;min-width:100px;">보내기</button>
         </div>
         <p style="margin-top:10px;font-size:12px;color:#888;">관리자만 답변을 남길 수 있습니다.</p>
       </div>
@@ -138,6 +143,23 @@
           <div class="row"><span class="lab">차액(현재가×돈수 - 공급가×돈수)</span><strong id="priceDiff" class="val" style="color:#FFD700;">-</strong></div>
         </div>
 
+        <!-- 배송지 정보 -->
+        <h2 class="sheet-h" style="margin-top:20px;">배송지 정보</h2>
+        <div class="addr-row">
+          <input id="zipcode" class="addr-input addr-zip" placeholder="우편번호" readonly>
+          <button id="btnFindZip" class="btn addr-btn">우편번호 찾기</button>
+        </div>
+        <div class="addr-row">
+          <input id="roadAddress" class="addr-input" placeholder="도로명 주소" readonly>
+        </div>
+        <div class="addr-row">
+          <input id="jibunAddress" class="addr-input" placeholder="지번 주소" readonly>
+        </div>
+        <div class="addr-row">
+          <input id="detailAddress" class="addr-input addr-half" placeholder="상세 주소(동/호)">
+          <input id="extraAddress" class="addr-input addr-half" placeholder="참고 항목">
+        </div>
+
         <div class="sheet-actions">
           <button id="orderSubmit" class="btn" style="background:#FFD700;color:#222;font-weight:700;">주문 요청</button>
         </div>
@@ -145,25 +167,16 @@
     </div>
   </div>
 
-  <!-- 관리자/유저 세션 모듈(있으면) -->
   <script src="/admin/auth.js" defer></script>
   <script src="app.js" defer></script>
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const $  = (s,p=document)=>p.querySelector(s);
+    const $$ = (s,p=document)=>Array.from(p.querySelectorAll(s));
     const LS_KEYS = ['gs_user','gs_user_backup','user','user_session','session_user'];
 
-    // ── 프로필 페이지 네비: 홈만 남기고 전부 숨김 (보조 보장)
-    try{
-      const center=document.querySelector('#navbar .nav-center');
-      const area=document.querySelector('#navbar #userArea');
-      const prof=document.querySelector('#navbar #navProfileBtn');
-      const menu=document.querySelector('#navbar .menu-btn');
-      [center,area,prof,menu].forEach(el=>{ if(el) el.style.display='none'; });
-    }catch(_){}
-
-    // 로고 클릭도 홈 이동 + 세션 유지
+    // 로고/홈 클릭 → 세션 백업 후 홈
     $('#logoClickable')?.addEventListener('click', (e)=>{
       e.preventDefault();
       if (window.__CURRENT_USER) {
@@ -172,8 +185,14 @@
       }
       location.href='index.html';
     });
+    $('.home-icon')?.addEventListener('click', ()=>{
+      if (window.__CURRENT_USER) {
+        localStorage.setItem('gs_user', JSON.stringify(window.__CURRENT_USER));
+        localStorage.setItem('gs_user_backup', JSON.stringify(window.__CURRENT_USER));
+      }
+    });
 
-    // ── 유틸
+    // ── 세션 유틸
     const readJSON = k => { try{ const r=localStorage.getItem(k); return r?JSON.parse(r):null; }catch(_){ return null; } };
     function fromGSApp(){ try{ const u = window.GSApp?.currentUser?.(); if(u && (u.username||u.email)) return u; }catch(_){ } return null; }
     function fromLocal(){
@@ -186,7 +205,7 @@
 
     async function fetchKVUser(usernameOrEmail){
       try{
-        const res = await fetch('/api/users',{cache:'no-store'});
+        const res = await fetch('/api/users?ts='+Date.now(),{cache:'no-store'});
         const json = await res.json();
         let list=[];
         if (json?.data && Array.isArray(json.data)){
@@ -214,10 +233,8 @@
       if (u && (u.username||u.email)){
         const kv = await fetchKVUser(u.username||u.email);
         if (kv) u = mergeUser(u, kv);
-        try{
-          localStorage.setItem('gs_user', JSON.stringify(u));
-          localStorage.setItem('gs_user_backup', JSON.stringify(u));
-        }catch(_){}
+        localStorage.setItem('gs_user', JSON.stringify(u));
+        localStorage.setItem('gs_user_backup', JSON.stringify(u));
         return u;
       }
       return null;
@@ -233,26 +250,36 @@
         ['권한',u.role||'user']
       ].forEach(([l,v])=>{ const d=document.createElement('div'); d.className='field'; d.innerHTML = `<label>${l}</label><span>${v||'-'}</span>`; grid.appendChild(d); });
     }
+
+    function orderRow(o){
+      const bank = (o.bankName&&o.bankAccount) ? `${o.bankName} ${o.bankAccount} (${o.bankHolder||''})` : (o.depositAccount||'');
+      const depAmt = (o.depositAmount!=null) ? Number(o.depositAmount).toLocaleString('ko-KR') : (o.totalPrice!=null?Number(o.totalPrice).toLocaleString('ko-KR'):'-');
+      return `
+        <tr>
+          <td>${o.id||o.orderId||'-'}</td>
+          <td>${o.item||'골드바'}</td>
+          <td style="text-align:right;">${o.don ?? (o.qty ?? '-')}</td>
+          <td style="text-align:right;">${Number(o.supplyPrice||o.supply||0).toLocaleString('ko-KR')}</td>
+          <td style="text-align:right;">${Number(o.currentPrice||o.price||0).toLocaleString('ko-KR')}</td>
+          <td style="text-align:right;">${Number(o.totalPrice||o.amount||0).toLocaleString('ko-KR')}</td>
+          <td style="text-align:right;">${Number(o.priceDiff||0).toLocaleString('ko-KR')}</td>
+          <td>${o.status||'-'}</td>
+          <td>${bank||'-'}</td>
+          <td style="text-align:right;">${depAmt||'-'}</td>
+          <td>${new Date(o.ts||o.date||Date.now()).toLocaleString('ko-KR')}</td>
+        </tr>`;
+    }
+
     function renderOrders(list){
       const el=$('#ordersContainer');
       if(!Array.isArray(list)||!list.length){ el.innerHTML='<div class="orders-empty">없음</div>'; return; }
       el.innerHTML =
         '<table class="orders-table"><thead><tr>' +
-        '<th>주문번호</th><th>상품</th><th>돈수</th><th>공급가</th><th>현재가</th><th>총금액</th><th>차액</th><th>상태</th><th>일시</th>' +
+        '<th>주문번호</th><th>상품</th><th>돈수</th><th>공급가</th><th>현재가</th><th>총금액</th><th>차액</th><th>상태</th><th>입금 계좌</th><th>입금 금액</th><th>일시</th>' +
         '</tr></thead><tbody>' +
-        list.map(o=>`
-          <tr>
-            <td>${o.id||o.orderId||'-'}</td>
-            <td>${o.item||'골드바'}</td>
-            <td style="text-align:right;">${o.don ?? (o.qty ?? '-')}</td>
-            <td style="text-align:right;">${Number(o.supplyPrice||o.supply||0).toLocaleString('ko-KR')}</td>
-            <td style="text-align:right;">${Number(o.currentPrice||o.price||0).toLocaleString('ko-KR')}</td>
-            <td style="text-align:right;">${Number(o.totalPrice||o.amount||0).toLocaleString('ko-KR')}</td>
-            <td style="text-align:right;">${Number(o.priceDiff||0).toLocaleString('ko-KR')}</td>
-            <td>${o.status||'-'}</td>
-            <td>${new Date(o.ts||o.date||Date.now()).toLocaleString('ko-KR')}</td>
-          </tr>`).join('') + '</tbody></table>';
+        list.map(orderRow).join('') + '</tbody></table>';
     }
+
     function renderMessages(list){
       const el=$('#messagesWrap');
       if(!Array.isArray(list)||!list.length){ el.innerHTML='<div class="orders-empty">문의가 없습니다.</div>'; return; }
@@ -275,31 +302,35 @@
     // ── 데이터 로드
     async function loadOrdersForUser(username,email){
       try{
-        const r=await fetch('/api/orders',{cache:'no-store'});
+        const r=await fetch('/api/orders?ts='+Date.now(),{cache:'no-store'});
         const j=await r.json();
         let arr=[];
         if (j?.data && window.decrypt){ try{ arr=await window.decrypt(j.data)||[]; }catch(_){ arr=[]; } }
         else if (Array.isArray(j)){ arr=j; }
-        return arr.filter(o => (o.username===username)||(o.user===username)||(o.email && o.email===email));
+        // 사용자 식별(모든 필드 케이스 지원)
+        return arr.filter(o =>
+          o.username===username || o.user===username ||
+          o.email===email || o.user===email
+        );
       }catch(_){ return []; }
     }
     async function loadInquiriesForUser(username,email){
       try{
-        const r=await fetch('/api/inquiries',{cache:'no-store'});
+        const r=await fetch('/api/inquiries?ts='+Date.now(),{cache:'no-store'});
         const j=await r.json();
         let arr=[];
         if (j?.data && window.decrypt){ try{ arr=await window.decrypt(j.data)||[]; }catch(_){ arr=[]; } }
         else if (Array.isArray(j)){ arr=j; }
         return arr
           .filter(q => (q.user===username || q.user===email))
-          .map(q => ({ id:q.id, content:q.content||q.message, title:q.title, answer:q.answer, read:!!q.answer, fromAdmin:false, ts:q.date||q.ts }));
+          .map(q => ({ id:q.id, content:q.content||q.message, title:q.title, answer:q.answer, read:!!q.answer, fromAdmin:!!q.fromAdmin, ts:q.date||q.ts }));
       }catch(_){ return []; }
     }
 
-    // ── 금시세(섹션1과 동일 소스 사용)
+    // ── 금시세(섹션1과 동일 소스)
     async function getCurrentGoldPrice(){
       try{
-        const r = await fetch('/api/security?type=goldprice',{cache:'no-store'});
+        const r = await fetch('/api/security?type=goldprice&ts='+Date.now(),{cache:'no-store'});
         const j = await r.json();
         const manual = Number(j?.manualGoldPrice||0);
         if (manual>0) return manual;
@@ -334,39 +365,57 @@
       });
     })();
 
-    // ── ORDERS에 "배열 암호화 저장" 방식으로 추가 (admin/orders.js와 동일)
+    // ── 주소 찾기
+    function openZipSearch(){
+      if (!window.daum || !window.daum.Postcode){ alert('우편번호 서비스를 로드하지 못했습니다. 잠시 후 다시 시도해주세요.'); return; }
+      new daum.Postcode({
+        oncomplete: function(data){
+          const roadAddr = data.roadAddress; // 도로명
+          const jibunAddr = data.jibunAddress; // 지번
+          let extra = '';
+          if(data.bname && /[동|로|가]$/g.test(data.bname)) extra += data.bname;
+          if(data.buildingName && data.apartment === 'Y') extra += (extra ? ', ' + data.buildingName : data.buildingName);
+          $('#zipcode').value = data.zonecode;
+          $('#roadAddress').value = roadAddr || '';
+          $('#jibunAddress').value = jibunAddr || '';
+          $('#extraAddress').value = extra || '';
+          $('#detailAddress').focus();
+        }
+      }).open();
+    }
+    $('#btnFindZip')?.addEventListener('click', openZipSearch);
+
+    // ── KV 저장 (admin/orders.js / inquiries.js 호환: 배열 암호화 저장 우선)
     async function saveOrderToKV(order){
       try{
-        // 1) 현재 목록 로드
-        const r1=await fetch('/api/orders',{cache:'no-store'});
+        const r1=await fetch('/api/orders?ts='+Date.now(),{cache:'no-store'});
         const j1=await r1.json();
         let arr=[];
         if (j1?.data && window.decrypt){ try{ arr=await window.decrypt(j1.data)||[]; }catch(_){ arr=[]; } }
         else if (Array.isArray(j1)){ arr=j1; }
 
-        // 2) 추가
-        arr.push({ ...order, user:order.username, amount:order.totalPrice, date:new Date(order.ts).toISOString() });
+        arr.push({
+          ...order,
+          user: order.username,                 // 관리자 페이지 호환
+          amount: order.totalPrice,
+          date: new Date(order.ts).toISOString()
+        });
 
-        // 3) 암호화하여 저장
         if (!window.encrypt) throw new Error('encrypt 함수 없음');
         const enc = await window.encrypt(arr);
-
         const r2=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:enc})});
         return r2.ok;
       }catch(e){
         console.warn('ORDERS 저장 실패:', e);
-        // 폴백(서버가 단건 추가를 지원할 때)
         try{
           const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userOrder:order})});
           return r.ok;
         }catch(_){ return false; }
       }
     }
-
-    // ── INQUIRIES도 동일 패턴
     async function saveInquiryToKV(rec){
       try{
-        const r1=await fetch('/api/inquiries',{cache:'no-store'});
+        const r1=await fetch('/api/inquiries?ts='+Date.now(),{cache:'no-store'});
         const j1=await r1.json();
         let arr=[];
         if (j1?.data && window.decrypt){ try{ arr=await window.decrypt(j1.data)||[]; }catch(_){ arr=[]; } }
@@ -376,7 +425,6 @@
 
         if (!window.encrypt) throw new Error('encrypt 함수 없음');
         const enc = await window.encrypt(arr);
-
         const r2=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:enc})});
         return r2.ok;
       }catch(e){
@@ -389,13 +437,6 @@
     }
 
     // ── 이벤트
-    document.querySelector('.home-icon')?.addEventListener('click', ()=>{
-      if (window.__CURRENT_USER){
-        localStorage.setItem('gs_user', JSON.stringify(window.__CURRENT_USER));
-        localStorage.setItem('gs_user_backup', JSON.stringify(window.__CURRENT_USER));
-      }
-    });
-
     $('#addOrderBtn')?.addEventListener('click', async ()=>{
       if (!window.__CURRENT_USER){ window.__CURRENT_USER = await resolveUser(); }
       if (!window.__CURRENT_USER){ alert('로그인이 필요합니다.'); location.href='login.html'; return; }
@@ -409,14 +450,27 @@
       if (!window.__CURRENT_USER){ alert('로그인이 필요합니다.'); return; }
       if (totalDon <= 0) return alert('상품을 선택하세요.');
 
+      // 주소 수집
+      const addr = {
+        zipcode: $('#zipcode').value.trim(),
+        road: $('#roadAddress').value.trim(),
+        jibun: $('#jibunAddress').value.trim(),
+        detail: $('#detailAddress').value.trim(),
+        extra: $('#extraAddress').value.trim()
+      };
+
       const order = {
         id:'O'+Date.now(),
         username:window.__CURRENT_USER.username, name:window.__CURRENT_USER.name, phone:window.__CURRENT_USER.phone, email:window.__CURRENT_USER.email,
+        item:'골드바',
         don: totalDon, supplyPrice, currentPrice,
         totalPrice: totalDon*supplyPrice, currentTotal: totalDon*currentPrice,
         priceDiff: (totalDon*currentPrice)-(totalDon*supplyPrice),
-        status:'주문 승인 대기', ts:Date.now()
+        status:'주문 승인 대기',
+        address: addr,                                    // 주소 저장
+        ts:Date.now()
       };
+
       const ok = await saveOrderToKV(order);
       if (!ok){ alert('주문 저장에 실패했습니다. 잠시 후 다시 시도해주세요.'); return; }
       alert('주문이 등록되었습니다.');
@@ -427,16 +481,24 @@
     $('#sendMsgBtn')?.addEventListener('click', async ()=>{
       if (!window.__CURRENT_USER){ window.__CURRENT_USER = await resolveUser(); }
       if (!window.__CURRENT_USER){ alert('로그인이 필요합니다.'); return; }
-      const txt = document.getElementById('msgInput').value.trim(); if(!txt) return;
-      const rec = { id:'Q'+Date.now(), user: window.__CURRENT_USER.username||window.__CURRENT_USER.email, title:'사용자 문의', content:txt, date:new Date().toISOString(), status:'미답변' };
+      const txt = $('#msgInput').value.trim(); if(!txt) return;
+      const rec = {
+        id:'Q'+Date.now(),
+        user: window.__CURRENT_USER.username||window.__CURRENT_USER.email,
+        title:'사용자 문의',
+        content:txt,
+        date:new Date().toISOString(),
+        status:'미답변'
+      };
       const ok = await saveInquiryToKV(rec);
       if (!ok){ alert('문의 저장에 실패했습니다.'); return; }
-      document.getElementById('msgInput').value='';
+      $('#msgInput').value='';
       renderMessages(await loadInquiriesForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email));
     });
 
     $('#closeOrderPanel')?.addEventListener('click', ()=> closeOrderPanel());
     $('#resetDon')?.addEventListener('click', ()=>{ totalDon=0; updateOrderCalc(); });
+
     $('#logoutBtn')?.addEventListener('click', ()=>{
       if (!confirm('로그아웃 하시겠습니까?')) return;
       try{ window.AdminAuth?.logout?.(); }catch(_){}
@@ -450,11 +512,17 @@
     // ── 부팅
     (async function boot(){
       window.__CURRENT_USER = await resolveUser();
-      if (!window.__CURRENT_USER) return; // 미로그인: 버튼 클릭 시 안내
-
+      if (!window.__CURRENT_USER) return; // 미로그인: 클릭 시 안내
       renderBase(window.__CURRENT_USER);
       renderOrders(await loadOrdersForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email));
       renderMessages(await loadInquiriesForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email));
+
+      // 상태 갱신(관리자 승인/입금확인 등) 폴링
+      setInterval(async ()=>{
+        if (!window.__CURRENT_USER) return;
+        const list = await loadOrdersForUser(window.__CURRENT_USER.username, window.__CURRENT_USER.email);
+        renderOrders(list);
+      }, 15000);
 
       // 페이지 이탈 시 세션 백업
       window.addEventListener('pagehide', ()=>{
