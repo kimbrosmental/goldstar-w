@@ -314,14 +314,11 @@
     // 로그인 후 남아있는 로그아웃 마커 제거
     try{ localStorage.removeItem('gs_logout'); }catch(_){}
 
-    // ===== 세션 FastPath: 가능한 모든 경로에서 즉시 확보 =====
+    // ===== 세션 FastPath & 보조 루틴 =====
     function getSessionFast(){
-      // 1) 메모리 캐시
       if (window.__SESSION_CACHE__) return window.__SESSION_CACHE__;
-      // 2) 라이브 객체
-      try{ if (window.AdminAuth?.currentSession) { const s = AdminAuth.currentSession(); if (s) return window.__SESSION_CACHE__ = s; } }catch(_){}
-      try{ if (window.GSApp?.currentUser) { const s = GSApp.currentUser(); if (s) return window.__SESSION_CACHE__ = s; } }catch(_){}
-      // 3) 로컬스토리지 스냅샷
+      try{ if (window.AdminAuth?.currentSession){ const s = AdminAuth.currentSession(); if (s) return window.__SESSION_CACHE__ = s; } }catch(_){}
+      try{ if (window.GSApp?.currentUser){ const s = GSApp.currentUser(); if (s) return window.__SESSION_CACHE__ = s; } }catch(_){}
       try{
         const a = localStorage.getItem(ADMIN_KEY); if (a) return window.__SESSION_CACHE__ = JSON.parse(a);
         const g = localStorage.getItem(GS_KEY);    if (g) return window.__SESSION_CACHE__ = JSON.parse(g);
@@ -343,9 +340,56 @@
     $('#homeLogo')?.addEventListener('click', e=>{ e.preventDefault(); stampLoginMarkers(); location.href='index.html'; });
     document.querySelector('.home-icon')?.addEventListener('click', ()=>{ stampLoginMarkers(); });
 
+    // ===== 서버 세션 프로빙(쿠키 기반 백엔드 세션 지원) =====
+    async function probeServerSession(){
+      const candidates = ['/api/me','/api/session','/api/auth/me','/api/user'];
+      for (const url of candidates){
+        try{
+          const r = await fetch(url, {credentials:'include', cache:'no-store'});
+          if (!r.ok) continue;
+          const ct = r.headers.get('Content-Type')||'';
+          const j  = /json/i.test(ct) ? await r.json() : null;
+          if (!j) continue;
+          const s = normalizeSessionShape(j);
+          if (s && (s.username || s.email)){
+            window.__SESSION_CACHE__ = s;
+            try{ localStorage.setItem('gs_user_backup', JSON.stringify(s)); localStorage.setItem('gs_logged_in','1'); }catch(_){}
+            return s;
+          }
+        }catch(_){}
+      }
+      return null;
+    }
+
+    function normalizeSessionShape(x){
+      if (!x) return null;
+      const s = {};
+      s.username = x.username || x.user || x.name || (x.email ? (x.email.split('@')[0]) : '') || '';
+      s.email    = x.email || x.mail || (x.user && x.user.email) || '';
+      s.name     = x.name || x.displayName || x.fullname || (x.user && (x.user.name||x.user.displayName)) || '';
+      s.phone    = x.phone || x.phoneNumber || '';
+      s.token    = x.token || x.jwt || x.idToken || '';
+      return s;
+    }
+
+    function normalizeUser(x){
+      if (!x) return null;
+      return {
+        username: x.username || x.user || (x.email ? x.email.split('@')[0] : '') || '-',
+        name: x.name || x.displayName || '-',
+        email: x.email || '-',
+        phone: x.phone || '-',
+        bank: x.bank || '',
+        account: x.account || '',
+        role: x.role || 'user',
+        created: x.created || Date.now(),
+        status: x.status || '정상'
+      };
+    }
+
     const fmt = n => Number(n||0).toLocaleString('ko-KR');
 
-    // ===== fetch JSON (토큰/크로스 플랫폼 안전) =====
+    // ===== fetch JSON =====
     function getAuthToken(){
       try{ if (window.AdminAuth?.getToken) return AdminAuth.getToken(); }catch(_){}
       try{
@@ -381,14 +425,7 @@
       return r;
     }
 
-    // ===== 암/복호화 & KV 파서 =====
-    async function safeEncrypt(arr){
-      try{
-        if (!window.encrypt) return arr;
-        const r = window.encrypt(arr);
-        return (r && typeof r.then==='function') ? await r : r;
-      }catch{ return arr; }
-    }
+    // ===== KV 유틸 =====
     async function kvToArray(payload){
       try{
         if (!payload) return [];
@@ -419,7 +456,7 @@
       }catch{ return []; }
     }
     async function kvSaveArray(url, list){
-      const body1 = { data: await safeEncrypt(list) };
+      const body1 = { data: (window.encrypt ? await window.encrypt(list) : list) };
       const options = (raw)=>({ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(raw) });
       let r = await fetchJSON(url, options(body1));
       if (!r.ok) r = await fetchJSON(url, options(list));
@@ -429,23 +466,9 @@
     // ===== 전역 상태 =====
     let SESSION = null;
     let CURRENT_USER = null;
-    let ORDER_MAP = Object.create(null); // key -> order
+    let ORDER_MAP = Object.create(null);
 
-    // ===== 유저 파생/로딩 =====
-    function deriveUserFromSession(s){
-      return {
-        username: (s?.username || s?.user || (s?.email ? s.email.split('@')[0] : '') || '-'),
-        name: s?.name || s?.displayName || '-',
-        email: s?.email || '-',
-        phone: s?.phone || '-',
-        bank: s?.bank || '',
-        account: s?.account || '',
-        role: 'user',
-        created: Date.now(),
-        status: s ? '정상' : '-'
-      };
-    }
-
+    // ===== USERS 로딩 =====
     async function fetchUsersAll(){
       const r = await fetchJSON('/api/users');
       if (!r.ok){ $('#ordersHint').style.display='block'; $('#ordersHint').textContent='회원 목록을 불러오지 못했습니다.'; return []; }
@@ -460,18 +483,19 @@
         users.find(u => (u.username||'').trim() === uname) ||
         users.find(u => mail && (u.email||'').trim().toLowerCase() === mail) ||
         null;
-      if(!found) found = deriveUserFromSession(SESSION);
+      if(!found) found = normalizeUser(SESSION);
       CURRENT_USER = found;
       renderProfileSummary(CURRENT_USER);
       renderProfileGrid(CURRENT_USER);
       stampLoginMarkers(SESSION || CURRENT_USER);
+      // 세션 힌트 숨김
+      const hint = $('#sessionHint'); if (hint) hint.style.display='none';
     }
 
     function renderProfileSummary(u){
-      const sum = $('#summaryLine'); // 숨김 유지
+      const sum = $('#summaryLine');
       if (sum) sum.textContent = `${u.name||''} (${u.username||''})`;
     }
-
     function renderProfileGrid(u){
       const grid = $('#profileGrid');
       const fields = [
@@ -490,23 +514,43 @@
     }
 
     // ===== 세션/유저 보장 (주문/문의 전에 호출) =====
-    async function ensureSessionAndUser(){
+    async function ensureSessionAndUser(opts={}){
+      const timeout = typeof opts.timeout === 'number' ? opts.timeout : 2000;
+      const allowPseudo = 'allowPseudo' in opts ? !!opts.allowPseudo : true;
+      const start = performance.now();
+
+      // 0) 이미 있으면 종료
       if (!SESSION) SESSION = getSessionFast();
-      if (!SESSION){
-        // 마지막 백업 시도
-        try{
-          const b = localStorage.getItem('gs_user_backup');
-          if (b) SESSION = JSON.parse(b);
-        }catch(_){}
+      if (SESSION && !CURRENT_USER) CURRENT_USER = normalizeUser(SESSION);
+      if (SESSION || CURRENT_USER){
+        const hint = $('#sessionHint'); if (hint) hint.style.display='none';
+        return { session: SESSION, user: CURRENT_USER };
       }
-      if (!CURRENT_USER && SESSION){
-        CURRENT_USER = deriveUserFromSession(SESSION);
-        renderProfileSummary(CURRENT_USER);
-        renderProfileGrid(CURRENT_USER);
-        // 백그라운드 정합성 보강
-        loadCurrentUser().catch(()=>{});
+
+      // 1) 서버 세션 프로빙 시작
+      let serverSess = null;
+      const probe = probeServerSession().then(s=>{ serverSess = s; return s; });
+
+      // 2) 짧은 폴링 (AdminAuth/GSApp가 늦게 초기화되는 모바일 대비)
+      while (performance.now() - start < timeout){
+        await new Promise(r=>setTimeout(r,120));
+        let live = getSessionFast();
+        if (!live && serverSess) live = serverSess;
+        if (live){
+          SESSION = live;
+          if (!CURRENT_USER) CURRENT_USER = normalizeUser(SESSION);
+          const hint = $('#sessionHint'); if (hint) hint.style.display='none';
+          return { session: SESSION, user: CURRENT_USER };
+        }
       }
-      return { session: SESSION, user: CURRENT_USER };
+
+      // 3) 대체: 이미 화면에 유저가 로드되어 있으면 그걸로 진행(주문/문의 가능)
+      if (allowPseudo && CURRENT_USER){
+        const hint = $('#sessionHint'); if (hint) hint.style.display='none';
+        return { session: null, user: CURRENT_USER };
+      }
+
+      return { session:null, user:null };
     }
 
     // ===== 금 시세 =====
@@ -543,12 +587,12 @@
     async function saveInquiriesAll(list){ await kvSaveArray('/api/inquiries', list); }
 
     function matchToMe(item){
-      const uname = (SESSION?.username || (SESSION?.email ? SESSION.email.split('@')[0] : '') || '').trim();
-      const mail  = (CURRENT_USER?.email || '').trim().toLowerCase();
-      const ufields = [item.user, item.username, item.member, item.uid, item.userId, item.userid];
-      const mfields = [item.email, item.userEmail];
-      const hitUser = ufields.some(v => (v||'').toString().trim() === uname);
-      const hitMail = mfields.some(v => (v||'').toString().trim().toLowerCase() === mail);
+      const uname = (SESSION?.username || (SESSION?.email ? SESSION.email.split('@')[0] : '') || CURRENT_USER?.username || '').trim();
+      const mail  = (CURRENT_USER?.email || SESSION?.email || '').trim().toLowerCase();
+      const ufs = [item.user, item.username, item.member, item.uid, item.userId, item.userid];
+      const mfs = [item.email, item.userEmail];
+      const hitUser = ufs.some(v => (v||'').toString().trim() === uname);
+      const hitMail = mfs.some(v => (v||'').toString().trim().toLowerCase() === mail);
       return hitUser || (mail && hitMail);
     }
 
@@ -588,7 +632,6 @@
     }
 
     function firstAnswerOf(m){
-      // 답변 하나만 노출
       if (m.answer || m.adminAnswer || m.reply || m.adminReply || m.response) {
         return (m.answer || m.adminAnswer || m.reply || m.adminReply || m.response);
       }
@@ -679,7 +722,7 @@
     $('#closeOrderDetail')?.addEventListener('click', closeOrderDetail);
     $('#orderDetailPanel')?.addEventListener('click', (e)=>{ if(e.target.id==='orderDetailPanel') closeOrderDetail(); });
 
-    // ===== 주문 패널(생성) =====
+    // ===== 주문 생성 패널 =====
     const productList = [0.5,1,2,3,5,10];
     let totalDon = 0;
     function openOrderPanel(){ $('#orderPanel').classList.add('show'); totalDon = 0; updateOrderCalc(); loadGoldPrice().then(updateOrderCalc); }
@@ -756,16 +799,16 @@
 
     // 이벤트
     $('#addOrderBtn')?.addEventListener('click', async ()=>{
-      await ensureSessionAndUser();
+      await ensureSessionAndUser({ allowPseudo:true });
       openOrderPanel();
     });
     $('#closeOrderPanel')?.addEventListener('click', closeOrderPanel);
     $('#resetDon')?.addEventListener('click', ()=>{ totalDon=0; updateOrderCalc(); });
 
-    // 주문 요청 (세션/유저 보장)
+    // 주문 요청 (세션/유저 보장: 대체 세션 허용)
     $('#orderSubmit')?.addEventListener('click', async ()=>{
-      const ensured = await ensureSessionAndUser();
-      if(!ensured.session || !ensured.user){
+      const ensured = await ensureSessionAndUser({ allowPseudo:true, timeout:2000 });
+      if(!ensured.user){
         alert('로그인 세션을 확인할 수 없습니다. 다시 로그인해 주세요.');
         location.href='login.html';
         return;
@@ -775,10 +818,11 @@
         alert('배송지(우편번호/주소)를 입력해 주세요.');
         return;
       }
+      const uname = (ensured.session?.username || ensured.user.username || (ensured.session?.email?ensured.session.email.split('@')[0]:'')) || '';
       const order = {
         id:'O'+Date.now(),
         date:new Date().toISOString(),
-        user: (ensured.session.username || (ensured.session.email?ensured.session.email.split('@')[0]:'')),
+        user: uname,
         name: ensured.user.name,
         email: ensured.user.email,
         phone: ensured.user.phone,
@@ -813,10 +857,10 @@
       if (order) openOrderDetail(order);
     });
 
-    // 1:1 문의 등록 (옵티미스틱 UI)
+    // 1:1 문의 등록 (옵티미스틱 UI + 대체 세션 허용)
     $('#sendMsgBtn')?.addEventListener('click', async ()=>{
-      const ensured = await ensureSessionAndUser();
-      if(!ensured.session || !ensured.user){
+      const ensured = await ensureSessionAndUser({ allowPseudo:true, timeout:2000 });
+      if(!ensured.user){
         alert('로그인 세션을 확인할 수 없습니다. 다시 로그인해 주세요.');
         location.href='login.html';
         return;
@@ -824,7 +868,7 @@
       const txt = $('#msgInput').value.trim();
       if(!txt) return;
 
-      const uname = (ensured.session.username || (ensured.session.email?ensured.session.email.split('@')[0]:'')) || ensured.user.username || '';
+      const uname = (ensured.session?.username || ensured.user.username || (ensured.session?.email?ensured.session.email.split('@')[0]:'')) || '';
       const newInquiry = {
         id:'Q'+Date.now(),
         user: uname,
@@ -860,7 +904,6 @@
         $('#msgInput').value = '';
         await renderInquiries();
       }catch(e){
-        // 실패 시 롤백: 방금 추가 카드 제거
         const first = wrap.querySelector('.msg-item[data-qid="'+newInquiry.id+'"]');
         if(first) first.remove();
         alert('문의 등록에 실패했습니다. 잠시 후 다시 시도해주세요.');
@@ -888,46 +931,39 @@
       location.href='index.html';
     });
 
-    // ===== 초기 구동: 즉시 정보 렌더 + 백그라운드 보강 =====
+    // ===== 초기 구동 =====
     (async function init(){
       const hint = $('#sessionHint');
 
       // Fast-Path 세션
       SESSION = getSessionFast();
 
-      // (1) 회원정보: 즉시 세션 파생으로 렌더 → 이후 정확 데이터로 교체
+      // (1) 화면 즉시 렌더 (세션 파생 사용자)
       if (SESSION){
         try{ localStorage.setItem('gs_logged_in','1'); }catch(_){}
-        const quickUser = deriveUserFromSession(SESSION);
-        CURRENT_USER = quickUser; // 즉시 사용 가능
-        renderProfileSummary(quickUser);
-        renderProfileGrid(quickUser); // 즉시 “로딩 중…” 교체
+        CURRENT_USER = normalizeUser(SESSION);
+        renderProfileSummary(CURRENT_USER);
+        renderProfileGrid(CURRENT_USER);
+        hint.style.display='none';
       }else{
-        // 700ms 지나도록 세션이 없을 때만 안내 문구 표시 (영구 표시 방지)
-        setTimeout(()=>{ 
-          if (!getSessionFast()){ hint.style.display='block'; hint.textContent = '세션 확인 중…'; }
-        }, 700);
+        setTimeout(()=>{ if (!getSessionFast()){ hint.style.display='block'; hint.textContent = '세션 확인 중…'; } }, 600);
       }
 
-      // (2) 데이터 먼저 병렬로
+      // (2) 데이터 먼저
       await Promise.allSettled([loadGoldPrice(), renderOrders(), renderInquiries()]);
 
-      // (3) USERS로 정확한 유저 정보 보강 (세션이 있으면)
+      // (3) 정확 유저 데이터로 보강
       if (SESSION){ await loadCurrentUser(); }
 
-      // (4) 백그라운드 세션 확보 재시도 (모바일 느릴 때 대비)
-      let tries = 0;
-      while (tries < 20 && !SESSION){
-        await new Promise(r=>setTimeout(r,150));
-        SESSION = getSessionFast();
-        tries++;
-      }
-      if (SESSION){
+      // (4) 백그라운드 세션 확보(모바일 대비)
+      const ensured = await ensureSessionAndUser({ allowPseudo:true, timeout:1500 });
+      if (ensured.user){
+        CURRENT_USER = ensured.user;
+        renderProfileSummary(CURRENT_USER);
+        renderProfileGrid(CURRENT_USER);
         hint.style.display='none';
-        try{ localStorage.setItem('gs_logged_in','1'); stampLoginMarkers(SESSION); }catch(_){}
-        // 정확정보로 다시 보강
-        await loadCurrentUser();
-        await Promise.allSettled([renderOrders(), renderInquiries()]);
+        // USERS 정합성 보강
+        if (ensured.session) await loadCurrentUser();
       }
 
       // 탭 복귀/주기 새로고침
