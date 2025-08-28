@@ -71,6 +71,10 @@
     .home-icon span{font-size:30px;color:#FFD700;}
     /* 요약 라인 숨김(요청) */
     #summaryLine{display:none;}
+
+    /* 작은 상태 라벨 */
+    .mini-hint{font-size:12px;color:#9bd3ff;margin:8px 0 0;}
+    .mini-err{font-size:12px;color:#ff9b9b;margin:8px 0 0;}
   </style>
 </head>
 <body>
@@ -97,6 +101,7 @@
       <div class="profile-header" id="summaryHeader" style="flex-direction:column;align-items:flex-start;gap:8px;">
         <h1 style="font-size:30px;color:#4fc3f7;">내 정보</h1>
         <div id="summaryLine"></div>
+        <div id="sessionHint" class="mini-hint" style="display:none;"></div>
         <div class="actions" style="margin-top:4px;">
           <button class="btn" id="addOrderBtn">주문 추가</button>
           <button class="btn danger" id="logoutBtn">로그아웃</button>
@@ -113,12 +118,14 @@
       <div class="profile-card">
         <h2>주문 내역</h2>
         <div id="ordersContainer"></div>
+        <div id="ordersHint" class="mini-err" style="display:none;"></div>
       </div>
 
       <!-- 1:1 문의 -->
       <div class="profile-card">
         <h2>1:1 문의</h2>
         <div id="messagesWrap" style="margin-bottom:16px;"></div>
+        <div id="inqHint" class="mini-err" style="display:none;"></div>
         <div style="display:flex;gap:8px;align-items:flex-start;">
           <textarea id="msgInput" placeholder="문의 내용을 입력하세요" style="flex:1;min-height:70px;background:#0c1a18;color:#fff;border:1px solid #1e4d47;border-radius:8px;padding:10px;font-size:14px;resize:vertical;"></textarea>
           <button class="btn" id="sendMsgBtn" style="height:70px;min-width:120px;">문의 등록</button>
@@ -215,6 +222,9 @@
     const ADMIN_KEY = 'admin_session_v1';
     const GS_KEY    = 'gs_user';
 
+    // 로그인 후 남아있는 로그아웃 마커 제거 (예상치 못한 자동 로그아웃 방지)
+    try{ localStorage.removeItem('gs_logout'); }catch(_){}
+
     function getAdminSession(){
       try{
         if (window.AdminAuth?.currentSession) return AdminAuth.currentSession();
@@ -248,6 +258,52 @@
     // util
     const fmt = n => Number(n||0).toLocaleString('ko-KR');
 
+    // ===== 토큰/헤더 구성 & JSON fetch 보강 =====
+    function getAuthToken(){
+      try{
+        if (window.AdminAuth?.getToken) return AdminAuth.getToken();
+      }catch(_){}
+      try{
+        const s = getAdminSession() || getGsSession();
+        return s?.token || s?.jwt || s?.idToken || null;
+      }catch(_){ return null; }
+    }
+
+    async function fetchJSON(url, init={}){
+      const tryOnce = async (withCred=true)=>{
+        const hdr = new Headers(init.headers || {});
+        const token = getAuthToken();
+        if (token && !hdr.has('Authorization')) hdr.set('Authorization', 'Bearer '+token);
+        if (!hdr.has('Accept')) hdr.set('Accept','application/json, text/plain, */*');
+        let resp;
+        try{
+          resp = await fetch(url, {
+            cache:'no-store',
+            credentials: withCred ? 'include':'omit',
+            ...init,
+            headers: hdr
+          });
+        }catch(e){
+          return { ok:false, error:e };
+        }
+        const ct = resp.headers.get('Content-Type')||'';
+        if (!resp.ok) {
+          return { ok:false, status:resp.status, contentType:ct, raw:await resp.text().catch(()=>'' ) };
+        }
+        if (!/application\/json/i.test(ct)) {
+          // 서버가 로그인 HTML 등을 돌려준 경우
+          return { ok:false, status:200, contentType:ct, raw:await resp.text().catch(()=>'' ) };
+        }
+        const json = await resp.json().catch(()=>null);
+        return json ? { ok:true, json } : { ok:false, status:200, contentType:ct };
+      };
+
+      // 1) include → 2) omit 재시도
+      let r = await tryOnce(true);
+      if (!r.ok) r = await tryOnce(false);
+      return r;
+    }
+
     // ===== 공통: 복호화/암호화 =====
     async function safeDecrypt(payload){
       try{
@@ -268,32 +324,24 @@
     async function kvToArray(payload){
       try{
         if (!payload) return [];
-
-        // 1) 이미 배열
         if (Array.isArray(payload)) return payload;
 
-        // 2) 상용 컨테이너 속성
         let cand = payload?.data ?? payload?.list ?? payload?.items ?? payload?.values ??
                    payload?.value ?? payload?.records ?? payload?.result ?? payload?.results;
 
-        // 3) 첫 배열 속성 자동 선택
         if (!cand && typeof payload === 'object') {
           for (const k of Object.keys(payload)) {
             if (Array.isArray(payload[k])) { cand = payload[k]; break; }
           }
         }
-
-        // 4) cand가 배열
         if (Array.isArray(cand)) return cand;
 
-        // 5) cand가 객체-맵(키:값) → values
         const maybeMap = cand || payload;
         if (maybeMap && typeof maybeMap === 'object' && !Array.isArray(maybeMap)) {
           const vals = Object.values(maybeMap);
           if (vals.length && vals.every(v => typeof v === 'object')) return vals;
         }
 
-        // 6) 문자열(JSON/암호문) 시도
         async function tryString(str){
           try{ const j = JSON.parse(str); if (Array.isArray(j)) return j; if (Array.isArray(j?.data)) return j.data; }catch{}
           if (window.decrypt){
@@ -313,16 +361,14 @@
     // ===== 공통 저장 =====
     async function kvSaveArray(url, list){
       const body1 = { data: await safeEncrypt(list) };
-      let ok = false;
-      try{
-        const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify(body1) });
-        ok = r.ok;
-      }catch{}
-      if (!ok){
-        try{
-          await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body: JSON.stringify(list) });
-        }catch{}
-      }
+      const options = (raw)=>({
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(raw)
+      });
+      let r = await fetchJSON(url, options(body1));
+      if (!r.ok) r = await fetchJSON(url, options(list)); // 평문 폴백
+      if (!r.ok) throw new Error('save failed: '+url);
     }
 
     // 전역 상태
@@ -331,17 +377,15 @@
 
     // ===== USERS에서 현재 사용자 로드 =====
     async function fetchUsersAll(){
-      try{
-        const res = await fetch('/api/users', {cache:'no-store', credentials:'include'});
-        const json = await res.json();
-        return await kvToArray(json);
-      }catch{ return []; }
+      const r = await fetchJSON('/api/users');
+      if (!r.ok){ $('#ordersHint').style.display='block'; $('#ordersHint').textContent='회원 목록을 불러오지 못했습니다.'; return []; }
+      return await kvToArray(r.json);
     }
 
     async function loadCurrentUser(){
       const users = await fetchUsersAll();
-      const uname = (SESSION.username || SESSION.user || (SESSION.email ? SESSION.email.split('@')[0] : '') || '').trim();
-      const mail  = (SESSION.email || '').trim().toLowerCase();
+      const uname = (SESSION?.username || SESSION?.user || (SESSION?.email ? SESSION.email.split('@')[0] : '') || '').trim();
+      const mail  = (SESSION?.email || '').trim().toLowerCase();
 
       CURRENT_USER =
         users.find(u => (u.username||'').trim() === uname) ||
@@ -351,9 +395,9 @@
       if(!CURRENT_USER){
         CURRENT_USER = {
           username: uname || '-',
-          name: SESSION.name || SESSION.displayName || '-',
+          name: SESSION?.name || SESSION?.displayName || '-',
           email: mail || '-',
-          phone: SESSION.phone || '-',
+          phone: SESSION?.phone || '-',
           role: 'user',
           created: Date.now()
         };
@@ -392,37 +436,44 @@
     let currentPrice = 0;
     async function loadGoldPrice(){
       try{
-        const r = await fetch('/api/security?type=goldprice', {cache:'no-store', credentials:'include'});
-        const j = await r.json();
-        const manual = j?.manualGoldPrice ? Number(j.manualGoldPrice) : 0;
-        if(manual>0){ currentPrice = manual; return; }
-      }catch{}
+        const r = await fetchJSON('/api/security?type=goldprice');
+        if (r.ok){
+          const j = r.json;
+          const manual = j?.manualGoldPrice ? Number(j.manualGoldPrice) : 0;
+          if(manual>0){ currentPrice = manual; return; }
+        }
+      }catch(_){}
       try{
         const d = await fetch('https://gold-price-proxy.hanoiosaka1.workers.dev/price').then(r=>r.json());
         if(d?.price) currentPrice = Number(d.price);
-      }catch{}
+      }catch(_){}
     }
 
     // ===== ORDERS / INQUIRIES =====
     async function fetchOrdersAll(){
-      try{
-        const res = await fetch('/api/orders', {cache:'no-store', credentials:'include'});
-        const json = await res.json();
-        return await kvToArray(json);
-      }catch{ return []; }
+      const r = await fetchJSON('/api/orders');
+      if (!r.ok){
+        $('#ordersHint').style.display='block';
+        $('#ordersHint').textContent = '주문 내역을 불러오지 못했습니다. 잠시 후 다시 시도하세요.';
+        return [];
+      }
+      return await kvToArray(r.json);
     }
     async function fetchInquiriesAll(){
-      try{
-        const res = await fetch('/api/inquiries', {cache:'no-store', credentials:'include'});
-        const json = await res.json();
-        return await kvToArray(json);
-      }catch{ return []; }
+      const r = await fetchJSON('/api/inquiries');
+      if (!r.ok){
+        $('#inqHint').style.display='block';
+        $('#inqHint').textContent = '1:1 문의 목록을 불러오지 못했습니다. 잠시 후 다시 시도하세요.';
+        return [];
+      }
+      $('#inqHint').style.display='none';
+      return await kvToArray(r.json);
     }
     async function saveOrdersAll(list){ await kvSaveArray('/api/orders', list); }
     async function saveInquiriesAll(list){ await kvSaveArray('/api/inquiries', list); }
 
     function matchToMe(item){
-      const uname = (SESSION.username || (SESSION.email ? SESSION.email.split('@')[0] : '') || '').trim();
+      const uname = (SESSION?.username || (SESSION?.email ? SESSION.email.split('@')[0] : '') || '').trim();
       const mail  = (CURRENT_USER?.email || '').trim().toLowerCase();
 
       const ufields = [item.user, item.username, item.member, item.uid, item.userId, item.userid];
@@ -609,7 +660,7 @@
       const order = {
         id:'O'+Date.now(),
         date:new Date().toISOString(),
-        user: (SESSION.username || (SESSION.email?SESSION.email.split('@')[0]:'')),
+        user: (SESSION?.username || (SESSION?.email?SESSION.email.split('@')[0]:'')),
         name: CURRENT_USER.name,
         email: CURRENT_USER.email,
         phone: CURRENT_USER.phone,
@@ -642,7 +693,7 @@
       const txt = $('#msgInput').value.trim();
       if(!txt) return;
 
-      const uname = (SESSION.username || (SESSION.email?SESSION.email.split('@')[0]:'')) || CURRENT_USER.username || '';
+      const uname = (SESSION?.username || (SESSION?.email?SESSION.email.split('@')[0]:'')) || CURRENT_USER.username || '';
       const newInquiry = {
         id:'Q'+Date.now(),
         user: uname,
@@ -696,15 +747,30 @@
       location.href='index.html';
     });
 
-    // ===== 초기 구동 =====
+    // ===== 초기 구동 (자동 리다이렉트 제거, 소프트 재시도) =====
     (async function init(){
-      const s = await waitForSession();
+      const hint = $('#sessionHint');
+      let s = await waitForSession();
       if(!s){
-        // 팝업 최소화: 모바일에서도 조용히 로그인 화면으로
-        location.href='login.html';
-        return;
+        hint.style.display='block';
+        hint.textContent = '로그인 세션을 확인 중입니다... (네트워크/쿠키 설정을 확인해 주세요)';
+        // 소프트 재시도 루프 (리다이렉트 없음)
+        let tries = 0;
+        while(!s && tries < 40){ // 약 6초~ 범위 재시도
+          await new Promise(r=>setTimeout(r,150));
+          s = getAdminSession() || getGsSession();
+          tries++;
+        }
       }
-      window.__SESSION__ = (SESSION = s);
+      if(!s){
+        // 세션이 끝내 안 잡혀도 페이지는 유지 (사용자가 직접 새로고침/로그인 가능)
+        console.warn('세션을 가져오지 못했습니다.');
+      }else{
+        window.__SESSION__ = (SESSION = s);
+        // 백업 저장(사파리 ITP 대비)
+        try{ localStorage.setItem('gs_user_backup', JSON.stringify(SESSION)); }catch(_){}
+      }
+
       await loadCurrentUser();
       await loadGoldPrice();
       await renderOrders();
@@ -712,7 +778,30 @@
 
       // 탭 복귀/주기 새로고침
       document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ renderOrders(); renderInquiries(); } });
-      setInterval(()=>{ renderOrders(); renderInquiries(); }, 6000);
+      setInterval(()=>{ 
+        // 세션 워치독: 사라졌으면 로컬 백업으로 복구 시도
+        const live = getAdminSession() || getGsSession();
+        if (live) SESSION = live;
+        else {
+          try{
+            const backup = localStorage.getItem('gs_user_backup');
+            if (backup) SESSION = JSON.parse(backup);
+          }catch(_){}
+        }
+        renderOrders(); renderInquiries();
+      }, 6000);
+
+      // 다른 탭에서 로그인/로그아웃 감지
+      window.addEventListener('storage', (e)=>{
+        if (e.key === 'admin_session_v1' || e.key === 'gs_user'){
+          const ns = getAdminSession() || getGsSession();
+          if (ns) SESSION = ns;
+        }
+        if (e.key === 'gs_logout'){
+          // 다른 탭에서 로그아웃되면 홈으로 이동
+          location.href = 'index.html';
+        }
+      });
     })();
 
   });
