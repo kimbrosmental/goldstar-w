@@ -211,7 +211,7 @@
     const $  = (s,p=document)=>p.querySelector(s);
     const $$ = (s,p=document)=>Array.from(p.querySelectorAll(s));
 
-    // ===== 세션 처리 (AdminAuth + GSApp 둘 다 지원, 늦게 초기화되는 경우 대기) =====
+    // ===== 세션 처리 (AdminAuth + GSApp + localStorage) =====
     const ADMIN_KEY = 'admin_session_v1';
     const GS_KEY    = 'gs_user';
 
@@ -229,14 +229,14 @@
         return raw ? JSON.parse(raw) : null;
       }catch(_){ return null; }
     }
-    async function waitForSession(timeout=5000){
+    async function waitForSession(timeout=10000){
       const start = performance.now();
       return new Promise(resolve=>{
         (function tick(){
           const s = getAdminSession() || getGsSession();
           if (s && (s.username || s.email)) return resolve(s);
           if (performance.now() - start > timeout) return resolve(null);
-          setTimeout(tick, 120);
+          setTimeout(tick, 150);
         })();
       });
     }
@@ -264,57 +264,53 @@
       }catch{ return arr; }
     }
 
-    // ===== 공통: 다양한 KV 응답 정규화 =====
+    // ===== 공통: KV 응답 → 배열 보강 파서 =====
     async function kvToArray(payload){
       try{
         if (!payload) return [];
 
-        // 배열 그대로
+        // 1) 이미 배열
         if (Array.isArray(payload)) return payload;
 
-        // 흔한 컨테이너
+        // 2) 상용 컨테이너 속성
         let cand = payload?.data ?? payload?.list ?? payload?.items ?? payload?.values ??
                    payload?.value ?? payload?.records ?? payload?.result ?? payload?.results;
 
-        // 객체 내 첫 배열 필드
+        // 3) 첫 배열 속성 자동 선택
         if (!cand && typeof payload === 'object') {
           for (const k of Object.keys(payload)) {
             if (Array.isArray(payload[k])) { cand = payload[k]; break; }
           }
         }
 
-        // cand가 배열
+        // 4) cand가 배열
         if (Array.isArray(cand)) return cand;
 
-        // cand가 문자열(JSON/암호문)
+        // 5) cand가 객체-맵(키:값) → values
+        const maybeMap = cand || payload;
+        if (maybeMap && typeof maybeMap === 'object' && !Array.isArray(maybeMap)) {
+          const vals = Object.values(maybeMap);
+          if (vals.length && vals.every(v => typeof v === 'object')) return vals;
+        }
+
+        // 6) 문자열(JSON/암호문) 시도
         async function tryString(str){
           try{ const j = JSON.parse(str); if (Array.isArray(j)) return j; if (Array.isArray(j?.data)) return j.data; }catch{}
           if (window.decrypt){
             const dec = await window.decrypt(str);
-            if (Array.isArray(dec)) return dec;
             try{ const j2 = JSON.parse(dec); if (Array.isArray(j2)) return j2; if (Array.isArray(j2?.data)) return j2.data; }catch{}
           }
           return null;
         }
-
-        if (typeof cand === 'string'){
-          const r = await tryString(cand);
-          if (r) return r;
-        }
-        if (typeof payload?.data === 'string'){
-          const r = await tryString(payload.data);
-          if (r) return r;
-        }
-        if (typeof payload === 'string'){
-          const r = await tryString(payload);
-          if (r) return r;
-        }
+        if (typeof cand === 'string'){ const r = await tryString(cand); if (r) return r; }
+        if (typeof payload?.data === 'string'){ const r = await tryString(payload.data); if (r) return r; }
+        if (typeof payload === 'string'){ const r = await tryString(payload); if (r) return r; }
 
         return [];
       }catch{ return []; }
     }
 
-    // ===== 공통 저장 (우선 {data: encrypt(list)} 시도, 실패 시 배열 그대로 백업 시도) =====
+    // ===== 공통 저장 =====
     async function kvSaveArray(url, list){
       const body1 = { data: await safeEncrypt(list) };
       let ok = false;
@@ -352,7 +348,6 @@
         users.find(u => mail && (u.email||'').trim().toLowerCase() === mail) ||
         null;
 
-      // USERS에 없으면 세션 정보로 최소 표시
       if(!CURRENT_USER){
         CURRENT_USER = {
           username: uname || '-',
@@ -426,17 +421,22 @@
     async function saveOrdersAll(list){ await kvSaveArray('/api/orders', list); }
     async function saveInquiriesAll(list){ await kvSaveArray('/api/inquiries', list); }
 
-    async function renderOrders(){
-      const all = await fetchOrdersAll();
+    function matchToMe(item){
       const uname = (SESSION.username || (SESSION.email ? SESSION.email.split('@')[0] : '') || '').trim();
       const mail  = (CURRENT_USER?.email || '').trim().toLowerCase();
 
-      const mine = all.filter(o=>{
-        const u = (o.user || o.username || '').trim();
-        const e = (o.email || '').trim().toLowerCase();
-        return (u === uname) || (mail && e === mail);
-      });
+      const ufields = [item.user, item.username, item.member, item.uid, item.userId, item.userid];
+      const mfields = [item.email, item.userEmail];
 
+      const hitUser = ufields.some(v => (v||'').toString().trim() === uname);
+      const hitMail = mfields.some(v => (v||'').toString().trim().toLowerCase() === mail);
+
+      return hitUser || (mail && hitMail);
+    }
+
+    async function renderOrders(){
+      const all = await fetchOrdersAll();
+      const mine = all.filter(matchToMe);
       const el = $('#ordersContainer');
       if(!mine.length){
         el.innerHTML = '<div class="orders-empty">없음</div>';
@@ -467,15 +467,7 @@
 
     async function renderInquiries(){
       const all  = await fetchInquiriesAll();
-      const uname = (SESSION.username || (SESSION.email ? SESSION.email.split('@')[0] : '') || '').trim();
-      const mail  = (CURRENT_USER?.email || '').trim().toLowerCase();
-
-      const mine = all.filter(q=>{
-        const u = (q.user || q.username || '').trim();
-        const e = (q.email || '').trim().toLowerCase();
-        return (u === uname) || (mail && e === mail);
-      });
-
+      const mine = all.filter(matchToMe);
       const wrap = $('#messagesWrap');
       if(!mine.length){
         wrap.innerHTML = '<div class="orders-empty">문의가 없습니다.</div>';
@@ -652,20 +644,21 @@
       location.href='index.html';
     });
 
-    // ===== 초기 구동: 세션을 먼저 기다린 후 로드 =====
+    // ===== 초기 구동 =====
     (async function init(){
-      SESSION = await waitForSession();
-      if(!SESSION){
+      const s = await waitForSession();
+      if(!s){
         alert('로그인 세션을 찾을 수 없습니다. 다시 로그인해 주세요.');
         location.href='login.html';
         return;
       }
+      window.__SESSION__ = (SESSION = s);
       await loadCurrentUser();
       await loadGoldPrice();
       await renderOrders();
       await renderInquiries();
 
-      // 탭 전환/복귀 및 주기적 최신화
+      // 탭 복귀/주기 새로고침
       document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ renderOrders(); renderInquiries(); } });
       setInterval(()=>{ renderOrders(); renderInquiries(); }, 6000);
     })();

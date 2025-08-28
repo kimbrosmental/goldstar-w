@@ -5,13 +5,16 @@
   <script src="/config.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Gold-Star World</title>
+  <title>Gold-Star World</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <meta http-equiv="Referrer-Policy" content="no-referrer">
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
+/* ✅ 네비 로고 크기: 홈/로그인 동일하게 고정 */
+#navbar .logo img { height:52px !important; width:auto; object-fit:contain; }
+
 /* ====== 고급 호버 이펙트: 검정색 제외, 구별선 제외, 섹션별 적용 ====== */
 /* 박스류만 금빛 테두리, 텍스트/아이콘은 살짝 올라가는 이펙트만 */
 /* 박스류 금빛 테두리, 텍스트/아이콘은 살짝 올라가는 이펙트 */
@@ -238,13 +241,13 @@
 
   <!-- Intro overlay (5초 1회만 보여주고, 페이드아웃 디졸브) -->
   <div id="introOverlay" aria-hidden="true" role="dialog">
-  <img id="introGif" src="img/gold-intro.webp" alt="Intro" style="width:100vw;height:100vh;object-fit:cover;" />
+    <img id="introGif" src="img/gold-intro.webp" alt="Intro" style="width:100vw;height:100vh;object-fit:cover;" />
   </div>
 
   <nav id="navbar">
     <div class="container">
-  <div class="logo"><a href="index.html" id="homeLogo"><img src="img/logo.png" alt="골드스타 로고"></a></div>
-  <div class="nav-center">
+      <div class="logo"><a href="index.html" id="homeLogo"><img src="img/logo.png" alt="골드스타 로고"></a></div>
+      <div class="nav-center">
         <ul class="nav-links">
           <li><a href="#section1">소개</a></li>
           <li><a href="#section2">진행</a></li>
@@ -255,10 +258,12 @@
       </div>
       <div class="nav-right">
         <div class="user-area">
-  <a href="signup.html" class="btn user-link" id="signupBtn">회원가입</a>
-  <a href="login.html" class="btn user-link" id="loginBtn">로그인</a>
-  <button id="adminReturnBtn" class="btn" style="display:none;margin-left:8px;"><i class="fas fa-cog"></i></button>
-</div>
+          <!-- ✅ 프로필 버튼 추가 (로그인 시 노출) -->
+          <a href="profile.html" class="btn user-link" id="profileBtn" style="display:none;">내정보</a>
+          <a href="signup.html" class="btn user-link" id="signupBtn">회원가입</a>
+          <a href="login.html" class="btn user-link" id="loginBtn">로그인</a>
+          <button id="adminReturnBtn" class="btn" style="display:none;margin-left:8px;"><i class="fas fa-cog"></i></button>
+        </div>
         <div class="menu-btn" data-i18n-aria="aria_menu_open" aria-label="메뉴 열기" role="button" tabindex="0">
           <span></span><span></span><span></span>
         </div>
@@ -280,7 +285,7 @@
   <main class="fadein" id="mainFadein">
     <!-- Section1 -->
     <section id="section1" class="section">
-  <div class="content fadein">
+      <div class="content fadein">
         <h2 class="hook">
           <span class="line line1" data-i18n="hook_line1">“금은 결국 오른다.”</span>
           <span class="line line2" data-i18n="hook_line2">“다만, 합리적 금액에 살 수 있는 순간은 짧다.”</span>
@@ -312,7 +317,7 @@
 
     <!-- Section2: 진행 (이전 상태로 복원) -->
     <section id="section2" class="section">
-  <div class="content fadein">
+      <div class="content fadein">
         <div class="story-content">
           <h2>주요 이슈</h2>
           <div class="story-grid">
@@ -329,7 +334,7 @@
 
     <!-- Section3 -->
     <section id="section3" class="section">
-  <div class="content fadein">
+      <div class="content fadein">
         <div class="process-content">
           <h2></h2>
           <!-- 상단 행: 좌측 설명, 우측 영상 -->
@@ -360,7 +365,7 @@
 
     <!-- Section4 -->
     <section id="section4" class="section">
-  <div class="content fadein">
+      <div class="content fadein">
         <div class="achievement-content">
           <h2>실제 공급 성과</h2>
           <div class="achievement-grid">
@@ -415,11 +420,11 @@
 
     <!-- Section5 -->
     <section id="section5" class="section">
-  <div class="content center fadein">
-  <h2 class="section5-title">지금 바로 문의하세요</h2>
-  <h2 class="section5-title">회원가입 후 직접 주문 가능합니다.</h2>
-  <h2 class="section5-title"> 궁금하신 사항은 텔레그램 으로 문의 주세요.</h2>
-  <p class="section5-text">골드스타와 함께 새로운 투자의 기회를 시작하세요</p>
+      <div class="content center fadein">
+        <h2 class="section5-title">지금 바로 문의하세요</h2>
+        <h2 class="section5-title">회원가입 후 직접 주문 가능합니다.</h2>
+        <h2 class="section5-title"> 궁금하신 사항은 텔레그램 으로 문의 주세요.</h2>
+        <p class="section5-text">골드스타와 함께 새로운 투자의 기회를 시작하세요</p>
         <div class="contact-buttons">
           <a href="#" class="kakao-link"><img src="img/카카오톡 문의.gif" alt="카카오톡 문의"/></a>
           <a href="https://t.me/Goldstar_Korea" target="_blank" rel="noopener"><img src="img/텔레그램 문의.gif" alt="텔레그램 문의"/></a>
@@ -453,7 +458,6 @@
   <script src="/hover-gif.js"></script>
   <script src="/app.js"></script>
   <script>
-     
   // 카카오톡 문의 클릭 시 "준비중입니다." 알림
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.kakao-link').forEach(el => {
@@ -463,88 +467,143 @@
       });
     });
   });
-// 모든 fadein 요소에 Intersection Observer로 디졸브 효과 적용
-document.addEventListener('DOMContentLoaded', function(){
-  const fadeEls = document.querySelectorAll('.fadein');
-  const mainFade = document.getElementById('mainFadein');
-  if(mainFade) {
-    setTimeout(()=>mainFade.classList.add('visible'), 400); // 인트로 오버레이 이후 페이드인
-  }
-  const observer = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        entry.target.classList.add('visible');
-      }
+  // 모든 fadein 요소에 Intersection Observer로 디졸브 효과 적용
+  document.addEventListener('DOMContentLoaded', function(){
+    const fadeEls = document.querySelectorAll('.fadein');
+    const mainFade = document.getElementById('mainFadein');
+    if(mainFade) {
+      setTimeout(()=>mainFade.classList.add('visible'), 400); // 인트로 오버레이 이후 페이드인
+    }
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.3 });
+    fadeEls.forEach(el=>{
+      observer.observe(el);
     });
-  }, { threshold: 0.3 });
-  fadeEls.forEach(el=>{
-    observer.observe(el);
   });
-});
-    // 로그인 상태에 따라 네비게이션 바 버튼 제어
-    function updateNavForAdmin() {
-      var isAdmin = !!localStorage.getItem('admin_session_v1');
-      var signupBtn = document.getElementById('signupBtn');
-      var loginBtn = document.getElementById('loginBtn');
-      var adminBtn = document.getElementById('adminReturnBtn');
-      if (isAdmin) {
+  </script>
+
+  <script>
+  /* ✅ 로그인 상태에 따라 네비게이션 버튼 제어 (사용자/관리자 모두)
+     - AdminAuth, GSApp, localStorage를 모두 점검
+     - storage 변화에도 실시간 반영
+  */
+  (function(){
+    const ADMIN_KEY = 'admin_session_v1';
+    const GS_KEY    = 'gs_user';
+
+    function getAdminSession(){
+      try{
+        // AdminAuth가 있으면 우선 사용
+        if (window.AdminAuth?.currentSession) return AdminAuth.currentSession();
+        const raw = localStorage.getItem(ADMIN_KEY);
+        return raw ? JSON.parse(raw) : null;
+      }catch(_){ return null; }
+    }
+    function getGsSession(){
+      try{
+        if (window.GSApp?.currentUser) return GSApp.currentUser();
+        const raw = localStorage.getItem(GS_KEY);
+        return raw ? JSON.parse(raw) : null;
+      }catch(_){ return null; }
+    }
+    function isLoggedIn(){
+      const s = getAdminSession() || getGsSession();
+      return !!(s && (s.username || s.email));
+    }
+    function isAdmin(){
+      // 관리자 세션 키 존재 여부로 판별
+      const raw = localStorage.getItem(ADMIN_KEY);
+      return !!raw;
+    }
+
+    function updateNav(){
+      const signupBtn = document.getElementById('signupBtn');
+      const loginBtn  = document.getElementById('loginBtn');
+      const profileBtn= document.getElementById('profileBtn');
+      const adminBtn  = document.getElementById('adminReturnBtn');
+
+      const logged = isLoggedIn();
+      const admin  = isAdmin();
+
+      if (logged) {
         if (signupBtn) signupBtn.style.display = 'none';
-        if (loginBtn) loginBtn.style.display = 'none';
-        if (adminBtn) adminBtn.style.display = 'inline-flex';
+        if (loginBtn)  loginBtn.style.display  = 'none';
+        if (profileBtn) profileBtn.style.display = 'inline-flex';
       } else {
         if (signupBtn) signupBtn.style.display = '';
-        if (loginBtn) loginBtn.style.display = '';
+        if (loginBtn)  loginBtn.style.display  = '';
+        if (profileBtn) profileBtn.style.display = 'none';
+      }
+      if (admin) {
+        if (adminBtn) adminBtn.style.display = 'inline-flex';
+      } else {
         if (adminBtn) adminBtn.style.display = 'none';
       }
     }
-    document.addEventListener('DOMContentLoaded', function() {
-      updateNavForAdmin();
-      var adminBtn = document.getElementById('adminReturnBtn');
-      if (adminBtn) {
-        adminBtn.addEventListener('click', function() {
-          window.location.href = 'admin/index.html';
-        });
-      }
-    });
-    // 로그인/로그아웃 시에도 updateNavForAdmin()을 호출해야 함 (app.js에서 처리 가능)
-  </script>
-  <script>
-// Intro overlay: GIF 1회만 보여주고 2초 후 ESC 효과 및 마지막 1초에 페이드아웃 디졸브 (총 3초만 재생)
-// 네비게이션 로고 클릭 시 항상 홈(index.html)으로 이동
-document.addEventListener('DOMContentLoaded', function() {
-  var homeLogo = document.getElementById('homeLogo');
-  if(homeLogo) {
-    homeLogo.addEventListener('click', function(e) {
-      e.preventDefault();
-      window.location.href = 'index.html';
-    });
-  }
-});
 
-// Intro overlay: GIF 1회만 보여주고 4초 후 페이드아웃, 새로고침 없이 사라짐
-(function(){
-  const overlay=document.getElementById('introOverlay');
-  const img=document.getElementById('introGif');
-  if(!overlay||!img) return;
-  // 세션 기준 1회만 보여주고, 이후엔 바로 숨김
-  const played=sessionStorage.getItem('intro_played_v10');
-  if(played){ overlay.style.display='none'; document.body.style.overflow=''; document.documentElement.style.overflow=''; return; }
-  function hideIntro(){
-    overlay.classList.add('hidden');
-    setTimeout(()=>{
-      if(img) img.remove();
-      overlay.style.display='none';
-      document.body.style.overflow='';
-      document.documentElement.style.overflow='';
-      sessionStorage.setItem('intro_played_v10','1');
-    }, 1000); // 디졸브 효과 1초
-  }
-  document.documentElement.style.overflow='hidden';
-  document.body.style.overflow='hidden';
-  setTimeout(hideIntro, 4000); // 4초 후 자동 페이드아웃
-  overlay.addEventListener('click', hideIntro);
-})();
+    document.addEventListener('DOMContentLoaded', ()=>{
+      updateNav();
+      // Admin 바로가기
+      const adminBtn = document.getElementById('adminReturnBtn');
+      if (adminBtn) {
+        adminBtn.addEventListener('click', ()=>{ window.location.href='admin/index.html'; });
+      }
+      // GSApp가 늦게 로드되는 경우를 대비한 보강 호출
+      setTimeout(updateNav, 250);
+      setTimeout(updateNav, 800);
+      setTimeout(updateNav, 1800);
+    });
+
+    // storage 변경(다른 탭 로그아웃/로그인)에도 즉시 반영
+    window.addEventListener('storage', (e)=>{
+      if ([ADMIN_KEY, GS_KEY].includes(e.key)) updateNav();
+    });
+  })();
   </script>
+
+  <script>
+  // Intro overlay: GIF 1회만 보여주고 2초 후 ESC 효과 및 마지막 1초에 페이드아웃 디졸브 (총 3초만 재생)
+  // 네비게이션 로고 클릭 시 항상 홈(index.html)으로 이동
+  document.addEventListener('DOMContentLoaded', function() {
+    var homeLogo = document.getElementById('homeLogo');
+    if(homeLogo) {
+      homeLogo.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = 'index.html';
+      });
+    }
+  });
+
+  // Intro overlay: GIF 1회만 보여주고 4초 후 페이드아웃, 새로고침 없이 사라짐
+  (function(){
+    const overlay=document.getElementById('introOverlay');
+    const img=document.getElementById('introGif');
+    if(!overlay||!img) return;
+    // 세션 기준 1회만 보여주고, 이후엔 바로 숨김
+    const played=sessionStorage.getItem('intro_played_v10');
+    if(played){ overlay.style.display='none'; document.body.style.overflow=''; document.documentElement.style.overflow=''; return; }
+    function hideIntro(){
+      overlay.classList.add('hidden');
+      setTimeout(()=>{
+        if(img) img.remove();
+        overlay.style.display='none';
+        document.body.style.overflow='';
+        document.documentElement.style.overflow='';
+        sessionStorage.setItem('intro_played_v10','1');
+      }, 1000); // 디졸브 효과 1초
+    }
+    document.documentElement.style.overflow='hidden';
+    document.body.style.overflow='hidden';
+    setTimeout(hideIntro, 4000); // 4초 후 자동 페이드아웃
+    overlay.addEventListener('click', hideIntro);
+  })();
+  </script>
+
   <script>
     // Extra best-effort content protection for this page
     document.addEventListener('contextmenu', e=> e.preventDefault());
@@ -589,8 +648,8 @@ document.addEventListener('DOMContentLoaded', function() {
     })();
 
     // 메뉴 토글
-  const menuBtn = document.querySelector('.menu-btn');
-  const navLinks = document.querySelector('.nav-links');
+    const menuBtn = document.querySelector('.menu-btn');
+    const navLinks = document.querySelector('.nav-links');
     menuBtn.addEventListener('click', () => {
       menuBtn.classList.toggle('active');
       navLinks.classList.toggle('active');
@@ -611,12 +670,10 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
 
-  // 스크롤탑
-  document.getElementById('scrollToTop').addEventListener('click', () => {
+    // 스크롤탑
+    document.getElementById('scrollToTop').addEventListener('click', () => {
       window.scrollTo({ top:0, behavior:'smooth' });
     });
-
-  // 테마 제거됨
 
     // 스크롤 진행률
     const bar = document.getElementById('scroll-progress');
@@ -630,221 +687,220 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('DOMContentLoaded', updateBar);
 
     // 금 시세 API & 렌더링
-  const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
+    const API_URL   = 'https://gold-price-proxy.hanoiosaka1.workers.dev/price';
 
-  // 슬롯머신 숫자 애니메이션 함수
-  // 고급 Elastic/EaseOut + 폭죽 효과
-  // 슬롯머신 스타일: 느리게→빠르게→한자리씩 정지
-  // 슬롯머신 스타일: 느리게→빠르게→한자리씩 정지 (더 느리게)
-  function animateNumber(el, from, to, duration = 5200, onComplete) {
-    from = Number(from) || 0;
-    to = Number(to) || 0;
-    if (from === to) {
-      el.textContent = fmt(to) + '원';
-      if (onComplete) onComplete();
-      return;
-    }
-    const start = performance.now();
-    const toStr = fmt(to);
-    const digits = toStr.replace(/[^0-9]/g, '').split('');
-    const len = digits.length;
-    let lastFrame = false;
-    function slotEase(t) {
-      // 0~0.25: 매우 느림, 0.25~0.7: 5배 빠름, 0.7~1: 한자리씩 정지 (전체적으로 더 느리게)
-      if (t < 0.25) return t * 0.15;
-      if (t < 0.7) return 0.0375 + (t-0.25)*1.1;
-      return 0.45 + (t-0.7)*0.8;
-    }
-    function step(now) {
-      const progress = Math.min((now - start) / duration, 1);
-      const eased = slotEase(progress);
-      let curVal = Math.floor(from + (to - from) * eased);
-      let curStr = fmt(curVal);
-      // 마지막 0.3구간: 한자리씩 정지
-      if (progress > 0.7) {
-        let arr = curStr.replace(/[^0-9]/g, '').split('');
-        for (let i = 0; i < len; i++) {
-          if (progress < 0.75 + i*0.05) arr[i] = Math.floor(Math.random()*10).toString();
-          else arr[i] = digits[i];
+    // 슬롯머신 숫자 애니메이션 함수
+    // 고급 Elastic/EaseOut + 폭죽 효과
+    // 슬롯머신 스타일: 느리게→빠르게→한자리씩 정지
+    function animateNumber(el, from, to, duration = 5200, onComplete) {
+      from = Number(from) || 0;
+      to = Number(to) || 0;
+      if (from === to) {
+        el.textContent = fmt(to) + '원';
+        if (onComplete) onComplete();
+        return;
+      }
+      const start = performance.now();
+      const toStr = fmt(to);
+      const digits = toStr.replace(/[^0-9]/g, '').split('');
+      const len = digits.length;
+      let lastFrame = false;
+      function slotEase(t) {
+        // 0~0.25: 매우 느림, 0.25~0.7: 5배 빠름, 0.7~1: 한자리씩 정지 (전체적으로 더 느리게)
+        if (t < 0.25) return t * 0.15;
+        if (t < 0.7) return 0.0375 + (t-0.25)*1.1;
+        return 0.45 + (t-0.7)*0.8;
+      }
+      function step(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = slotEase(progress);
+        let curVal = Math.floor(from + (to - from) * eased);
+        let curStr = fmt(curVal);
+        // 마지막 0.3구간: 한자리씩 정지
+        if (progress > 0.7) {
+          let arr = curStr.replace(/[^0-9]/g, '').split('');
+          for (let i = 0; i < len; i++) {
+            if (progress < 0.75 + i*0.05) arr[i] = Math.floor(Math.random()*10).toString();
+            else arr[i] = digits[i];
+          }
+          curStr = arr.join('').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
         }
-        curStr = arr.join('').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
-      }
-      el.textContent = curStr + '원';
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      } else {
-        el.textContent = toStr + '원';
-        if (!lastFrame) {
-          lastFrame = true;
-          if (onComplete) onComplete();
+        el.textContent = curStr + '원';
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          el.textContent = toStr + '원';
+          if (!lastFrame) {
+            lastFrame = true;
+            if (onComplete) onComplete();
+          }
         }
       }
+      requestAnimationFrame(step);
     }
-    requestAnimationFrame(step);
-  }
 
-  // 금색 폭죽 효과 (canvas)
-  function goldFirework(targetEl) {
-    const rect = targetEl.getBoundingClientRect();
-    const canvas = document.createElement('canvas');
-    canvas.style.position = 'fixed';
-    canvas.style.left = (rect.left + window.scrollX - rect.width*0.5) + 'px';
-    canvas.style.top = (rect.top + window.scrollY - rect.height*0.5) + 'px';
-    canvas.width = rect.width*2;
-    canvas.height = rect.height*2;
-    canvas.style.pointerEvents = 'none';
-    canvas.style.zIndex = 9999;
-    document.body.appendChild(canvas);
-    const ctx = canvas.getContext('2d');
-    const particles = [];
-    const colors = ['#FFD700','#FFF8DC','#FFEC8B','#FFFACD','#F5DEB3'];
-    for(let i=0;i<48;i++){
-      const angle = (Math.PI*2*i)/48;
-      const speed = 3+Math.random()*5;
-      particles.push({
-        x: canvas.width/2,
-        y: canvas.height/2,
-        vx: Math.cos(angle)*speed,
-        vy: Math.sin(angle)*speed,
-        r: 4+Math.random()*5,
-        color: colors[Math.floor(Math.random()*colors.length)],
-        alpha: 1
-      });
-    }
-    let frame=0;
-    function draw(){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      particles.forEach(p=>{
-        ctx.globalAlpha = p.alpha;
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-        ctx.fillStyle = p.color;
-        ctx.fill();
-        p.x += p.vx;
-        p.y += p.vy;
-        p.alpha -= 0.012;
-      });
-      frame++;
-      if(frame<90){
-        requestAnimationFrame(draw);
-      }else{
-        canvas.remove();
-      }
-    }
-    draw();
-  }
-  const fmt = n => Number(n).toLocaleString('ko-KR');
-
-  async function renderGoldPrice(){
-    const priceEl  = document.getElementById('mainPrice');
-    const changeEl = document.getElementById('priceChange');
-    const supplyEl = document.querySelector('.supply-price');
-    const supplyCh = document.querySelector('.supply-footer .change-line');
-    // DOM 준비 후, 초기값을 0으로 세팅 (시작전 - 대신 0)
-    if (priceEl) priceEl.textContent = '0원';
-    if (supplyEl) supplyEl.textContent = '0원';
-    let prevMain = 0;
-    let prevSupply = 0;
-
-    try {
-      // 1) KV에서 goldprice 값 확인
-      const kvRes = await fetch('/api/security?type=goldprice');
-      const kvJson = await kvRes.json();
-      const manual = kvJson && kvJson.manualGoldPrice ? Number(kvJson.manualGoldPrice) : 0;
-
-      let basePrice = 0;
-      let supplyVal = 520000; // 공급가격을 항상 520,000원으로 고정
-      // intro webp가 끝난 뒤에만 애니메이션 실행
-      function runEffects(main, supply) {
-        // 항상 0에서 시작해 가격이 올라가는 이펙트
-        if (priceEl) animateNumber(priceEl, 0, main, 2800, ()=>{
-          goldFirework(priceEl);
-        });
-        if (supplyEl) animateNumber(supplyEl, 0, supply, 2800, ()=>{
-          goldFirework(supplyEl);
+    // 금색 폭죽 효과 (canvas)
+    function goldFirework(targetEl) {
+      const rect = targetEl.getBoundingClientRect();
+      const canvas = document.createElement('canvas');
+      canvas.style.position = 'fixed';
+      canvas.style.left = (rect.left + window.scrollX - rect.width*0.5) + 'px';
+      canvas.style.top = (rect.top + window.scrollY - rect.height*0.5) + 'px';
+      canvas.width = rect.width*2;
+      canvas.height = rect.height*2;
+      canvas.style.pointerEvents = 'none';
+      canvas.style.zIndex = 9999;
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      const particles = [];
+      const colors = ['#FFD700','#FFF8DC','#FFEC8B','#FFFACD','#F5DEB3'];
+      for(let i=0;i<48;i++){
+        const angle = (Math.PI*2*i)/48;
+        const speed = 3+Math.random()*5;
+        particles.push({
+          x: canvas.width/2,
+          y: canvas.height/2,
+          vx: Math.cos(angle)*speed,
+          vy: Math.sin(angle)*speed,
+          r: 4+Math.random()*5,
+          color: colors[Math.floor(Math.random()*colors.length)],
+          alpha: 1
         });
       }
-      if (manual > 0) {
-        basePrice = manual;
-        runEffects(manual, supplyVal);
-      } else {
-        const d = await fetch(API_URL).then(r=>r.json());
-        if (d && d.price) {
-          basePrice = d.price;
-          runEffects(d.price, supplyVal);
-          const arrow = d.trend==='up' ? '▲' : d.trend==='down' ? '▼' : '';
-          const pct   = d.percent || '';
-          const chg   = d.change ? fmt(d.change)+'원' : '';
-          changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
-          changeEl.className = 'change-line' + (d.trend==='up'? ' up': d.trend==='down'? ' down':'');
+      let frame=0;
+      function draw(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        particles.forEach(p=>{
+          ctx.globalAlpha = p.alpha;
+          ctx.beginPath();
+          ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+          p.x += p.vx;
+          p.y += p.vy;
+          p.alpha -= 0.012;
+        });
+        frame++;
+        if(frame<90){
+          requestAnimationFrame(draw);
+        }else{
+          canvas.remove();
         }
       }
-      // 공급가 대비 퍼센트만 표시
-      if (supplyEl && supplyCh && basePrice > 0) {
-        const supplyVal2 = supplyVal;
-        if (supplyVal2 > 0) {
-          const rate = (basePrice - supplyVal2)/basePrice*100;
-          const sign = rate > 0 ? '▼' : '▲';
-          const absPct = Math.abs(rate).toFixed(2) + '%';
-          supplyCh.textContent = `${sign} ${absPct}`;
-          supplyCh.className = 'change-line ' + (rate > 0 ? 'down' : 'up');
-        }
-      }
-    } catch (e) {
-      priceEl.textContent = '–';
-      changeEl.textContent = '';
+      draw();
     }
-  }
+    const fmt = n => Number(n).toLocaleString('ko-KR');
 
-  // intro webp가 끝난 뒤에 금액 애니메이션 항상 실행 (transitionend, click 모두 1초 후)
-  document.addEventListener('DOMContentLoaded', function(){
-    // 금시세, 공급가격 모두 0원으로 초기화 및 가운데 정렬
-    const priceEl = document.getElementById('mainPrice');
-    const supplyEl = document.querySelector('.supply-price');
-    if (priceEl) {
-      priceEl.textContent = '0원';
-      priceEl.style.textAlign = 'center';
-      priceEl.style.marginLeft = 'auto';
-      priceEl.style.marginRight = 'auto';
-      priceEl.style.display = 'block';
-    }
-    if (supplyEl) {
-      supplyEl.textContent = '0원';
-      supplyEl.style.textAlign = 'center';
-      supplyEl.style.marginLeft = 'auto';
-      supplyEl.style.marginRight = 'auto';
-      supplyEl.style.display = 'block';
-    }
-    let animationStarted = false;
-    function startAnimation() {
-      if (!animationStarted) {
-        animationStarted = true;
-        setTimeout(renderGoldPrice, 300); // intro 끝나고 0.5초 후 실행
+    async function renderGoldPrice(){
+      const priceEl  = document.getElementById('mainPrice');
+      const changeEl = document.getElementById('priceChange');
+      const supplyEl = document.querySelector('.supply-price');
+      const supplyCh = document.querySelector('.supply-footer .change-line');
+      // DOM 준비 후, 초기값을 0으로 세팅 (시작전 - 대신 0)
+      if (priceEl) priceEl.textContent = '0원';
+      if (supplyEl) supplyEl.textContent = '0원';
+      let prevMain = 0;
+      let prevSupply = 0;
+
+      try {
+        // 1) KV에서 goldprice 값 확인
+        const kvRes = await fetch('/api/security?type=goldprice');
+        const kvJson = await kvRes.json();
+        const manual = kvJson && kvJson.manualGoldPrice ? Number(kvJson.manualGoldPrice) : 0;
+
+        let basePrice = 0;
+        let supplyVal = 520000; // 공급가격을 항상 520,000원으로 고정
+        // intro webp가 끝난 뒤에만 애니메이션 실행
+        function runEffects(main, supply) {
+          // 항상 0에서 시작해 가격이 올라가는 이펙트
+          if (priceEl) animateNumber(priceEl, 0, main, 2800, ()=>{
+            goldFirework(priceEl);
+          });
+          if (supplyEl) animateNumber(supplyEl, 0, supply, 2800, ()=>{
+            goldFirework(supplyEl);
+          });
+        }
+        if (manual > 0) {
+          basePrice = manual;
+          runEffects(manual, supplyVal);
+        } else {
+          const d = await fetch(API_URL).then(r=>r.json());
+          if (d && d.price) {
+            basePrice = d.price;
+            runEffects(d.price, supplyVal);
+            const arrow = d.trend==='up' ? '▲' : d.trend==='down' ? '▼' : '';
+            const pct   = d.percent || '';
+            const chg   = d.change ? fmt(d.change)+'원' : '';
+            changeEl.textContent = [arrow, pct, chg].filter(Boolean).join(' ');
+            changeEl.className = 'change-line' + (d.trend==='up'? ' up': d.trend==='down'? ' down':'');
+          }
+        }
+        // 공급가 대비 퍼센트만 표시
+        if (supplyEl && supplyCh && basePrice > 0) {
+          const supplyVal2 = supplyVal;
+          if (supplyVal2 > 0) {
+            const rate = (basePrice - supplyVal2)/basePrice*100;
+            const sign = rate > 0 ? '▼' : '▲';
+            const absPct = Math.abs(rate).toFixed(2) + '%';
+            supplyCh.textContent = `${sign} ${absPct}`;
+            supplyCh.className = 'change-line ' + (rate > 0 ? 'down' : 'up');
+          }
+        }
+      } catch (e) {
+        priceEl.textContent = '–';
+        changeEl.textContent = '';
       }
     }
-    const overlay = document.getElementById('introOverlay');
-    if (overlay) {
-      let ended = false;
-      function trigger() {
-        if (!ended) {
-          ended = true;
-          startAnimation();
+
+    // intro webp가 끝난 뒤에 금액 애니메이션 항상 실행 (transitionend, click 모두 1초 후)
+    document.addEventListener('DOMContentLoaded', function(){
+      // 금시세, 공급가격 모두 0원으로 초기화 및 가운데 정렬
+      const priceEl = document.getElementById('mainPrice');
+      const supplyEl = document.querySelector('.supply-price');
+      if (priceEl) {
+        priceEl.textContent = '0원';
+        priceEl.style.textAlign = 'center';
+        priceEl.style.marginLeft = 'auto';
+        priceEl.style.marginRight = 'auto';
+        priceEl.style.display = 'block';
+      }
+      if (supplyEl) {
+        supplyEl.textContent = '0원';
+        supplyEl.style.textAlign = 'center';
+        supplyEl.style.marginLeft = 'auto';
+        supplyEl.style.marginRight = 'auto';
+        supplyEl.style.display = 'block';
+      }
+      let animationStarted = false;
+      function startAnimation() {
+        if (!animationStarted) {
+          animationStarted = true;
+          setTimeout(renderGoldPrice, 300); // intro 끝나고 0.5초 후 실행
         }
       }
-      overlay.addEventListener('transitionend', trigger);
-      overlay.addEventListener('click', trigger);
-      setTimeout(trigger, 6000);
-    } else {
-      startAnimation();
-    }
-  });
+      const overlay = document.getElementById('introOverlay');
+      if (overlay) {
+        let ended = false;
+        function trigger() {
+          if (!ended) {
+            ended = true;
+            startAnimation();
+          }
+        }
+        overlay.addEventListener('transitionend', trigger);
+        overlay.addEventListener('click', trigger);
+        setTimeout(trigger, 6000);
+      } else {
+        startAnimation();
+      }
+    });
 
     // Section2: Carousel + 설명글 자동 생성
     // — 최대 20개, VISIBLE_COUNT만큼만 표시
     const MAX_ITEMS = 20;
     const VISIBLE_COUNT = 13; // 1~MAX_ITEMS 사이의 값으로 조정하세요
 
-  document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
       const items = [
         { img: 'section_1.jpg',  desc: '우간다 황금의 첫 걸음 — 땅속에서 피어나는 기회의 빛' },
         { img: 'section_2.jpg',  desc: '지하 암석 속 황금의 길 — 끝없는 도전' },
@@ -886,8 +942,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
 
-  // 무한 루프를 위해 복제
-  track.innerHTML += track.innerHTML;
+      // 무한 루프를 위해 복제
+      track.innerHTML += track.innerHTML;
     });
 
     // (i18n & user nav handled by app.js) — 보조 보장 로직
@@ -901,45 +957,45 @@ document.addEventListener('DOMContentLoaded', function() {
       safeBuild();
       setTimeout(safeBuild, 300);
       setTimeout(safeBuild, 1000);
-  // 테마 기능 삭제됨
+      // 테마 기능 삭제됨
     });
   </script>
-  <script>
-// 섹션5 텔레그램 문의.gif에 호버 이펙트가 적용되도록 JS 보장
 
-document.addEventListener('DOMContentLoaded', function(){
-  // 텔레그램 문의.gif 이미지에 호버 이벤트 추가
-  document.querySelectorAll('.contact-buttons img, .fixed-social-icons img').forEach(function(img){
-    img.addEventListener('mouseenter', function(){
-      img.style.transform = 'translateY(-8px) scale(1.03)';
-    });
-    img.addEventListener('mouseleave', function(){
-      img.style.transform = '';
+  <script>
+  // 섹션5 텔레그램 문의.gif에 호버 이펙트가 적용되도록 JS 보장
+  document.addEventListener('DOMContentLoaded', function(){
+    // 텔레그램 문의.gif 이미지에 호버 이벤트 추가
+    document.querySelectorAll('.contact-buttons img, .fixed-social-icons img').forEach(function(img){
+      img.addEventListener('mouseenter', function(){
+        img.style.transform = 'translateY(-8px) scale(1.03)';
+      });
+      img.addEventListener('mouseleave', function(){
+        img.style.transform = '';
+      });
     });
   });
-});
   </script>
-  <script>
-// 맨위로 버튼 아이콘을 올바른 위쪽 화살표로 직접 수정
-// (FontAwesome 사용 시 <i class="fas fa-arrow-up"></i> 또는 유니코드 ↑)
 
-document.addEventListener('DOMContentLoaded', function(){
-  var scrollBtn = document.getElementById('scrollToTop');
-  if(scrollBtn) {
-    // 아이콘이 잘못된 경우 교체
-    var icon = scrollBtn.querySelector('i');
-    if(icon) {
-      icon.className = 'fas fa-arrow-up'; // FontAwesome 위쪽 화살표
-      icon.textContent = '';
-    } else {
-      // 아이콘이 없으면 직접 추가
-      var newIcon = document.createElement('i');
-      newIcon.className = 'fas fa-arrow-up';
-      scrollBtn.innerHTML = '';
-      scrollBtn.appendChild(newIcon);
+  <script>
+  // 맨위로 버튼 아이콘을 올바른 위쪽 화살표로 직접 수정
+  // (FontAwesome 사용 시 <i class="fas fa-arrow-up"></i> 또는 유니코드 ↑)
+  document.addEventListener('DOMContentLoaded', function(){
+    var scrollBtn = document.getElementById('scrollToTop');
+    if(scrollBtn) {
+      // 아이콘이 잘못된 경우 교체
+      var icon = scrollBtn.querySelector('i');
+      if(icon) {
+        icon.className = 'fas fa-arrow-up'; // FontAwesome 위쪽 화살표
+        icon.textContent = '';
+      } else {
+        // 아이콘이 없으면 직접 추가
+        var newIcon = document.createElement('i');
+        newIcon.className = 'fas fa-arrow-up';
+        scrollBtn.innerHTML = '';
+        scrollBtn.appendChild(newIcon);
+      }
     }
-  }
-});
+  });
   </script>
 </body>
 </html>
