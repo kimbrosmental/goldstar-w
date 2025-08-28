@@ -229,14 +229,14 @@
         return raw ? JSON.parse(raw) : null;
       }catch(_){ return null; }
     }
-    async function waitForSession(timeout=2500){
+    async function waitForSession(timeout=5000){
       const start = performance.now();
       return new Promise(resolve=>{
         (function tick(){
           const s = getAdminSession() || getGsSession();
           if (s && (s.username || s.email)) return resolve(s);
           if (performance.now() - start > timeout) return resolve(null);
-          setTimeout(tick, 100);
+          setTimeout(tick, 120);
         })();
       });
     }
@@ -248,16 +248,85 @@
     // util
     const fmt = n => Number(n||0).toLocaleString('ko-KR');
 
+    // ===== 공통: 복호화/암호화 =====
     async function safeDecrypt(payload){
       try{
         if(!payload) return [];
         const r = window.decrypt ? window.decrypt(payload) : payload;
         return (r && typeof r.then==='function') ? await r : r;
-      }catch(e){ return []; }
+      }catch{ return []; }
     }
     async function safeEncrypt(arr){
-      const r = window.encrypt ? window.encrypt(arr) : arr;
-      return (r && typeof r.then==='function') ? await r : r;
+      try{
+        if (!window.encrypt) return arr;
+        const r = window.encrypt(arr);
+        return (r && typeof r.then==='function') ? await r : r;
+      }catch{ return arr; }
+    }
+
+    // ===== 공통: 다양한 KV 응답 정규화 =====
+    async function kvToArray(payload){
+      try{
+        if (!payload) return [];
+
+        // 배열 그대로
+        if (Array.isArray(payload)) return payload;
+
+        // 흔한 컨테이너
+        let cand = payload?.data ?? payload?.list ?? payload?.items ?? payload?.values ??
+                   payload?.value ?? payload?.records ?? payload?.result ?? payload?.results;
+
+        // 객체 내 첫 배열 필드
+        if (!cand && typeof payload === 'object') {
+          for (const k of Object.keys(payload)) {
+            if (Array.isArray(payload[k])) { cand = payload[k]; break; }
+          }
+        }
+
+        // cand가 배열
+        if (Array.isArray(cand)) return cand;
+
+        // cand가 문자열(JSON/암호문)
+        async function tryString(str){
+          try{ const j = JSON.parse(str); if (Array.isArray(j)) return j; if (Array.isArray(j?.data)) return j.data; }catch{}
+          if (window.decrypt){
+            const dec = await window.decrypt(str);
+            if (Array.isArray(dec)) return dec;
+            try{ const j2 = JSON.parse(dec); if (Array.isArray(j2)) return j2; if (Array.isArray(j2?.data)) return j2.data; }catch{}
+          }
+          return null;
+        }
+
+        if (typeof cand === 'string'){
+          const r = await tryString(cand);
+          if (r) return r;
+        }
+        if (typeof payload?.data === 'string'){
+          const r = await tryString(payload.data);
+          if (r) return r;
+        }
+        if (typeof payload === 'string'){
+          const r = await tryString(payload);
+          if (r) return r;
+        }
+
+        return [];
+      }catch{ return []; }
+    }
+
+    // ===== 공통 저장 (우선 {data: encrypt(list)} 시도, 실패 시 배열 그대로 백업 시도) =====
+    async function kvSaveArray(url, list){
+      const body1 = { data: await safeEncrypt(list) };
+      let ok = false;
+      try{
+        const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body1) });
+        ok = r.ok;
+      }catch{}
+      if (!ok){
+        try{
+          await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(list) });
+        }catch{}
+      }
     }
 
     // 전역 상태
@@ -265,29 +334,34 @@
     let CURRENT_USER = null;
 
     // ===== USERS에서 현재 사용자 로드 =====
-    async function loadCurrentUser(){
-      const res = await fetch('/api/users', {cache:'no-store'});
-      let users = [];
+    async function fetchUsersAll(){
       try{
+        const res = await fetch('/api/users', {cache:'no-store'});
         const json = await res.json();
-        if (Array.isArray(json)) users = json;
-        else if (json?.data) users = await safeDecrypt(json.data);
-        else if (Array.isArray(json?.data)) users = json.data;
-      }catch{ users = []; }
+        return await kvToArray(json);
+      }catch{ return []; }
+    }
 
-      // username/email 매칭
-      const uname = SESSION.username || SESSION.user || (SESSION.email ? SESSION.email.split('@')[0] : '');
+    async function loadCurrentUser(){
+      const users = await fetchUsersAll();
+      const uname = (SESSION.username || SESSION.user || (SESSION.email ? SESSION.email.split('@')[0] : '') || '').trim();
+      const mail  = (SESSION.email || '').trim().toLowerCase();
+
       CURRENT_USER =
-        users.find(u=>u.username===uname) ||
-        users.find(u=>SESSION.email && u.email===SESSION.email) ||
+        users.find(u => (u.username||'').trim() === uname) ||
+        users.find(u => mail && (u.email||'').trim().toLowerCase() === mail) ||
         null;
 
-      // USERS에 없으면 GS 세션 정보를 임시로 표시(최소한 화면은 뜨도록)
+      // USERS에 없으면 세션 정보로 최소 표시
       if(!CURRENT_USER){
-        const name = SESSION.name || SESSION.displayName || '-';
-        const email = SESSION.email || '-';
-        const phone = SESSION.phone || '-';
-        CURRENT_USER = { username: uname || '-', name, email, phone, role: 'user', created: Date.now() };
+        CURRENT_USER = {
+          username: uname || '-',
+          name: SESSION.name || SESSION.displayName || '-',
+          email: mail || '-',
+          phone: SESSION.phone || '-',
+          role: 'user',
+          created: Date.now()
+        };
       }
       renderProfileSummary(CURRENT_USER);
       renderProfileGrid(CURRENT_USER);
@@ -327,11 +401,11 @@
         const j = await r.json();
         const manual = j?.manualGoldPrice ? Number(j.manualGoldPrice) : 0;
         if(manual>0){ currentPrice = manual; return; }
-      }catch(_){}
+      }catch{}
       try{
         const d = await fetch('https://gold-price-proxy.hanoiosaka1.workers.dev/price').then(r=>r.json());
         if(d?.price) currentPrice = Number(d.price);
-      }catch(_){}
+      }catch{}
     }
 
     // ===== ORDERS / INQUIRIES =====
@@ -339,34 +413,30 @@
       try{
         const res = await fetch('/api/orders', {cache:'no-store'});
         const json = await res.json();
-        if (Array.isArray(json)) return json;
-        return await safeDecrypt(json.data);
-      }catch(_){ return []; }
+        return await kvToArray(json);
+      }catch{ return []; }
     }
     async function fetchInquiriesAll(){
       try{
         const res = await fetch('/api/inquiries', {cache:'no-store'});
         const json = await res.json();
-        if (Array.isArray(json)) return json;
-        return await safeDecrypt(json.data);
-      }catch(_){ return []; }
+        return await kvToArray(json);
+      }catch{ return []; }
     }
-    async function saveOrdersAll(list){
-      const encrypted = await safeEncrypt(list);
-      await fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data: encrypted}) });
-    }
-    async function saveInquiriesAll(list){
-      const encrypted = await safeEncrypt(list);
-      await fetch('/api/inquiries', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data: encrypted}) });
-    }
+    async function saveOrdersAll(list){ await kvSaveArray('/api/orders', list); }
+    async function saveInquiriesAll(list){ await kvSaveArray('/api/inquiries', list); }
 
     async function renderOrders(){
       const all = await fetchOrdersAll();
-      const uname = SESSION.username || (SESSION.email ? SESSION.email.split('@')[0] : '');
+      const uname = (SESSION.username || (SESSION.email ? SESSION.email.split('@')[0] : '') || '').trim();
+      const mail  = (CURRENT_USER?.email || '').trim().toLowerCase();
+
       const mine = all.filter(o=>{
-        return (o.user===uname) || (o.username===uname) ||
-               (CURRENT_USER?.email && o.email===CURRENT_USER.email);
+        const u = (o.user || o.username || '').trim();
+        const e = (o.email || '').trim().toLowerCase();
+        return (u === uname) || (mail && e === mail);
       });
+
       const el = $('#ordersContainer');
       if(!mine.length){
         el.innerHTML = '<div class="orders-empty">없음</div>';
@@ -396,11 +466,16 @@
     }
 
     async function renderInquiries(){
-      const all = await fetchInquiriesAll();
-      const uname = SESSION.username || (SESSION.email ? SESSION.email.split('@')[0] : '');
+      const all  = await fetchInquiriesAll();
+      const uname = (SESSION.username || (SESSION.email ? SESSION.email.split('@')[0] : '') || '').trim();
+      const mail  = (CURRENT_USER?.email || '').trim().toLowerCase();
+
       const mine = all.filter(q=>{
-        return (q.user===uname) || (CURRENT_USER?.email && q.email===CURRENT_USER.email);
+        const u = (q.user || q.username || '').trim();
+        const e = (q.email || '').trim().toLowerCase();
+        return (u === uname) || (mail && e === mail);
       });
+
       const wrap = $('#messagesWrap');
       if(!mine.length){
         wrap.innerHTML = '<div class="orders-empty">문의가 없습니다.</div>';
@@ -589,7 +664,9 @@
       await loadGoldPrice();
       await renderOrders();
       await renderInquiries();
-      // 폴링(관리자 변경 즉시 반영 체감)
+
+      // 탭 전환/복귀 및 주기적 최신화
+      document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ renderOrders(); renderInquiries(); } });
       setInterval(()=>{ renderOrders(); renderInquiries(); }, 6000);
     })();
 
