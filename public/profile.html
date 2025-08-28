@@ -215,7 +215,15 @@
     // 로그인 세션 (AdminAuth)
     const SESSION_KEY = 'admin_session_v1';
     function getSession(){
-      try{ return AdminAuth?.currentSession?.() || JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); }catch(_){ return null; }
+      try {
+        // localStorage 세션이 있으면 우선 사용
+        const local = JSON.parse(localStorage.getItem(SESSION_KEY)||'null');
+        if(local && local.username) return local;
+        // AdminAuth.currentSession()이 있으면 사용
+        const auth = AdminAuth?.currentSession?.();
+        if(auth && auth.username) return auth;
+        return null;
+      } catch(_) { return null; }
     }
     let SESSION = getSession();
     if(!SESSION || !SESSION.username){
