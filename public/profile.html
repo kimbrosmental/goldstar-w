@@ -18,7 +18,7 @@
     .profile-card{background:#102522;border:1px solid #1d4d46;padding:28px 30px;border-radius:18px;margin-bottom:40px;box-shadow:0 0 18px rgba(0,0,0,0.4);}
     .profile-card h2{font-size:22px;margin-bottom:16px;color:#FFD700;}
 
-    /* 회원 기본정보: 반응형 */
+    /* 반응형 기본정보 */
     .profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
     .field{background:#0c1a18;padding:14px 16px;border-radius:10px;min-width:0;}
     .field label{display:block;font-size:12px;color:#90a4ae;letter-spacing:.5px;margin-bottom:4px;}
@@ -28,7 +28,7 @@
     @media (max-width:720px) { .profile-card{padding:22px;} .actions{flex-wrap:wrap;} }
     @media (max-width:480px){ .profile-card{padding:18px;} }
 
-    /* 주문표 반응형 테이블 */
+    /* 주문표 반응형 */
     .orders-table{width:100%;border-collapse:collapse;margin-top:10px;table-layout:auto;}
     .orders-table th,.orders-table td{border:1px solid #1e4d47;padding:10px 12px;font-size:14px;vertical-align:top;}
     .orders-table th{background:#004d40;color:#FFD700;}
@@ -37,12 +37,13 @@
     .actions{display:flex;gap:10px;margin-top:14px;}
     .btn{background:#00695C;color:#fff;padding:10px 16px;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:.25s;will-change:transform,box-shadow;}
     .btn:hover{background:#00897B;transform:translateY(-2px) scale(1.02);box-shadow:0 8px 24px rgba(0,0,0,.35),0 0 0 2px rgba(255,215,0,.25);}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none;}
     .danger{background:#b71c1c;}
     .danger:hover{background:#d32f2f;}
     .pill{ background:#004d40; color:#FFD700; border:2px solid #FFD700; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; transition:.25s; }
     .pill:hover{ transform:translateY(-2px) scale(1.04); box-shadow:0 8px 24px rgba(0,0,0,.35),0 0 0 2px rgba(255,215,0,.25); }
 
-    /* 주문 패널 (우측 슬라이드) */
+    /* 주문 패널 */
     #orderPanel{ position:fixed; inset:0; display:none; z-index:9999; background:rgba(0,0,0,0.65); align-items:stretch; justify-content:flex-end; }
     #orderPanel.show{ display:flex; }
     #orderSheet{ width:min(720px, 96vw); background:linear-gradient(135deg,#102522 80%,#1d4d46 100%); height:100%; overflow:auto; box-shadow:0 0 32px #000; border-left:1px solid #1d4d46; transform:translateX(100%); transition:transform .28s ease; }
@@ -57,7 +58,6 @@
     .val{ font-size:1.15em; }
     .pill-wrap{ display:flex; gap:10px; flex-wrap:wrap; }
 
-    /* 주소 폼 그리드 */
     .addr-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; margin-top:12px; align-items:start; }
     .addr-grid label{ display:flex; flex-direction:column; gap:6px; font-size:13px; color:#FFD700; font-weight:700; background:#0c1a18; padding:12px 14px; border-radius:10px; }
     .addr-grid input, .addr-grid textarea{ width:100%; font-size:14px; padding:10px 12px; border-radius:8px; border:1px solid #1e4d47; background:#071412; color:#fff; box-sizing:border-box; }
@@ -67,13 +67,10 @@
 
     .sheet-actions .btn{ width:100%; margin-top:12px; font-size:1.08em; }
 
-    /* navbar 우측 홈 버튼만 */
     .home-icon{display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;}
     .home-icon span{font-size:30px;color:#FFD700;}
-    /* 요약 라인 숨김(요청) */
     #summaryLine{display:none;}
 
-    /* 알림 영역(오류/힌트) */
     .mini-err{font-size:12px;color:#ff9b9b;margin:8px 0 0;}
   </style>
 </head>
@@ -102,7 +99,7 @@
         <h1 style="font-size:30px;color:#4fc3f7;">내 정보</h1>
         <div id="summaryLine"></div>
         <div class="actions" style="margin-top:4px;">
-          <button class="btn" id="addOrderBtn">주문 추가</button>
+          <button class="btn" id="addOrderBtn" disabled>주문 추가</button>
           <button class="btn danger" id="logoutBtn">로그아웃</button>
         </div>
       </div>
@@ -127,7 +124,7 @@
         <div id="inqHint" class="mini-err" style="display:none;"></div>
         <div style="display:flex;gap:8px;align-items:flex-start;">
           <textarea id="msgInput" placeholder="문의 내용을 입력하세요" style="flex:1;min-height:70px;background:#0c1a18;color:#fff;border:1px solid #1e4d47;border-radius:8px;padding:10px;font-size:14px;resize:vertical;"></textarea>
-          <button class="btn" id="sendMsgBtn" style="height:70px;min-width:120px;">문의 등록</button>
+          <button class="btn" id="sendMsgBtn" style="height:70px;min-width:120px;" disabled>문의 등록</button>
         </div>
         <p style="margin-top:10px;font-size:12px;color:#888;">관리자 답변이 등록되면 여기에서 확인할 수 있습니다.</p>
       </div>
@@ -217,26 +214,28 @@
     const $  = (s,p=document)=>p.querySelector(s);
     const $$ = (s,p=document)=>Array.from(p.querySelectorAll(s));
 
-    /* =========================
-       1) 세션: 즉시 프라임 & 보강
-       ========================= */
+    /* ============ 세션: 동기/비동기 모두 대응 ============ */
     const ADMIN_KEY = 'admin_session_v1';
     const GS_KEY    = 'gs_user';
 
-    function _lsGet(key){
+    function lsGet(key){
       try{ const raw = localStorage.getItem(key); return raw? JSON.parse(raw): null; }catch(_){ return null; }
     }
-    function getAdminSession(){
+    async function getMaybeAsync(fn){
       try{
-        if (window.AdminAuth?.currentSession) return AdminAuth.currentSession();
-        return _lsGet(ADMIN_KEY);
+        const v = fn?.();
+        return (v && typeof v.then==='function') ? await v : v;
       }catch(_){ return null; }
     }
-    function getGsSession(){
-      try{
-        if (window.GSApp?.currentUser) return GSApp.currentUser();
-        return _lsGet(GS_KEY);
-      }catch(_){ return null; }
+    async function getAdminSession(){
+      // AdminAuth.currentSession()가 Promise일 수 있음
+      const live = await getMaybeAsync(()=>window.AdminAuth?.currentSession?.());
+      return live ?? lsGet(ADMIN_KEY);
+    }
+    async function getGsSession(){
+      // GSApp.currentUser()가 Promise일 수 있음
+      const live = await getMaybeAsync(()=>window.GSApp?.currentUser?.());
+      return live ?? lsGet(GS_KEY);
     }
     function normalizeUser(s){
       if(!s) return null;
@@ -254,10 +253,9 @@
         token: s.token||s.jwt||s.idToken||null
       };
     }
-    // 로그인 직후 홈 이동 시 내비 표시 위해 마커 유지
     function stampLoginMarkers(session){
       try{
-        const snap = session || getAdminSession() || getGsSession() || null;
+        const snap = session;
         if (snap){
           localStorage.setItem('gs_user', JSON.stringify(snap));
           localStorage.setItem('gs_user_backup', JSON.stringify(snap));
@@ -265,28 +263,37 @@
         localStorage.setItem('gs_logged_in','1');
       }catch(_){}
     }
-    $('#homeLogo')?.addEventListener('click', e=>{ e.preventDefault(); stampLoginMarkers(); location.href='index.html'; });
-    document.querySelector('.home-icon')?.addEventListener('click', ()=>{ stampLoginMarkers(); });
+    $('#homeLogo')?.addEventListener('click', e=>{ e.preventDefault(); if(SESSION) stampLoginMarkers(SESSION); location.href='index.html'; });
+    document.querySelector('.home-icon')?.addEventListener('click', ()=>{ if(SESSION) stampLoginMarkers(SESSION); });
 
-    // === 즉시 프라임 ===
-    let SESSION = normalizeUser(getAdminSession() || getGsSession() || _lsGet('gs_user') || _lsGet('gs_user_backup'));
-    // 늦게 초기화되는 경우 뒤늦게 갱신만
-    (async function lateBind(){
-      let tries=0;
-      while(tries<20){ // 약 3초
-        await new Promise(r=>setTimeout(r,150));
-        const s = normalizeUser(getAdminSession() || getGsSession());
-        if(s){ SESSION = s; stampLoginMarkers(s); break; }
-        tries++;
+    let SESSION = null;
+    function updateSessionBoundUI(){
+      const ready = !!(SESSION && SESSION.username);
+      $('#addOrderBtn')?.toggleAttribute('disabled', !ready);
+      $('#sendMsgBtn')?.toggleAttribute('disabled', !ready);
+    }
+
+    async function resolveSessionOnce(){
+      const a = await getAdminSession();
+      const g = await getGsSession();
+      const b = lsGet('gs_user') || lsGet('gs_user_backup');
+      return normalizeUser(a || g || b);
+    }
+    async function waitForSession(maxMs=10000){
+      const start = performance.now();
+      let s = await resolveSessionOnce();
+      if(s && s.username) return s;
+      while(performance.now()-start < maxMs){
+        await new Promise(r=>setTimeout(r,200));
+        s = await resolveSessionOnce();
+        if(s && s.username) return s;
       }
-    })();
+      return null;
+    }
 
-    /* =========================
-       2) 공통 유틸
-       ========================= */
+    /* ============ 공통 유틸/통신 ============ */
     const fmt = n => Number(n||0).toLocaleString('ko-KR');
 
-    // fetch JSON (동일 출처)
     async function fetchJSON(url, init={}){
       const hdr = new Headers(init.headers||{});
       if(!hdr.has('Accept')) hdr.set('Accept','application/json, text/plain, */*');
@@ -299,7 +306,6 @@
       return await resp.json();
     }
 
-    // 암/복호화 + 다양한 응답형 → 배열
     async function safeDecrypt(payload){
       try{
         if(!payload) return [];
@@ -355,9 +361,7 @@
       }
     }
 
-    /* =========================
-       3) USERS 로드 & 렌더
-       ========================= */
+    /* ============ USERS ============ */
     let CURRENT_USER = null;
 
     async function fetchUsersAll(){
@@ -375,7 +379,6 @@
         null;
 
       if(!CURRENT_USER){
-        // USERS에 아직 반영 전이어도 화면은 뜨도록
         CURRENT_USER = {
           username: uname || '-',
           name: SESSION?.name || '-',
@@ -389,8 +392,7 @@
       renderProfileGrid(CURRENT_USER);
     }
     function renderProfileSummary(u){
-      const sum = $('#summaryLine'); // 숨김 유지
-      if (sum) sum.textContent = `${u.name||''} (${u.username||''})`;
+      const sum = $('#summaryLine'); if (sum) sum.textContent = `${u.name||''} (${u.username||''})`;
     }
     function renderProfileGrid(u){
       const grid = $('#profileGrid'), card = $('#profileCard');
@@ -413,9 +415,7 @@
       }
     }
 
-    /* =========================
-       4) 금 시세
-       ========================= */
+    /* ============ 금 시세 ============ */
     let supplyPrice = 520000; // 고정 공급가
     let currentPrice = 0;
     async function loadGoldPrice(){
@@ -430,9 +430,7 @@
       }catch(_){}
     }
 
-    /* =========================
-       5) ORDERS / INQUIRIES
-       ========================= */
+    /* ============ ORDERS / INQUIRIES ============ */
     async function fetchOrdersAll(){
       try{ return await kvToArray(await fetchJSON('/api/orders')); }
       catch(e){ $('#ordersHint').style.display='block'; $('#ordersHint').textContent = '주문 내역을 불러오지 못했습니다.'; return []; }
@@ -447,13 +445,10 @@
     function matchToMe(item){
       const uname = (SESSION?.username || (SESSION?.email ? SESSION.email.split('@')[0] : '') || '').trim();
       const mail  = (CURRENT_USER?.email || '').trim().toLowerCase();
-
       const ufields = [item.user, item.username, item.member, item.uid, item.userId, item.userid];
       const mfields = [item.email, item.userEmail];
-
       const hitUser = ufields.some(v => (v||'').toString().trim() === uname);
       const hitMail = mfields.some(v => (v||'').toString().trim().toLowerCase() === mail);
-
       return hitUser || (mail && hitMail);
     }
 
@@ -486,9 +481,7 @@
         '</tbody></table>';
     }
 
-    function pickInquiryText(m){
-      return m.content||m.message||m.body||m.text||m.desc||'';
-    }
+    function pickInquiryText(m){ return m.content||m.message||m.body||m.text||m.desc||''; }
     function pickInquiryTime(m){
       const dt = m.date || m.created || m.createdAt || (m.ts? new Date(m.ts).toISOString() : '');
       return dt ? new Date(dt).toLocaleString('ko-KR') : '';
@@ -507,7 +500,7 @@
       if(!mine.length){ wrap.innerHTML = '<div class="orders-empty">문의가 없습니다.</div>'; return; }
       wrap.innerHTML = mine.slice().reverse().map(m=>{
         const status = (m.answer||m.adminAnswer||m.reply||m.adminReply||m.response) ? '답변완료' : (m.status||'미답변');
-        const ans = buildAnswerBlock(m); // 클릭 시 아래에 나오도록 하려면 토글 처리 가능(요청 시 확장)
+        const ans = buildAnswerBlock(m);
         return `
         <div class="msg-item" style="background:#0c1a18;padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:10px;">
           <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
@@ -521,13 +514,11 @@
       }).join('');
     }
 
-    /* =========================
-       6) 주문 패널
-       ========================= */
+    /* ============ 주문 패널 ============ */
     const productList = [0.5,1,2,3,5,10];
     let totalDon = 0;
     function openOrderPanel(){
-      if(!SESSION || !SESSION.username){ alert('로그인 세션을 확인할 수 없습니다. 다시 로그인해 주세요.'); return; }
+      if(!SESSION || !SESSION.username){ return; } // 세션 준비 전엔 열지 않음
       $('#orderPanel').classList.add('show');
       totalDon = 0;
       updateOrderCalc();
@@ -609,8 +600,8 @@
 
     // 주문 요청
     $('#orderSubmit')?.addEventListener('click', async ()=>{
-      if(!SESSION || !SESSION.username){ alert('로그인 세션을 확인할 수 없습니다. 다시 로그인해 주세요.'); return; }
-      if(!CURRENT_USER){ alert('회원 정보를 불러오는 중입니다. 잠시 후 다시 시도하세요.'); return; }
+      if(!SESSION || !SESSION.username){ return; }
+      if(!CURRENT_USER){ return; }
       if(totalDon<=0){ alert('상품을 선택하세요.'); return; }
       if(!$('#postCode').value.trim() || !$('#addr1').value.trim()){
         alert('배송지(우편번호/주소)를 입력해 주세요.'); return;
@@ -647,10 +638,10 @@
       await renderOrders();
     });
 
-    // 1:1 문의 등록 (내 글 내용은 즉시 보이고, 답변은 접기/펼치기)
+    // 1:1 문의 등록
     $('#sendMsgBtn')?.addEventListener('click', async ()=>{
-      if(!SESSION || !SESSION.username){ alert('로그인 세션을 확인할 수 없습니다. 다시 로그인해 주세요.'); return; }
-      if(!CURRENT_USER){ alert('회원 정보를 불러오는 중입니다. 잠시 후 다시 시도하세요.'); return; }
+      if(!SESSION || !SESSION.username){ return; }
+      if(!CURRENT_USER){ return; }
       const txt = $('#msgInput').value.trim();
       if(!txt) return;
 
@@ -666,7 +657,6 @@
         status:'미답변'
       };
 
-      // 낙관적 업데이트
       const wrap = $('#messagesWrap');
       wrap.insertAdjacentHTML('afterbegin', `
         <div class="msg-item" style="background:#0c1a18;padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:10px;">
@@ -684,9 +674,8 @@
         all.push(newInquiry);
         await saveInquiriesAll(all);
         $('#msgInput').value = '';
-        await renderInquiries(); // 서버 저장 후 재렌더
+        await renderInquiries();
       }catch(e){
-        alert('문의 등록에 실패했습니다. 잠시 후 다시 시도해주세요.');
         await renderInquiries();
       }
     });
@@ -705,43 +694,41 @@
       location.href='index.html';
     });
 
-    /* =========================
-       7) 초기 구동
-       ========================= */
+    /* ============ 초기 구동 ============ */
     (async function init(){
-      // 세션 없으면 바로 로그인 페이지로
-      if(!SESSION || !SESSION.username){
-        // 혹시 늦게 붙는 경우를 위해 한 번만 짧게 대기
-        let tries=0;
-        while(tries<8 && (!SESSION || !SESSION.username)){
-          await new Promise(r=>setTimeout(r,120));
-          SESSION = normalizeUser(getAdminSession() || getGsSession() || _lsGet('gs_user') || _lsGet('gs_user_backup'));
-          tries++;
-        }
-        if(!SESSION || !SESSION.username){
-          alert('로그인 세션을 찾을 수 없습니다. 다시 로그인해 주세요.');
-          location.href='login.html';
-          return;
-        }
+      // 즉시 한 번 시도 (동기/캐시 세션)
+      SESSION = await resolveSessionOnce();
+      if(SESSION) stampLoginMarkers(SESSION);
+      updateSessionBoundUI();
+
+      if(SESSION){
+        await Promise.all([loadCurrentUser(), loadGoldPrice()]);
+        await Promise.all([renderOrders(), renderInquiries()]);
       }
 
-      // 세션이 있으면 즉시 전부 병렬 로드
-      await Promise.all([loadCurrentUser(), loadGoldPrice()]);
-      await Promise.all([renderOrders(), renderInquiries()]);
+      // 백그라운드에서 세션을 확실히 잡아 갱신 (리다이렉트/경고 없음)
+      (async ()=>{
+        const got = await waitForSession(15000);
+        if(got){
+          SESSION = got; stampLoginMarkers(got); updateSessionBoundUI();
+          await loadCurrentUser();
+          await Promise.all([renderOrders(), renderInquiries()]);
+        }
+      })();
 
       // 탭 복귀/주기 새로고침
       document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ renderOrders(); renderInquiries(); } });
-      setInterval(()=>{ 
-        const live = normalizeUser(getAdminSession() || getGsSession() || _lsGet('gs_user') || _lsGet('gs_user_backup'));
-        if (live) SESSION = live;
+      setInterval(async ()=>{ 
+        const live = await resolveSessionOnce();
+        if (live){ SESSION = live; updateSessionBoundUI(); }
         renderOrders(); renderInquiries();
       }, 6000);
 
       // 다른 탭에서 로그인/로그아웃 감지
-      window.addEventListener('storage', (e)=>{
-        if (e.key === 'admin_session_v1' || e.key === 'gs_user' || e.key==='gs_user_backup'){
-          const ns = normalizeUser(getAdminSession() || getGsSession() || _lsGet('gs_user') || _lsGet('gs_user_backup'));
-          if (ns){ SESSION = ns; stampLoginMarkers(ns); }
+      window.addEventListener('storage', async (e)=>{
+        if (['admin_session_v1','gs_user','gs_user_backup'].includes(e.key||'')){
+          const ns = await resolveSessionOnce();
+          if (ns){ SESSION = ns; stampLoginMarkers(ns); updateSessionBoundUI(); }
         }
         if (e.key === 'gs_logout'){ location.href = 'index.html'; }
       });
