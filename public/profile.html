@@ -307,22 +307,35 @@
 
     async function resolveSession(){
       diagMsg.textContent='세션 확인중...';
-      // 1) 즉시
-      let a=await getAdminSession();
-      if(a){ setSession(normalizeSession(a,'AdminAuth/LS')); diagMsg.textContent='세션 확인 완료'; return; }
-      let g=await getGsSession();
-      if(g){ setSession(normalizeSession(g,'GSApp/LS')); diagMsg.textContent='세션 확인 완료'; return; }
-
-      // 2) 지연 초기화를 잠깐 기다림 (리다이렉트/알림 없음)
-      const start=performance.now();
-      while(performance.now()-start<8000){
-        await new Promise(r=>setTimeout(r,200));
-        a=await getAdminSession(); if(a){ setSession(normalizeSession(a,'AdminAuth/Live')); diagMsg.textContent='세션 확인 완료'; return; }
-        g=await getGsSession();    if(g){ setSession(normalizeSession(g,'GSApp/Live')); diagMsg.textContent='세션 확인 완료'; return; }
+      
+      // localStorage에서 직접 세션 확인 (로그인 완료 상태라면 이미 저장되어 있음)
+      try {
+        const adminSession = JSON.parse(localStorage.getItem('admin_session_v1') || 'null');
+        const gsSession = JSON.parse(localStorage.getItem('gs_user') || 'null');
+        
+        if (adminSession && adminSession.username) {
+          setSession(normalizeSession(adminSession, 'LocalStorage'));
+          diagMsg.textContent='세션 확인 완료';
+          return;
+        }
+        
+        if (gsSession && gsSession.username) {
+          setSession(normalizeSession(gsSession, 'LocalStorage'));
+          diagMsg.textContent='세션 확인 완료';
+          return;
+        }
+        
+        // 세션이 없으면 로그인 페이지로 이동
+        diagMsg.textContent='세션 없음 - 로그인 필요';
+        alert('로그인이 필요합니다.');
+        location.href='login.html';
+        
+      } catch(e) {
+        console.error('세션 확인 오류:', e);
+        diagMsg.textContent='세션 확인 실패';
+        alert('로그인이 필요합니다.');
+        location.href='login.html';
       }
-      // 못찾아도 페이지 유지(사용자가 진단으로 확인 가능)
-      setSession(null);
-      diagMsg.textContent='세션 확인 실패';
     }
 
     /*** ====== [공통 통신/파서] ====== ***/
@@ -706,7 +719,7 @@
 
     /*** ====== 초기 흐름 ====== ***/
     async function fullReload(){
-      diagMsg.textContent='새로 불러오는 중…';
+      diagMsg.textContent='데이터 불러오는 중…';
       await loadUsers();         // USERS
       await resolveCurrentUser();
       renderProfileSummary(CURRENT_USER);
@@ -715,24 +728,26 @@
       await renderOrders();
       await loadInquiries();     // INQUIRIES
       await renderInquiries();
-      diagMsg.textContent='완료';
+      diagMsg.textContent='데이터 로딩 완료';
     }
     $('#btnReload').addEventListener('click', fullReload);
 
     (async function init(){
-      // 세션 확정
+      // 세션 확인 (localStorage에서 직접 읽기)
       await resolveSession();
-      // 세션 있어도/없어도 진단은 볼 수 있도록 열어둔 상태 유지 선택은 사용자에게 맡김
-      // 데이터 로딩
-      await fullReload();
+      
+      // 세션이 있으면 데이터 로딩
+      if (SESSION && SESSION.username) {
+        await fullReload();
+      }
 
       // 다른 탭 세션 변화 감지
       window.addEventListener('storage', async (e)=>{
         if(['admin_session_v1','gs_user'].includes(e.key||'')){
-          const a=await getAdminSession(), g=await getGsSession();
-          const ns = a? normalizeSession(a,'AdminAuth/Live') : g? normalizeSession(g,'GSApp/Live') : null;
-          setSession(ns);
-          await fullReload();
+          await resolveSession();
+          if (SESSION && SESSION.username) {
+            await fullReload();
+          }
         }
       });
     })();
