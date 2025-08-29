@@ -562,10 +562,24 @@
     async function renderInquiries(){
       const wrap=$('#messagesWrap');
       const mine=cacheInq.filter(matchToMe);
-      if(!mine.length){ wrap.innerHTML='<div class="orders-empty">문의가 없습니다.</div>'; return; }
+      
+      console.log('전체 문의 데이터:', cacheInq);
+      console.log('내 문의 필터링 결과:', mine);
+      console.log('현재 SESSION:', SESSION);
+      console.log('현재 CURRENT_USER:', CURRENT_USER);
+      
+      if(!mine.length){ 
+        wrap.innerHTML='<div class="orders-empty">문의가 없습니다.</div>'; 
+        return; 
+      }
+      
       wrap.innerHTML = mine.slice().reverse().map(m=>{
+        console.log('렌더링할 문의:', m);
         const ans = pickAns(m);
         const status = ans ? '답변완료' : (m.status || '미답변');
+        const textContent = pickText(m);
+        console.log('문의 텍스트:', textContent);
+        
         // 기본: 내 문의 내용은 항상 보임, 답변은 클릭해서 펼침
         return `
         <details class="msg-item" ${ans ? '' : ''} style="background:#0c1a18;padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:10px;">
@@ -573,7 +587,7 @@
             <div style="font-weight:600;">${m.title||'1:1 문의'}</div>
             <span class="msg-status" style="font-size:11px;padding:2px 6px;border-radius:10px;background:${status==='답변완료'?'#2e7d32':(status==='미답변'?'#b71c1c':'#455a64')};color:#fff;white-space:nowrap;">${status}</span>
           </summary>
-          <div style="margin-top:8px;">${pickText(m)}</div>
+          <div style="margin-top:8px;">${textContent}</div>
           ${ans ? `<div style="margin-top:8px;padding:8px 10px;background:#08221f;border:1px solid #1e4d47;border-radius:8px;"><strong style="color:#FFD700;">[답변]</strong> ${ans}</div>` : ''}
           <div style="font-size:11px;color:#888;margin-top:6px;">${pickTime(m) || '-'}</div>
         </details>`;
