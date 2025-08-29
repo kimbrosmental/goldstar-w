@@ -452,16 +452,23 @@
     let cacheUsers=[], cacheOrders=[], cacheInq=[];
 
     function matchToMe(item){
+      // 중첩된 구조 확인
+      let checkItem = item;
+      if (item && item.userInquiry) {
+        checkItem = item.userInquiry;
+      }
+      
       const uname=(SESSION?.username|| (SESSION?.email?SESSION.email.split('@')[0]:'') || '').trim();
       const mail =(CURRENT_USER?.email||SESSION?.email||'').trim().toLowerCase();
-      const ufields=[item.user,item.username,item.member,item.uid,item.userId,item.userid];
-      const mfields=[item.email,item.userEmail];
+      const ufields=[checkItem.user,checkItem.username,checkItem.member,checkItem.uid,checkItem.userId,checkItem.userid];
+      const mfields=[checkItem.email,checkItem.userEmail];
       
       console.log('matchToMe 체크:', {
         sessionUsername: uname,
         sessionEmail: mail,
-        itemFields: { user: item.user, username: item.username, email: item.email },
-        item: item
+        itemFields: { user: checkItem.user, username: checkItem.username, email: checkItem.email },
+        originalItem: item,
+        checkItem: checkItem
       });
       
       const hitUser=ufields.some(v=>(v||'').toString().trim()===uname);
@@ -560,15 +567,57 @@
     }
 
     async function loadInquiries(){
-      try{ cacheInq = await kvLoad('/api/inquiries'); cntInq.textContent = cacheInq.length; }
-      catch{ cacheInq=[]; cntInq.textContent='err'; }
+      try{ 
+        const rawData = await kvLoad('/api/inquiries'); 
+        console.log('원본 문의 데이터:', rawData);
+        
+        // 데이터가 {userInquiry: {...}} 형태로 래핑되어 있는지 확인
+        cacheInq = rawData.map(item => {
+          if (item && item.userInquiry) {
+            console.log('userInquiry 래핑 데이터 발견:', item);
+            return item.userInquiry;
+          }
+          return item;
+        }).filter(item => item && typeof item === 'object');
+        
+        console.log('처리된 문의 데이터:', cacheInq);
+        cntInq.textContent = cacheInq.length; 
+      }
+      catch(e){ 
+        console.error('문의 로딩 오류:', e);
+        cacheInq=[]; 
+        cntInq.textContent='err'; 
+      }
     }
     function pickText(m){ 
       console.log('pickText for message:', m);
-      return m.content||m.message||m.body||m.text||m.desc||m.question||m.inquiry||'내용 없음'; 
+      
+      // 중첩된 구조 확인
+      if (m && m.userInquiry) {
+        console.log('userInquiry 래핑된 데이터:', m.userInquiry);
+        m = m.userInquiry;
+      }
+      
+      const content = m.content||m.message||m.body||m.text||m.desc||m.question||m.inquiry||'내용 없음';
+      console.log('추출된 content:', content);
+      return content;
     }
-    function pickTime(m){ const dt=m.date||m.created||m.createdAt||(m.ts? new Date(m.ts).toISOString(): ''); return dt? new Date(dt).toLocaleString('ko-KR') : ''; }
-    function pickAns(m){ return m.answer||m.adminAnswer||m.reply||m.adminReply||m.response||''; }
+    function pickTime(m){ 
+      // 중첩된 구조 확인
+      if (m && m.userInquiry) {
+        m = m.userInquiry;
+      }
+      
+      const dt=m.date||m.created||m.createdAt||(m.ts? new Date(m.ts).toISOString(): ''); 
+      return dt? new Date(dt).toLocaleString('ko-KR') : ''; 
+    }
+    function pickAns(m){ 
+      // 중첩된 구조 확인
+      if (m && m.userInquiry) {
+        m = m.userInquiry;
+      }
+      return m.answer||m.adminAnswer||m.reply||m.adminReply||m.response||''; 
+    }
 
     async function renderInquiries(){
       const wrap=$('#messagesWrap');
@@ -593,10 +642,27 @@
       
       wrap.innerHTML = displayInquiries.slice().reverse().map(m=>{
         console.log('렌더링할 문의:', m);
+        
+        // 중첩 구조 처리
+        let displayItem = m;
+        if (m && m.userInquiry) {
+          displayItem = m.userInquiry;
+        }
+        
         const ans = pickAns(m);
-        const status = ans ? '답변완료' : (m.status || '미답변');
+        const status = ans ? '답변완료' : (displayItem.status || '미답변');
         const textContent = pickText(m);
-        console.log('문의 텍스트:', textContent);
+        const timeContent = pickTime(m);
+        const titleContent = displayItem.title || '1:1 문의';
+        const authorInfo = displayItem.user || displayItem.username || displayItem.email || '알 수 없음';
+        
+        console.log('문의 렌더링 정보:', {
+          title: titleContent,
+          content: textContent,
+          time: timeContent,
+          author: authorInfo,
+          status: status
+        });
         
         // 임시로 표시되는 문의는 배경색을 다르게 표시
         const isFiltered = mine.includes(m);
@@ -606,12 +672,12 @@
         return `
         <details class="msg-item" ${ans ? '' : ''} style="background:${bgColor};padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:10px;">
           <summary style="display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;">
-            <div style="font-weight:600;">${m.title||'1:1 문의'} ${!isFiltered ? '(전체)' : ''}</div>
+            <div style="font-weight:600;">${titleContent} ${!isFiltered ? '(전체)' : ''}</div>
             <span class="msg-status" style="font-size:11px;padding:2px 6px;border-radius:10px;background:${status==='답변완료'?'#2e7d32':(status==='미답변'?'#b71c1c':'#455a64')};color:#fff;white-space:nowrap;">${status}</span>
           </summary>
-          <div style="margin-top:8px;">${textContent}</div>
+          <div style="margin-top:8px;white-space:pre-wrap;">${textContent}</div>
           ${ans ? `<div style="margin-top:8px;padding:8px 10px;background:#08221f;border:1px solid #1e4d47;border-radius:8px;"><strong style="color:#FFD700;">[답변]</strong> ${ans}</div>` : ''}
-          <div style="font-size:11px;color:#888;margin-top:6px;">${pickTime(m) || '-'} | 작성자: ${m.user || m.username || m.email || '알 수 없음'}</div>
+          <div style="font-size:11px;color:#888;margin-top:6px;">${timeContent} | 작성자: ${authorInfo}</div>
         </details>`;
       }).join('');
     }
