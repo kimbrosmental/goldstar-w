@@ -85,8 +85,8 @@
     /* 요약 라인 숨김(요청) */
     #summaryLine{display:none;}
 
-    /* 작은 상태 라벨 */
-    .mini-hint{font-size:12px;color:#9bd3ff;margin:8px 0 0;}
+    /* 작은 상태 라벨 (사용 안함, 화면 깔끔 유지) */
+    .mini-hint{display:none;}
     .mini-err{font-size:12px;color:#ff9b9b;margin:8px 0 0;}
   </style>
 </head>
@@ -114,7 +114,7 @@
       <div class="profile-header" id="summaryHeader" style="flex-direction:column;align-items:flex-start;gap:8px;">
         <h1 style="font-size:30px;color:#4fc3f7;">내 정보</h1>
         <div id="summaryLine"></div>
-        <div id="sessionHint" class="mini-hint" style="display:none;"></div>
+        <div id="sessionHint" class="mini-hint"></div>
         <div class="actions" style="margin-top:4px;">
           <button class="btn" id="addOrderBtn">주문 추가</button>
           <button class="btn danger" id="logoutBtn">로그아웃</button>
@@ -124,7 +124,7 @@
       <!-- 기본 정보 -->
       <div class="profile-card" id="profileCard">
         <h2>회원 기본 정보</h2>
-        <div id="profileLoading" class="mini-hint">로딩중…</div>
+        <div id="profileLoading" style="font-size:12px;color:#9bd3ff;">로딩중…</div>
         <div class="profile-grid" id="profileGrid" style="display:none;"></div>
         <div id="profileError" class="mini-err" style="display:none;"></div>
       </div>
@@ -132,14 +132,14 @@
       <!-- 주문 내역 -->
       <div class="profile-card">
         <h2>주문 내역</h2>
-        <div id="ordersContainer"><div class="mini-hint">로딩중…</div></div>
+        <div id="ordersContainer"><div style="font-size:12px;color:#9bd3ff;">로딩중…</div></div>
         <div id="ordersHint" class="mini-err" style="display:none;"></div>
       </div>
 
       <!-- 1:1 문의 -->
       <div class="profile-card">
         <h2>1:1 문의</h2>
-        <div id="messagesWrap"><div class="mini-hint">로딩중…</div></div>
+        <div id="messagesWrap"><div style="font-size:12px;color:#9bd3ff;">로딩중…</div></div>
         <div id="inqHint" class="mini-err" style="display:none;"></div>
         <div style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;">
           <textarea id="msgInput" placeholder="문의 내용을 입력하세요" style="flex:1;min-height:70px;background:#0c1a18;color:#fff;border:1px solid #1e4d47;border-radius:8px;padding:10px;font-size:14px;resize:vertical;"></textarea>
@@ -234,7 +234,7 @@
     const $$ = (s,p=document)=>Array.from(p.querySelectorAll(s));
 
     /* =========================
-       세션: 안정적 부트스트랩
+       세션: 조용한(무표시) 부트스트랩
        ========================= */
     const ADMIN_KEY='admin_session_v1';
     const GS_KEY   ='gs_user';
@@ -242,15 +242,13 @@
     const getAdminFromLS = ()=>{ try{ const raw=localStorage.getItem(ADMIN_KEY); return raw?JSON.parse(raw):null; }catch(_){ return null; } };
     const getGSFromLS    = ()=>{ try{ const raw=localStorage.getItem(GS_KEY);    return raw?JSON.parse(raw):null; }catch(_){ return null; } };
 
-    async function detectSession(maxWait=4000){
-      // 1) 즉시 글로벌
+    async function detectSession(maxWait=3500){
       const fromGlobals = async ()=>{
         try{
           if (window.AdminAuth?.currentSession){
             const r = AdminAuth.currentSession();
-            if (r && typeof r.then==='function'){
-              try{ const v = await r; if(v && (v.username||v.email)) return v; }catch(_){}
-            }else if (r && (r.username||r.email)){ return r; }
+            if (r && typeof r.then==='function'){ try{ const v = await r; if(v && (v.username||v.email)) return v; }catch(_){}} 
+            else if (r && (r.username||r.email)) return r;
           }
         }catch(_){}
         try{
@@ -261,27 +259,24 @@
         }catch(_){}
         return null;
       };
-      // 2) 즉시 LocalStorage
       const fromLS = ()=>{
-        const candidates = [getAdminFromLS(), getGSFromLS()];
-        try{ const b = localStorage.getItem('gs_user_backup'); if(b) candidates.push(JSON.parse(b)); }catch(_){}
-        return candidates.find(s=>s && (s.username||s.email)) || null;
+        const cands=[getAdminFromLS(), getGSFromLS()];
+        try{ const b=localStorage.getItem('gs_user_backup'); if(b) cands.push(JSON.parse(b)); }catch(_){}
+        return cands.find(s=>s && (s.username||s.email)) || null;
       };
 
       let s = await fromGlobals() || fromLS();
       if (s) return s;
 
-      // 3) 폴링 (느린 초기화 대비)
       const start = performance.now();
       while (performance.now() - start < maxWait){
         await new Promise(r=>setTimeout(r,120));
         s = await fromGlobals() || fromLS();
         if (s) return s;
       }
-      return null;
+      return fromLS(); // 마지막엔 조용히 백업값이라도 반환
     }
 
-    // 홈/로고 클릭 시 세션 스냅샷 → 홈에서 "내정보" 노출 보장
     function stampLogin(session){
       try{
         const snap = session || getAdminFromLS() || getGSFromLS();
@@ -295,17 +290,12 @@
     $('#homeLogo')?.addEventListener('click', e=>{ e.preventDefault(); stampLogin(SESSION); location.href='index.html'; });
     document.querySelector('.home-icon')?.addEventListener('click', ()=>{ stampLogin(SESSION); });
 
-    // 상태표시
-    const hint = $('#sessionHint');
-    function showHint(msg){ hint.style.display='block'; hint.textContent=msg; }
-    function hideHint(){ hint.style.display='none'; }
-
     // util
     const fmt = n => Number(n||0).toLocaleString('ko-KR');
     const timeText = (v)=>{ if(!v) return '-'; const d = typeof v==='number'? new Date(v):new Date(v); return isNaN(+d)?'-':d.toLocaleString('ko-KR'); };
 
     /* =========================
-       fetch & KV 파서(모든 형태)
+       fetch & KV 파서
        ========================= */
     async function getJSON(url){
       const r = await fetch(url, {cache:'no-store'});
@@ -424,7 +414,6 @@
       }
       renderProfileSummary(CURRENT_USER);
       renderProfileGrid(CURRENT_USER);
-      // 세션 스냅샷(인덱스 네비 표시용)
       stampLogin(SESSION || CURRENT_USER);
     }
 
@@ -463,7 +452,6 @@
         return [];
       }
     }
-    // 단건 저장 → 실패 시 배열로 fallback
     async function saveInquiryOne(obj){
       try{
         await postJSON('/api/inquiries', obj);
@@ -639,7 +627,7 @@
 
     // 주문 요청
     $('#orderSubmit')?.addEventListener('click', async ()=>{
-      if(!CURRENT_USER){ alert('로그인 세션 오류'); return; }
+      if(!CURRENT_USER || !myId()){ alert('로그인 세션 확인 중입니다. 잠시 후 다시 시도해 주세요.'); return; }
       if(totalDon<=0){ alert('상품을 선택하세요.'); return; }
       if(!$('#postCode').value.trim() || !$('#addr1').value.trim()){ alert('배송지(우편번호/주소)를 입력해 주세요.'); return; }
       const order = {
@@ -675,9 +663,9 @@
       }
     });
 
-    // 1:1 문의 등록 (단건 저장 + 즉시 반영)
+    // 1:1 문의 등록
     $('#sendMsgBtn')?.addEventListener('click', async ()=>{
-      if(!CURRENT_USER){ alert('로그인 세션 오류'); return; }
+      if(!CURRENT_USER || !myId()){ alert('로그인 세션 확인 중입니다. 잠시 후 다시 시도해 주세요.'); return; }
       const txt = $('#msgInput').value.trim();
       if(!txt) return;
       const uname = (SESSION?.username || (SESSION?.email?SESSION.email.split('@')[0]:'')) || CURRENT_USER.username || '';
@@ -717,27 +705,32 @@
     });
 
     /* =========================
-       초기 구동
+       초기 구동 (무표시 세션)
        ========================= */
     (async function init(){
-      showHint('세션 확인 중…');
-      SESSION = await detectSession(4000);
-      if (SESSION){ hideHint(); } else { showHint('세션이 지연되고 있습니다. 잠시만 기다려 주세요.'); }
-
-      // 세션이 있든 없든, USERS에서 가능한 한 현재 사용자 매칭 시도
+      SESSION = await detectSession(3500);
       await loadCurrentUser();
       await loadGoldPrice();
       await renderOrders();
       await renderInquiries();
 
-      // 탭 복귀/주기 새로고침
-      document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ renderOrders(); renderInquiries(); } });
-      setInterval(()=>{ renderOrders(); renderInquiries(); }, 6000);
+      // 백그라운드 세션 보강
+      setInterval(async ()=>{
+        const s = await detectSession(500);
+        if (s && (!SESSION || (s.username!==SESSION.username || s.email!==SESSION.email))){
+          SESSION = s; stampLogin(s);
+          await loadCurrentUser(); // 사용자 정보 갱신
+          await renderOrders();
+          await renderInquiries();
+        }
+      }, 6000);
 
-      // 다른 탭 로그인/로그아웃 감지
+      // 탭 복귀 시 새로고침
+      document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ renderOrders(); renderInquiries(); } });
+      // 다른 탭 변화 감지
       window.addEventListener('storage', (e)=>{
         if (e.key==='admin_session_v1' || e.key==='gs_user'){
-          detectSession(500).then(s=>{ if(s){ SESSION=s; hideHint(); stampLogin(s); }});
+          detectSession(500).then(s=>{ if(s){ SESSION=s; stampLogin(s); }});
         }
         if (e.key==='gs_logout'){ location.href='index.html'; }
       });
