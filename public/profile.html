@@ -857,7 +857,6 @@
 
     /*** ====== 초기 흐름 ====== ***/
     async function fullReload(){
-      diagMsg.textContent='데이터 로딩중...';
       await loadUsers();         // USERS
       await resolveCurrentUser();
       renderProfileSummary(CURRENT_USER);
@@ -866,7 +865,6 @@
       await renderOrders();
       await loadInquiries();     // INQUIRIES
       await renderInquiries();
-      diagMsg.textContent='데이터 로딩 완료';
     }
     $('#btnReload').addEventListener('click', fullReload);
 
