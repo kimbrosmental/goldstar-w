@@ -24,15 +24,10 @@
     .field label{display:block;font-size:12px;color:#90a4ae;letter-spacing:.5px;margin-bottom:4px;}
     .field span{font-weight:600;font-size:15px;word-break:break-word;overflow-wrap:anywhere;}
 
-    /* 브레이크포인트에서 여백 조정 */
+    /* 브레이크포인트 */
     @media (max-width:1024px){ .profile-wrapper{padding:10px 16px 64px;} }
-    @media (max-width:720px) {
-      .profile-card{padding:22px;}
-      .actions{flex-wrap:wrap;}
-    }
-    @media (max-width:480px){
-      .profile-card{padding:18px;}
-    }
+    @media (max-width:720px){ .profile-card{padding:22px;} .actions{flex-wrap:wrap;} }
+    @media (max-width:480px){ .profile-card{padding:18px;} }
 
     /* 주문 내역: 반응형 테이블 */
     .table-responsive{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
@@ -41,30 +36,18 @@
     .orders-table th{background:#004d40;color:#FFD700;}
     .orders-empty{color:#bbb;font-size:14px;margin-top:8px;}
 
-    /* 초소형(≤760px)에서 카드형 스택으로 변환 */
+    /* 초소형(≤760px)에서 카드형 스택 */
     @media (max-width:760px){
       .orders-table{min-width:0;border:0;}
       .orders-table thead{display:none;}
       .orders-table, .orders-table tbody, .orders-table tr, .orders-table td{display:block;width:100%;}
       .orders-table tr{
-        margin:0 0 12px;
-        border:1px solid #1e4d47;
-        border-radius:12px;
-        overflow:hidden;
-        background:#0c1a18;
-        cursor:pointer;
+        margin:0 0 12px;border:1px solid #1e4d47;border-radius:12px;overflow:hidden;background:#0c1a18;cursor:pointer;
       }
-      .orders-table td{
-        border:none;
-        border-bottom:1px solid #113a35;
-        position:relative;
-        padding-left:44%;
-        min-height:44px;
-      }
+      .orders-table td{border:none;border-bottom:1px solid #113a35;position:relative;padding-left:44%;min-height:44px;}
       .orders-table td:last-child{border-bottom:none;}
       .orders-table td::before{
-        content:attr(data-label);
-        position:absolute;left:12px;top:10px;width:40%;
+        content:attr(data-label);position:absolute;left:12px;top:10px;width:40%;
         white-space:nowrap;font-size:12px;color:#90a4ae;font-weight:600;
       }
     }
@@ -94,13 +77,7 @@
     .pill-wrap{ display:flex; gap:10px; flex-wrap:wrap; }
 
     /* 주소 폼 그리드 */
-    .addr-grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px 14px;
-      margin-top:12px;
-      align-items:start;
-    }
+    .addr-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; margin-top:12px; align-items:start; }
     .addr-grid label{ display:flex; flex-direction:column; gap:6px; font-size:13px; color:#FFD700; font-weight:700; background:#0c1a18; padding:12px 14px; border-radius:10px; }
     .addr-grid input, .addr-grid textarea{ width:100%; font-size:14px; padding:10px 12px; border-radius:8px; border:1px solid #1e4d47; background:#071412; color:#fff; box-sizing:border-box; }
     .addr-row{ display:flex; gap:8px; align-items:center; }
@@ -378,7 +355,7 @@
         bank: x.bank || '',
         account: x.account || '',
         role: x.role || 'user',
-        created: x.created || Date.now(),
+        created: x.created || x.createdAt || Date.now(),
         status: x.status || '정상'
       };
     }
@@ -420,7 +397,7 @@
         if (!payload) return [];
         if (Array.isArray(payload)) return payload;
         let cand = payload?.data ?? payload?.list ?? payload?.items ?? payload?.values ??
-                   payload?.value ?? payload?.records ?? payload?.result ?? payload?.results;
+                   payload?.value ?? payload?.record ?? payload?.result ?? payload?.results ?? payload?.user;
         if (!cand && typeof payload === 'object') {
           for (const k of Object.keys(payload)) { if (Array.isArray(payload[k])) { cand = payload[k]; break; } }
         }
@@ -429,18 +406,19 @@
         if (maybeMap && typeof maybeMap === 'object' && !Array.isArray(maybeMap)) {
           const vals = Object.values(maybeMap);
           if (vals.length && vals.every(v => typeof v === 'object')) return vals;
+          // 단일 유저 오브젝트일 수 있음
+          if ((maybeMap.username || maybeMap.email)) return maybeMap;
         }
         async function tryString(str){
-          try{ const j = JSON.parse(str); if (Array.isArray(j)) return j; if (Array.isArray(j?.data)) return j.data; }catch{}
+          try{ const j = JSON.parse(str); if (Array.isArray(j)) return j; if (Array.isArray(j?.data)) return j.data; if (j?.username||j?.email) return j; }catch{}
           if (window.decrypt){
             const dec = await window.decrypt(str);
-            try{ const j2 = JSON.parse(dec); if (Array.isArray(j2)) return j2; if (Array.isArray(j2?.data)) return j2.data; }catch{}
+            try{ const j2 = JSON.parse(dec); if (Array.isArray(j2)) return j2; if (Array.isArray(j2?.data)) return j2.data; if (j2?.username||j2?.email) return j2; }catch{}
           }
           return null;
         }
-        if (typeof cand === 'string'){ const r = await tryString(cand); if (r) return r; }
+        if (typeof maybeMap === 'string'){ const r = await tryString(maybeMap); if (r) return r; }
         if (typeof payload?.data === 'string'){ const r = await tryString(payload.data); if (r) return r; }
-        if (typeof payload === 'string'){ const r = await tryString(payload); if (r) return r; }
         return [];
       }catch{ return []; }
     }
@@ -457,7 +435,45 @@
     let CURRENT_USER = null;
     let ORDER_MAP = Object.create(null);
 
-    /* ===================== USERS 로딩 ===================== */
+    /* ===================== USERS: KV에서 직접 조회(신규) ===================== */
+    async function fetchUserFromKVKeys(keys){
+      const endpoints = [
+        k => `/api/kv?ns=USERS&key=${encodeURIComponent(k)}`,
+        k => `/api/kv/users?key=${encodeURIComponent(k)}`,
+        k => `/api/users/by-key?key=${encodeURIComponent(k)}`,
+        k => `/api/users/${encodeURIComponent(k)}`,
+        k => `/api/users?username=${encodeURIComponent(k)}`,
+        k => `/api/user?username=${encodeURIComponent(k)}`,
+        k => `/api/user/${encodeURIComponent(k)}`
+      ];
+      for (const key of keys){
+        for (const build of endpoints){
+          const url = build(key);
+          const r = await fetchJSON(url);
+          if (r.ok){
+            const any = await kvToArray(r.json);
+            // 배열일 수 있고, 단일 오브젝트일 수도 있음
+            if (Array.isArray(any) && any.length){
+              // username/email 일치하는 것 우선
+              const hit = any.find(u => matchUserKey(u, key));
+              if (hit) return normalizeUser(hit);
+              // 첫 요소라도 반환
+              return normalizeUser(any[0]);
+            } else if (any && (any.username || any.email)){
+              return normalizeUser(any);
+            }
+          }
+        }
+      }
+      return null;
+    }
+    function matchUserKey(u, key){
+      const uname = (u.username||u.user||'').trim().toLowerCase();
+      const mail  = (u.email||'').trim().toLowerCase();
+      const k = String(key).trim().toLowerCase();
+      return uname===k || mail===k || (mail.split('@')[0]===k);
+    }
+
     async function fetchUsersAll(){
       const r = await fetchJSON('/api/users');
       if (!r.ok){ $('#ordersHint').style.display='block'; $('#ordersHint').textContent='회원 목록을 불러오지 못했습니다.'; return []; }
@@ -465,14 +481,28 @@
     }
 
     async function loadCurrentUser(){
-      const users = await fetchUsersAll();
-      const uname = (SESSION?.username || SESSION?.user || (SESSION?.email ? SESSION.email.split('@')[0] : '') || '').trim().toLowerCase();
-      const mail  = (SESSION?.email || '').trim().toLowerCase();
-      let found =
-        users.find(u => (u.username||'').trim().toLowerCase() === uname) ||
-        users.find(u => mail && (u.email||'').trim().toLowerCase() === mail) ||
-        null;
+      // 1) 세션에서 키 후보 구성
+      const uname = (SESSION?.username || SESSION?.user || (SESSION?.email ? SESSION.email.split('@')[0] : '') || '').trim();
+      const mail  = (SESSION?.email || '').trim();
+      const keys = Array.from(new Set([uname, mail, (mail.split('@')[0]||'')].filter(Boolean)));
+
+      // 2) USERS KV에서 직접 조회 (우선)
+      let found = null;
+      if (keys.length) found = await fetchUserFromKVKeys(keys);
+
+      // 3) 폴백: /api/users 전체에서 매칭
+      if (!found){
+        const users = await fetchUsersAll();
+        const unameLC = uname.toLowerCase(), mailLC = mail.toLowerCase();
+        found =
+          users.find(u => (u.username||'').trim().toLowerCase() === unameLC) ||
+          users.find(u => mail && (u.email||'').trim().toLowerCase() === mailLC) ||
+          null;
+      }
+
+      // 4) 최종 폴백: 세션 정보로 유저 구성
       if(!found) found = normalizeUser(SESSION);
+
       CURRENT_USER = found;
       renderProfileSummary(CURRENT_USER);
       renderProfileGrid(CURRENT_USER);
@@ -511,10 +541,7 @@
       if (SESSION && !CURRENT_USER) CURRENT_USER = normalizeUser(SESSION);
       if (SESSION || CURRENT_USER){ hideSessionHint(); return { session: SESSION, user: CURRENT_USER }; }
 
-      // 700ms 이후 힌트 노출(깜빡임 방지)
       setTimeout(()=>{ if (!SESSION && !CURRENT_USER) showSessionHint('세션 확인 중…'); }, 700);
-
-      // 서버 프로브 + 짧은 폴링
       let serverSess = null;
       const probe = probeServerSession().then(s=>{ serverSess = s; return s; });
 
@@ -529,10 +556,7 @@
           return { session: SESSION, user: CURRENT_USER };
         }
       }
-
-      // 백업으로도 못 찾은 경우, 화면에 유저가 이미 있으면 대체 허용
       if (allowPseudo && CURRENT_USER){ hideSessionHint(); return { session:null, user: CURRENT_USER }; }
-
       return { session:null, user:null };
     }
 
@@ -576,17 +600,16 @@
 
       const ufs = [
         item.user, item.username, item.member, item.uid, item.userId, item.userid,
-        item.owner, item.ownerId, item.by, item.login, item.account, item.user_name
+        item.owner, item.ownerId, item.by, item.login, item.account, item.user_name,
+        item.writer, item.author, item.memberId, item.accountId, item.userKey
       ];
       const mfs = [item.email, item.userEmail, item.ownerEmail];
 
-      // ownerKey(신규) 우선
       if (item.ownerKey){
-        const ok1 = item.ownerKey.toLowerCase();
+        const ok1 = String(item.ownerKey||'').toLowerCase();
         const ok2 = (myUser+'|'+myMail).toLowerCase();
         if (ok1 === ok2) return true;
       }
-
       const hitUser = ufs.some(v => same(v, myUser));
       const hitMail = mfs.some(v => same(v, myMail));
       return hitUser || (myMail && hitMail);
@@ -607,7 +630,7 @@
         const d = new Date(t);
         if (!isNaN(d)) return d.toLocaleString('ko-KR');
       }
-      return new Date().toLocaleString('ko-KR'); // 최후
+      return new Date().toLocaleString('ko-KR');
     }
 
     async function renderOrders(){
@@ -639,16 +662,19 @@
           </tr>
         `;
       }).join('');
-      hideSessionHint(); // 데이터가 보이면 힌트 감춤
+      hideSessionHint();
     }
 
+    function userMessageText(m){
+      return (m.content || m.message || m.text || m.body || m.msg || m.description || '').toString();
+    }
     function firstAnswerOf(m){
       if (m.answer || m.adminAnswer || m.reply || m.adminReply || m.response) {
         return (m.answer || m.adminAnswer || m.reply || m.adminReply || m.response);
       }
       if (Array.isArray(m.replies) && m.replies.length) {
         const r = m.replies[0];
-        return r?.content || r?.text || '';
+        return r?.content || r?.text || r?.body || '';
       }
       return '';
     }
@@ -657,13 +683,14 @@
       const all  = await fetchInquiriesAll();
       const mine = all.filter(matchToMe);
       const wrap = $('#messagesWrap');
-      if(!mine.length){ wrap.innerHTML = '<div class="orders-empty">문의가 없습니다.</div>'; return; }
+      if(!mine.length){ wrap.innerHTML = '<div class="orders-empty">내 1:1 문의가 없습니다.</div>'; return; }
 
       wrap.innerHTML = mine.slice().reverse().map(m=>{
         const ans = firstAnswerOf(m);
         const hasAnswer = !!ans;
         const status = hasAnswer ? '답변완료' : (m.status || '미답변');
         const dateStr = resolveDate(m);
+        const msg = userMessageText(m);
         return `
           <div class="msg-item" data-qid="${m.id||m.qid||m.ts||''}">
             <div class="msg-hd">
@@ -674,7 +701,7 @@
               <span class="msg-status" style="background:${status==='답변완료'?'#2e7d32':(status==='미답변'?'#b71c1c':'#455a64')}">${status}</span>
             </div>
             <!-- 본문은 기본 표시 -->
-            <div class="msg-text">${(m.content||m.message||'').replace(/\n/g,'<br>')}</div>
+            <div class="msg-text">${msg.replace(/\n/g,'<br>')}</div>
             <!-- 답변만 접힘 -->
             <div class="msg-answer">
               ${
@@ -874,7 +901,7 @@
       if (order) openOrderDetail(order);
     });
 
-    // 1:1 문의 등록 (본문 기본 표시, 답변 1개 제한)
+    // 1:1 문의 등록
     $('#sendMsgBtn')?.addEventListener('click', async ()=>{
       const ensured = await ensureSessionAndUser({ allowPseudo:true, timeout:2000 });
       if(!ensured.user){
@@ -909,7 +936,7 @@
           <div class="msg-hd">
             <div style="font-weight:600;display:flex;gap:8px;align-items:center;">
               <span>${newInquiry.title}</span>
-              <small style="color:#9ab;opacity:.9">${resolveDate(newInquiry)}</small>
+              <small style="color:#9ab;opacity:.9">${new Date(newInquiry.ts).toLocaleString('ko-KR')}</small>
             </div>
             <span class="msg-status" style="background:#b71c1c">미답변</span>
           </div>
@@ -954,7 +981,7 @@
 
     /* ===================== 초기 구동 ===================== */
     (async function init(){
-      // Fast-Path
+      // Fast-Path 세션
       SESSION = getSessionFast();
       if (SESSION){
         try{ localStorage.setItem('gs_logged_in','1'); }catch(_){}
@@ -969,7 +996,7 @@
       // 콘텐츠 우선 로드
       await Promise.allSettled([loadGoldPrice(), renderOrders(), renderInquiries()]);
 
-      // 정확 유저 보강
+      // 정확 유저 보강 (KV에서 직접)
       if (SESSION){ await loadCurrentUser(); hideSessionHint(); }
 
       // 백그라운드 세션 확보
