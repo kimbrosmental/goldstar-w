@@ -17,38 +17,20 @@
     .profile-card{background:#102522;border:1px solid #1d4d46;padding:28px 30px;border-radius:18px;margin-bottom:40px;box-shadow:0 0 18px rgba(0,0,0,0.4);}
     .profile-card h2{font-size:22px;margin-bottom:16px;color:#FFD700;}
 
-    /* 회원 기본 정보: 반응형 */
+    /* 반응형 기본 정보 그리드 */
     .profile-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
     .field{background:#0c1a18;padding:14px 16px;border-radius:10px;min-width:0;}
     .field label{display:block;font-size:12px;color:#90a4ae;letter-spacing:.5px;margin-bottom:4px;}
     .field span{font-weight:600;font-size:15px;word-break:break-word;overflow-wrap:anywhere;}
 
     @media (max-width:1024px){ .profile-wrapper{padding:10px 16px 64px;} }
-    @media (max-width:720px){ .profile-card{padding:22px;} .actions{flex-wrap:wrap;} }
+    @media (max-width:720px) { .profile-card{padding:22px;} .actions{flex-wrap:wrap;} }
     @media (max-width:480px){ .profile-card{padding:18px;} }
 
-    /* 주문 내역: 반응형 테이블 */
-    .table-responsive{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    .orders-table{width:100%;border-collapse:collapse;margin-top:10px;min-width:720px;}
+    .orders-table{width:100%;border-collapse:collapse;margin-top:10px;}
     .orders-table th,.orders-table td{border:1px solid #1e4d47;padding:10px 12px;font-size:14px;}
     .orders-table th{background:#004d40;color:#FFD700;}
     .orders-empty{color:#bbb;font-size:14px;margin-top:8px;}
-
-    @media (max-width:760px){
-      .orders-table{min-width:0;border:0;}
-      .orders-table thead{display:none;}
-      .orders-table, .orders-table tbody, .orders-table tr, .orders-table td{display:block;width:100%;}
-      .orders-table tr{
-        margin:0 0 12px;border:1px solid #1e4d47;border-radius:12px;overflow:hidden;background:#0c1a18;cursor:pointer;
-      }
-      .orders-table td{border:none;border-bottom:1px solid #113a35;position:relative;padding-left:44%;min-height:44px;}
-      .orders-table td:last-child{border-bottom:none;}
-      .orders-table td::before{
-        content:attr(data-label);position:absolute;left:12px;top:10px;width:40%;
-        white-space:nowrap;font-size:12px;color:#90a4ae;font-weight:600;
-      }
-    }
-
     .actions{display:flex;gap:10px;margin-top:14px;}
     .btn{background:#00695C;color:#fff;padding:10px 16px;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:.25s;will-change:transform,box-shadow;}
     .btn:hover{background:#00897B;transform:translateY(-2px) scale(1.02);box-shadow:0 8px 24px rgba(0,0,0,.35),0 0 0 2px rgba(255,215,0,.25);}
@@ -57,7 +39,7 @@
     .pill{ background:#004d40; color:#FFD700; border:2px solid #FFD700; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; transition:.25s; }
     .pill:hover{ transform:translateY(-2px) scale(1.04); box-shadow:0 8px 24px rgba(0,0,0,.35),0 0 0 2px rgba(255,215,0,.25); }
 
-    /* 패널 */
+    /* 패널(주문/상세) */
     #orderPanel, #orderDetailPanel{ position:fixed; inset:0; display:none; z-index:9999; background:rgba(0,0,0,0.65); align-items:stretch; justify-content:flex-end; }
     #orderPanel.show, #orderDetailPanel.show{ display:flex; }
     #orderSheet, #orderDetailSheet{ width:min(720px, 96vw); background:linear-gradient(135deg,#102522 80%,#1d4d46 100%); height:100%; overflow:auto; box-shadow:0 0 32px #000; border-left:1px solid #1d4d46; transform:translateX(100%); transition:transform .28s ease; }
@@ -73,8 +55,11 @@
 
     .pill-wrap{ display:flex; gap:10px; flex-wrap:wrap; }
 
-    /* 주소 폼 */
-    .addr-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; margin-top:12px; align-items:start; }
+    /* 주소 폼 그리드 */
+    .addr-grid{
+      display:grid; grid-template-columns: 1fr 1fr;
+      gap: 12px 14px; margin-top:12px; align-items:start;
+    }
     .addr-grid label{ display:flex; flex-direction:column; gap:6px; font-size:13px; color:#FFD700; font-weight:700; background:#0c1a18; padding:12px 14px; border-radius:10px; }
     .addr-grid input, .addr-grid textarea{ width:100%; font-size:14px; padding:10px 12px; border-radius:8px; border:1px solid #1e4d47; background:#071412; color:#fff; box-sizing:border-box; }
     .addr-row{ display:flex; gap:8px; align-items:center; }
@@ -83,19 +68,20 @@
 
     .sheet-actions .btn{ width:100%; margin-top:12px; font-size:1.08em; }
 
+    /* navbar 우측 홈 버튼만 */
     .home-icon{display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;}
     .home-icon span{font-size:30px;color:#FFD700;}
 
-    .mini-hint{font-size:12px;color:#9bd3ff;margin:8px 0 0;display:none;}
-    .mini-err{font-size:12px;color:#ff9b9b;margin:8px 0 0;display:none;}
+    /* 보조 메시지 */
+    #summaryLine{display:none;}
+    .mini-hint{font-size:12px;color:#9bd3ff;margin:8px 0 0;}
+    .mini-err{font-size:12px;color:#ff9b9b;margin:8px 0 0;}
 
-    /* 문의 카드 */
-    .msg-item{background:#0c1a18;border:1px solid #1e4d47;border-radius:8px;margin-bottom:10px;cursor:pointer;}
-    .msg-hd{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;}
-    .msg-text{padding:0 12px 10px 12px;}
-    .msg-answer{display:none;padding:0 12px 12px;}
-    .msg-item.open .msg-answer{display:block;}
-    .msg-status{font-size:11px;padding:2px 6px;border-radius:10px;color:#fff;white-space:nowrap;}
+    /* 문의 아이템 토글 */
+    .msg-item{background:#0c1a18;padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:10px;cursor:pointer;}
+    .msg-item .body{margin-top:6px;}
+    .msg-item .answer{display:none;margin-top:6px;padding:8px 10px;background:#08221f;border:1px solid #1e4d47;border-radius:8px;}
+    .msg-item.open .answer{display:block;}
   </style>
 </head>
 <body>
@@ -119,70 +105,46 @@
 
   <main>
     <div class="profile-wrapper">
-      <div class="profile-header" style="flex-direction:column;align-items:flex-start;gap:8px;">
+      <div class="profile-header" id="summaryHeader" style="flex-direction:column;align-items:flex-start;gap:8px;">
         <h1 style="font-size:30px;color:#4fc3f7;">내 정보</h1>
-        <div id="sessionHint" class="mini-hint">세션 확인 중…</div>
+        <div id="summaryLine"></div>
+        <div id="sessionHint" class="mini-hint" style="display:none;"></div>
         <div class="actions" style="margin-top:4px;">
           <button class="btn" id="addOrderBtn">주문 추가</button>
           <button class="btn danger" id="logoutBtn">로그아웃</button>
         </div>
       </div>
 
-      <!-- 회원 기본 정보 -->
-      <div class="profile-card" id="profileCard">
+      <!-- 기본 정보 -->
+      <div class="profile-card" id="profileCard" hidden>
         <h2>회원 기본 정보</h2>
         <div class="profile-grid" id="profileGrid">
-          <div class="field"><label>이름</label><span>로딩 중…</span></div>
-          <div class="field"><label>아이디</label><span>로딩 중…</span></div>
-          <div class="field"><label>연락처</label><span>로딩 중…</span></div>
-          <div class="field"><label>이메일</label><span>로딩 중…</span></div>
-          <div class="field"><label>은행</label><span>로딩 중…</span></div>
-          <div class="field"><label>계좌번호</label><span>로딩 중…</span></div>
-          <div class="field"><label>가입일</label><span>로딩 중…</span></div>
-          <div class="field"><label>상태</label><span>로딩 중…</span></div>
+          <div class="orders-empty">로딩중…</div>
         </div>
       </div>
 
       <!-- 주문 내역 -->
       <div class="profile-card">
         <h2>주문 내역</h2>
-        <div class="table-responsive">
-          <table class="orders-table">
-            <thead>
-              <tr>
-                <th>주문번호</th>
-                <th>상품</th>
-                <th>돈수</th>
-                <th>공급가(원)</th>
-                <th>총금액(원)</th>
-                <th>입금금액(50%)</th>
-                <th>상태</th>
-                <th>일시</th>
-              </tr>
-            </thead>
-            <tbody id="ordersContainer">
-              <tr><td colspan="8" style="text-align:center">로딩 중…</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div id="ordersHint" class="mini-err"></div>
+        <div id="ordersContainer"><div class="orders-empty">로딩중…</div></div>
+        <div id="ordersHint" class="mini-err" style="display:none;"></div>
       </div>
 
       <!-- 1:1 문의 -->
       <div class="profile-card">
         <h2>1:1 문의</h2>
-        <div id="messagesWrap" style="margin-bottom:16px;"></div>
-        <div id="inqHint" class="mini-err"></div>
+        <div id="messagesWrap" style="margin-bottom:16px;"><div class="orders-empty">로딩중…</div></div>
+        <div id="inqHint" class="mini-err" style="display:none;"></div>
         <div style="display:flex;gap:8px;align-items:flex-start;">
           <textarea id="msgInput" placeholder="문의 내용을 입력하세요" style="flex:1;min-height:70px;background:#0c1a18;color:#fff;border:1px solid #1e4d47;border-radius:8px;padding:10px;font-size:14px;resize:vertical;"></textarea>
           <button class="btn" id="sendMsgBtn" style="height:70px;min-width:120px;">문의 등록</button>
         </div>
-        <p style="margin-top:10px;font-size:12px;color:#888;">문의 카드를 누르면 관리자 답변이 펼쳐집니다.</p>
+        <p style="margin-top:10px;font-size:12px;color:#888;">관리자 답변이 등록되면 문의를 클릭해 확인할 수 있습니다.</p>
       </div>
     </div>
   </main>
 
-  <!-- 주문 생성 패널 -->
+  <!-- 주문 패널 -->
   <div id="orderPanel" aria-hidden="true">
     <div id="orderSheet">
       <div class="sheet-close"><button id="closeOrderPanel" class="btn danger">닫기</button></div>
@@ -220,8 +182,12 @@
 
         <h3 class="sheet-h" style="font-size:1.15em;margin-top:14px;">배송지 정보</h3>
         <div class="addr-grid">
-          <label>수령인 <input id="recvName" placeholder="이름" autocomplete="name"></label>
-          <label>연락처 <input id="recvPhone" placeholder="010-1234-5678" autocomplete="tel"></label>
+          <label>수령인
+            <input id="recvName" placeholder="이름" autocomplete="name">
+          </label>
+          <label>연락처
+            <input id="recvPhone" placeholder="010-1234-5678" autocomplete="tel">
+          </label>
 
           <label style="grid-column:1 / span 2;">우편번호
             <div class="addr-row">
@@ -232,9 +198,16 @@
             <div class="addr-help" id="postcodeHelp" style="display:none;"></div>
           </label>
 
-          <label style="grid-column:1 / span 2;">주소(도로명/지번) <input id="addr1" placeholder="도로명 또는 지번 주소" autocomplete="address-line1"></label>
-          <label style="grid-column:1 / span 2;">상세 주소 <input id="addr2" placeholder="동/호수 등 상세" autocomplete="address-line2"></label>
-          <label style="grid-column:1 / span 2;">요청사항 <textarea id="memo" rows="3" placeholder="요청사항이 있으면 적어주세요"></textarea></label>
+          <label style="grid-column:1 / span 2;">주소(도로명/지번)
+            <input id="addr1" placeholder="도로명 또는 지번 주소" autocomplete="address-line1">
+          </label>
+          <label style="grid-column:1 / span 2;">상세 주소
+            <input id="addr2" placeholder="동/호수 등 상세" autocomplete="address-line2">
+          </label>
+
+          <label style="grid-column:1 / span 2;">요청사항
+            <textarea id="memo" rows="3" placeholder="요청사항이 있으면 적어주세요"></textarea>
+          </label>
         </div>
 
         <div class="sheet-actions">
@@ -250,7 +223,7 @@
       <div class="sheet-close"><button id="closeOrderDetail" class="btn danger">닫기</button></div>
       <div class="sheet-body">
         <h2 class="sheet-h">주문 상세</h2>
-        <div id="orderDetailBody"></div>
+        <div id="orderDetailBody">로딩중…</div>
       </div>
     </div>
   </div>
@@ -259,447 +232,508 @@
   document.addEventListener('DOMContentLoaded', () => {
     const $  = (s,p=document)=>p.querySelector(s);
     const $$ = (s,p=document)=>Array.from(p.querySelectorAll(s));
-    const fmt = n => Number(n||0).toLocaleString('ko-KR');
 
-    /* ===== 세션 (로컬 즉시 + 비차단 보강) ===== */
-    function readLS(k){ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(_){ return null; } }
-    function getSessionFast(){
-      try{ if (window.AdminAuth?.currentSession) return AdminAuth.currentSession(); }catch(_){}
-      try{ if (window.GSApp?.currentUser) return GSApp.currentUser(); }catch(_){}
-      return readLS('admin_session_v1') || readLS('gs_user') || readLS('gs_user_backup') || null;
-    }
-    function deriveIdentity(s){
-      const email=(s?.email||'').trim();
-      const username=(s?.username||s?.user||(email?email.split('@')[0]:'')||'').trim();
-      const name=(s?.name||s?.displayName||'').trim();
-      const phone=(s?.phone||'').trim();
-      return {username,email,name,phone};
-    }
-    let SESSION = getSessionFast();
-    let ID = deriveIdentity(SESSION);
-    const sessionHint = $('#sessionHint');
-    if (ID.username) sessionHint.style.display='none';
+    const ADMIN_KEY = 'admin_session_v1';
+    const GS_KEY    = 'gs_user';
 
-    /* ===== 공통 fetch & 파서 ===== */
-    async function fetchJSON(url, init){
+    // 홈/로고 클릭: 세션 스냅샷 유지
+    function stampLoginMarkers(session){
       try{
-        const r = await fetch(url,{cache:'no-store', ...init});
-        const ct=r.headers.get('Content-Type')||'';
-        if(!r.ok) throw new Error('HTTP '+r.status);
-        if(/json/i.test(ct)) return await r.json();
-        const t=await r.text(); try{ return JSON.parse(t); }catch{ return t; }
-      }catch(e){ return null; }
-    }
-    async function safeDecrypt(x){
-      try{
-        if (!x) return null;
-        if (Array.isArray(x) || typeof x==='object') return x;
-        if (typeof x==='string'){
-          try{ return JSON.parse(x); }catch{}
-          if (window.decrypt){
-            const dec = await window.decrypt(x);
-            try{ return JSON.parse(dec); }catch{ return dec; }
-          }
+        const snap = session || getAdminSessionSync() || getGsSessionSync() || null;
+        if (snap){
+          localStorage.setItem('gs_user', JSON.stringify(snap));
+          localStorage.setItem('gs_user_backup', JSON.stringify(snap));
         }
-        return x;
+        localStorage.setItem('gs_logged_in','1');
+      }catch(_){}
+    }
+    $('#homeLogo')?.addEventListener('click', e=>{ e.preventDefault(); stampLoginMarkers(); location.href='index.html'; });
+    document.querySelector('.home-icon')?.addEventListener('click', ()=>{ stampLoginMarkers(); });
+
+    // ===== 세션 유틸 =====
+    function getAdminSessionSync(){
+      try{
+        if (window.AdminAuth?.currentSession){
+          const s = window.AdminAuth.currentSession();
+          if (s) return s;
+        }
+      }catch(_){}
+      try{
+        const raw = localStorage.getItem(ADMIN_KEY);
+        return raw ? JSON.parse(raw) : null;
       }catch(_){ return null; }
     }
-    function unwrap(x){
-      if (x==null) return null;
-      if (Array.isArray(x)) return x;
-      if (typeof x==='object'){
-        if ('data' in x) return unwrap(x.data);
-        if ('value' in x) return unwrap(x.value);
-        if ('list' in x) return unwrap(x.list);
-        if ('items' in x) return unwrap(x.items);
-        return x;
+    function getGsSessionSync(){
+      try{
+        if (window.GSApp?.currentUser){
+          const s = window.GSApp.currentUser();
+          if (s) return s;
+        }
+      }catch(_){}
+      try{
+        const raw = localStorage.getItem(GS_KEY);
+        return raw ? JSON.parse(raw) : null;
+      }catch(_){ return null; }
+    }
+    async function getAdminSessionAsync(){
+      // AdminAuth가 비동기 준비되는 경우 대비
+      for (let i=0;i<30;i++){ // ~4.5s
+        try{
+          if (window.AdminAuth?.currentSession){
+            const v = window.AdminAuth.currentSession();
+            if (v) return v;
+          }
+        }catch(_){}
+        await new Promise(r=>setTimeout(r,150));
       }
-      return x;
+      return null;
     }
-    async function getList(url){
-      const j = await fetchJSON(url);
-      const dec = await safeDecrypt(j);
-      const u = unwrap(dec);
-      return Array.isArray(u) ? u : (Array.isArray(u?.data)?u.data:[]);
+    async function getToken(){
+      try{
+        if (window.AdminAuth?.getToken){
+          const t = window.AdminAuth.getToken();
+          return (t && typeof t.then==='function') ? await t : t;
+        }
+      }catch(_){}
+      const s = SESSION || getAdminSessionSync() || getGsSessionSync();
+      return s?.token || s?.jwt || s?.idToken || null;
     }
-    async function kvGet(ns,key){
-      const a = await fetchJSON(`/api/kv?ns=${encodeURIComponent(ns)}&key=${encodeURIComponent(key)}`);
-      if (a!=null) return a;
-      const b = await fetchJSON(`/api/kv/${encodeURIComponent(ns)}?key=${encodeURIComponent(key)}`);
-      return b;
-    }
-    async function kvSet(ns,key,val){
-      const body = JSON.stringify(val);
-      const a = await fetchJSON(`/api/kv?ns=${encodeURIComponent(ns)}&key=${encodeURIComponent(key)}`, {method:'POST', headers:{'Content-Type':'application/json'}, body});
-      if (a!=null) return true;
-      const b = await fetchJSON(`/api/kv/${encodeURIComponent(ns)}?key=${encodeURIComponent(key)}`, {method:'POST', headers:{'Content-Type':'application/json'}, body});
-      return b!=null;
-    }
-    function ownerKeyOf(id){ return ((id.username||'')+'|'+(id.email||'')).toLowerCase(); }
 
-    /* ===== USERS: 우선 전역 리스트 → 실패 시 KV 단일키 ===== */
-    async function loadUser(){
-      // 1) /api/users (전역 리스트)
-      let users = await getList('/api/users');
-      if (Array.isArray(users) && users.length){
-        const uname = ID.username;
-        const mail = (ID.email||'').toLowerCase();
-        const found =
-          users.find(u=> (u.username||'').trim()===uname) ||
-          users.find(u=> mail && (u.email||'').trim().toLowerCase()===mail);
-        if (found){
-          applyUser(found);
-          return;
-        }
+    // ===== 공통 포맷터/파서 =====
+    const fmt = n => Number(n||0).toLocaleString('ko-KR');
+
+    async function fetchJSON(url, init={}){
+      const token = await getToken().catch(()=>null);
+      const hdr = new Headers(init.headers || {});
+      if (token && !hdr.has('Authorization')) hdr.set('Authorization','Bearer '+token);
+      if (!hdr.has('Accept')) hdr.set('Accept','application/json, text/plain, */*');
+
+      let resp;
+      try{
+        resp = await fetch(url, { cache:'no-store', credentials:'include', ...init, headers: hdr });
+      }catch(e){ return { ok:false, error:String(e) }; }
+
+      const ct = resp.headers.get('Content-Type')||'';
+      if (!resp.ok){
+        let raw = '';
+        try{ raw = await resp.text(); }catch(_){}
+        return { ok:false, status:resp.status, contentType:ct, raw };
       }
-      // 2) KV USERS (여러 키 후보)
-      const keys = Array.from(new Set([ID.username, ID.email, (ID.email||'').split('@')[0]].filter(Boolean)));
-      for (const k of keys){
-        const raw = await kvGet('USERS', k);
-        const dec = await safeDecrypt(raw);
-        const u = unwrap(dec);
-        if (u && (u.username || u.email)){
-          applyUser(u);
-          return;
-        }
+      if (!/application\/json/i.test(ct)){
+        let raw = '';
+        try{ raw = await resp.text(); }catch(_){}
+        return { ok:false, status:200, contentType:ct, raw };
       }
-      // 3) 그래도 없으면 세션 정보로 표기
-      applyUser({
-        username: ID.username||'-', name: ID.name||'-', email: ID.email||'-', phone: ID.phone||'-',
-        bank:'', account:'', status:'-', created: Date.now()
-      });
+      const json = await resp.json().catch(()=>null);
+      return json ? { ok:true, json } : { ok:false, status:200, contentType:ct };
     }
-    function applyUser(u){
-      const norm = {
-        username: (u.username || (u.email?u.email.split('@')[0]:'') || ID.username || '').trim(),
-        name: (u.name || u.displayName || ID.name || '').trim(),
-        email: (u.email || ID.email || '').trim(),
-        phone: (u.phone || '').trim(),
-        bank: u.bank || '',
-        account: u.account || '',
-        status: u.status || '정상',
-        created: u.created || u.createdAt || Date.now()
-      };
-      ID = { ...ID, ...norm };
-      const grid = $('#profileGrid');
-      const rows = [
-        ['이름', norm.name||'-'],
-        ['아이디', norm.username||'-'],
-        ['연락처', norm.phone||'-'],
-        ['이메일', norm.email||'-'],
-        ['은행', norm.bank||'-'],
-        ['계좌번호', norm.account||'-'],
-        ['가입일', norm.created ? new Date(norm.created).toLocaleString('ko-KR') : '-'],
-        ['상태', norm.status||'-']
+
+    async function safeDecrypt(payload){
+      try{
+        if(!payload) return [];
+        const r = window.decrypt ? window.decrypt(payload) : payload;
+        return (r && typeof r.then==='function') ? await r : r;
+      }catch{ return []; }
+    }
+    async function safeEncrypt(arr){
+      try{
+        if (!window.encrypt) return arr;
+        const r = window.encrypt(arr);
+        return (r && typeof r.then==='function') ? await r : r;
+      }catch{ return arr; }
+    }
+    async function kvToArray(payload){
+      try{
+        if (!payload) return [];
+        if (Array.isArray(payload)) return payload;
+        let cand = payload?.data ?? payload?.list ?? payload?.items ?? payload?.values ??
+                   payload?.value ?? payload?.records ?? payload?.result ?? payload?.results;
+        if (!cand && typeof payload === 'object') {
+          for (const k of Object.keys(payload)){ if (Array.isArray(payload[k])) { cand = payload[k]; break; } }
+        }
+        if (Array.isArray(cand)) return cand;
+        const maybeMap = cand || payload;
+        if (maybeMap && typeof maybeMap === 'object' && !Array.isArray(maybeMap)) {
+          const vals = Object.values(maybeMap);
+          if (vals.length && vals.every(v => typeof v === 'object')) return vals;
+        }
+        async function tryString(str){
+          try{ const j = JSON.parse(str); if (Array.isArray(j)) return j; if (Array.isArray(j?.data)) return j.data; }catch{}
+          if (window.decrypt){
+            const dec = await window.decrypt(str);
+            try{ const j2 = JSON.parse(dec); if (Array.isArray(j2)) return j2; if (Array.isArray(j2?.data)) return j2.data; }catch{}
+          }
+          return null;
+        }
+        if (typeof cand === 'string'){ const r = await tryString(cand); if (r) return r; }
+        if (typeof payload?.data === 'string'){ const r = await tryString(payload.data); if (r) return r; }
+        if (typeof payload === 'string'){ const r = await tryString(payload); if (r) return r; }
+        return [];
+      }catch{ return []; }
+    }
+    async function kvSaveArray(url, list){
+      const body1 = { data: await safeEncrypt(list) };
+      const opt = (raw)=>({ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(raw) });
+      let r = await fetchJSON(url, opt(body1));
+      if (!r.ok) r = await fetchJSON(url, opt(list));
+      if (!r.ok) throw new Error('save failed: '+url);
+    }
+
+    // ===== 전역 상태 =====
+    let SESSION = null;
+    let CURRENT_USER = null;
+    let supplyPrice = 520000;
+    let currentPrice = 0;
+
+    // ===== USERS =====
+    async function fetchUsersAll(){
+      const r = await fetchJSON('/api/users');
+      return r.ok ? await kvToArray(r.json) : [];
+    }
+    function normalizeName(v){ return (v||'').toString().trim(); }
+    function deriveUnameFromEmail(mail){ return (mail||'').split('@')[0]||''; }
+
+    async function loadCurrentUser(){
+      const users = await fetchUsersAll();
+      const uname = normalizeName(SESSION?.username || SESSION?.user || deriveUnameFromEmail(SESSION?.email));
+      const mail  = normalizeName(SESSION?.email).toLowerCase();
+
+      CURRENT_USER =
+        users.find(u => normalizeName(u.username) === uname) ||
+        users.find(u => mail && normalizeName(u.email).toLowerCase() === mail) ||
+        null;
+
+      if(!CURRENT_USER){
+        CURRENT_USER = {
+          username: uname || '-',
+          name: SESSION?.name || SESSION?.displayName || '-',
+          email: mail || '-',
+          phone: SESSION?.phone || '-',
+          role: 'user',
+          created: Date.now()
+        };
+      }
+      renderProfileSummary(CURRENT_USER);
+      renderProfileGrid(CURRENT_USER);
+      stampLoginMarkers(SESSION || CURRENT_USER);
+    }
+
+    function renderProfileSummary(u){
+      const sum = $('#summaryLine'); // 숨김 유지
+      if (sum) sum.textContent = `${u.name||''} (${u.username||''})`;
+    }
+    function renderProfileGrid(u){
+      const grid = $('#profileGrid'), card = $('#profileCard');
+      card.hidden = false; grid.innerHTML = '';
+      const fields = [
+        ['이름', u.name||'-'],
+        ['아이디', u.username||'-'],
+        ['연락처', u.phone||'-'],
+        ['이메일', u.email||'-'],
+        ['은행', u.bank||'-'],
+        ['계좌번호', u.account||'-'],
+        ['가입일', u.created ? new Date(u.created).toLocaleString('ko-KR') : '-'],
+        ['상태', u.status||'-']
       ];
-      grid.innerHTML = rows.map(([l,v])=> `<div class="field"><label>${l}</label><span>${v}</span></div>`).join('');
-      sessionHint.style.display='none';
+      for(const [l,v] of fields){
+        const div = document.createElement('div');
+        div.className='field';
+        div.innerHTML = `<label>${l}</label><span>${v}</span>`;
+        grid.appendChild(div);
+      }
     }
 
-    /* ===== 금 시세 ===== */
-    const SUPPLY_PRICE = 520000;
-    let marketPrice = 0;
+    // ===== 금 시세 =====
     async function loadGoldPrice(){
       try{
-        const j = await fetchJSON('/api/security?type=goldprice');
-        const manual = Number(j?.manualGoldPrice||0); if (manual>0){ marketPrice = manual; return; }
+        const r = await fetchJSON('/api/security?type=goldprice');
+        if (r.ok){
+          const j = r.json;
+          const manual = j?.manualGoldPrice ? Number(j.manualGoldPrice) : 0;
+          if(manual>0){ currentPrice = manual; return; }
+        }
       }catch(_){}
       try{
-        const d = await fetchJSON('https://gold-price-proxy.hanoiosaka1.workers.dev/price');
-        if (d?.price) marketPrice = Number(d.price);
+        const d = await fetch('https://gold-price-proxy.hanoiosaka1.workers.dev/price').then(r=>r.json());
+        if(d?.price) currentPrice = Number(d.price);
       }catch(_){}
     }
 
-    /* ===== 주문 (전역 리스트 / KV 단일키 둘 다 지원) ===== */
-    let ORDER_MAP = Object.create(null);
-    function timeString(v){
-      if (v?.ts) return new Date(Number(v.ts)).toLocaleString('ko-KR');
-      const c = v?.date || v?.createdAt || v?.created || v?.time || v?.timestamp;
-      if (c){ const d=new Date(c); if(!isNaN(d)) return d.toLocaleString('ko-KR'); }
-      return '-';
-    }
-    function matchMe(o){
-      const uname = ID.username;
-      const mail = (ID.email||'').toLowerCase();
-      const ufields = [o.user,o.username,o.member,o.uid,o.userId,o.userid];
-      const mfields = [o.email,o.userEmail];
-      const hitUser = ufields.some(v => (v||'').toString().trim()===uname);
-      const hitMail = mfields.some(v => (v||'').toString().trim().toLowerCase()===mail);
+    // ===== ORDERS / INQUIRIES =====
+    async function fetchOrdersAll(){ const r = await fetchJSON('/api/orders'); return r.ok ? await kvToArray(r.json) : []; }
+    async function fetchInquiriesAll(){ const r = await fetchJSON('/api/inquiries'); return r.ok ? await kvToArray(r.json) : []; }
+    async function saveOrdersAll(list){ await kvSaveArray('/api/orders', list); }
+    async function saveInquiriesAll(list){ await kvSaveArray('/api/inquiries', list); }
+
+    function myMatch(item){
+      const uname = normalizeName(SESSION?.username || deriveUnameFromEmail(SESSION?.email));
+      const mail  = normalizeName(CURRENT_USER?.email).toLowerCase();
+      const ufields = [item.user, item.username, item.member, item.uid, item.userId, item.userid];
+      const mfields = [item.email, item.userEmail];
+      const hitUser = ufields.some(v => normalizeName(v) === uname);
+      const hitMail = mfields.some(v => normalizeName(v).toLowerCase() === mail);
       return hitUser || (mail && hitMail);
     }
-    async function loadOrders(){
-      const key = ownerKeyOf(ID);
-      let list = null;
-
-      // 1) KV per-user
-      const kv = await kvGet('ORDERS', key);
-      const kvd = await safeDecrypt(kv);
-      const kvu = unwrap(kvd);
-      if (Array.isArray(kvu)) list = kvu;
-
-      // 2) fallback: /api/orders (전역 리스트)
-      if (!Array.isArray(list) || !list.length){
-        const all = await getList('/api/orders');
-        if (Array.isArray(all)) list = all.filter(matchMe);
+    function firstDateLike(o){
+      const cands = [o.date, o.created, o.createdAt, o.timestamp, o.time, o.ts];
+      for (const v of cands){
+        if (!v && v!==0) continue;
+        // 숫자(timestamp)
+        if (typeof v === 'number') return new Date(v).toLocaleString('ko-KR');
+        // ISO 문자열
+        const d = new Date(v);
+        if (!isNaN(+d)) return d.toLocaleString('ko-KR');
       }
-      if (!Array.isArray(list)) list = [];
-
-      const tbody = $('#ordersContainer');
-      ORDER_MAP = Object.create(null);
-      if (!list.length){
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">없음</td></tr>';
-        return;
-      }
-      tbody.innerHTML = list.map((o, i)=>{
-        const don = Number(o.don||o.qty||0);
-        const sup = Number(o.supplyPrice||SUPPLY_PRICE||0);
-        const total = Number(o.totalPrice || (don*sup));
-        const deposit = Math.round(total*0.5);
-        const oid = o.id || o.orderId || ('row-'+i);
-        ORDER_MAP[oid] = o;
-        return `
-          <tr data-oid="${oid}" style="cursor:pointer;">
-            <td data-label="주문번호">${oid}</td>
-            <td data-label="상품">골드바</td>
-            <td data-label="돈수" style="text-align:right;">${don}</td>
-            <td data-label="공급가(원)" style="text-align:right;">${fmt(sup)}</td>
-            <td data-label="총금액(원)" style="text-align:right;">${fmt(total)}</td>
-            <td data-label="입금금액(50%)" style="text-align:right;">${fmt(deposit)}</td>
-            <td data-label="상태">${o.status||'-'}</td>
-            <td data-label="일시">${timeString(o)}</td>
-          </tr>
-        `;
-      }).join('');
+      return '-';
     }
-    function openOrderDetail(order){
-      const body = $('#orderDetailBody');
-      const don = Number(order.don||order.qty||0);
-      const sup = Number(order.supplyPrice||SUPPLY_PRICE||0);
-      const total = Number(order.totalPrice || (don*sup));
-      const deposit = Math.round(total*0.5);
-      const addr = order.address || {};
-      body.innerHTML = `
-        <div class="kpi">
-          <div class="row"><span class="lab">주문번호</span><span class="val">${order.id||order.orderId||'-'}</span></div>
-          <div class="row"><span class="lab">일시</span><span class="val">${timeString(order)}</span></div>
-          <div class="row"><span class="lab">상태</span><span class="val">${order.status||'-'}</span></div>
-        </div>
-        <div class="kpi">
-          <div class="row"><span class="lab">상품</span><span class="val">골드바</span></div>
-          <div class="row"><span class="lab">돈수</span><span class="val">${don}</span></div>
-          <div class="row"><span class="lab">공급가</span><span class="val">${fmt(sup)} 원</span></div>
-          <div class="row"><span class="lab">총금액</span><span class="val">${fmt(total)} 원</span></div>
-          <div class="row"><span class="lab">입금(50%)</span><span class="val">${fmt(deposit)} 원</span></div>
-        </div>
-        <h3 class="sheet-h" style="font-size:1.15em;margin-top:10px;">수령/배송 정보</h3>
-        <div class="kpi">
-          <div class="row"><span class="lab">수령인</span><span class="val">${addr.recvName||order.recvName||'-'}</span></div>
-          <div class="row"><span class="lab">연락처</span><span class="val">${addr.recvPhone||order.recvPhone||'-'}</span></div>
-          <div class="row"><span class="lab">우편번호</span><span class="val">${addr.postCode||addr.zip||'-'}</span></div>
-          <div class="row"><span class="lab">주소</span><span class="val">${addr.addr1||addr.address1||'-'}</span></div>
-          <div class="row"><span class="lab">상세주소</span><span class="val">${addr.addr2||addr.address2||'-'}</span></div>
-          <div class="row"><span class="lab">요청사항</span><span class="val">${order.memo||'-'}</span></div>
-        </div>
-      `;
+
+    // ----- 주문 목록 + 상세 패널 -----
+    function openOrderDetailPanel(html){
+      $('#orderDetailBody').innerHTML = html || '내용이 없습니다.';
       $('#orderDetailPanel').classList.add('show');
     }
+    function closeOrderDetailPanel(){ $('#orderDetailPanel').classList.remove('show'); }
+    $('#closeOrderDetail').addEventListener('click', closeOrderDetailPanel);
 
-    /* ===== 1:1 문의 (전역 리스트 / KV 단일키) ===== */
-    function msgText(m){ return (m.content||m.message||m.text||m.body||m.msg||m.description||'').toString(); }
-    function firstAnswer(m){
-      if (m.answer || m.adminAnswer || m.reply || m.adminReply || m.response) return (m.answer || m.adminAnswer || m.reply || m.adminReply || m.response);
-      if (Array.isArray(m.replies) && m.replies.length) return (m.replies[0]?.content || m.replies[0]?.text || m.replies[0]?.body || '');
-      return '';
-    }
-    async function loadInquiries(){
-      const key = ownerKeyOf(ID);
-      let list = null;
+    async function renderOrders(){
+      const all = await fetchOrdersAll();
+      const mine = all.filter(myMatch);
+      const el = $('#ordersContainer');
+      if(!mine.length){ el.innerHTML = '<div class="orders-empty">없음</div>'; return; }
 
-      // 1) KV per-user
-      const kv = await kvGet('INQUIRIES', key);
-      const kvd = await safeDecrypt(kv);
-      const kvu = unwrap(kvd);
-      if (Array.isArray(kvu)) list = kvu;
+      // 클릭 시 상세 패널 열기
+      el.innerHTML =
+        '<table class="orders-table"><thead><tr>' +
+        '<th>주문번호</th><th>상품</th><th>돈수</th><th>공급가(원)</th><th>총금액(원)</th><th>입금금액(50%)</th><th>상태</th><th>일시</th>' +
+        '</tr></thead><tbody>' +
+        mine.map(o=>{
+          const don = Number(o.don||o.qty||0);
+          const sup = Number(o.supplyPrice||supplyPrice||0);
+          const total = Number(o.totalPrice || (don*sup));
+          const deposit = Math.round(total*0.5);
+          const ts = firstDateLike(o);
+          return `<tr class="order-row" data-id="${o.id||''}">
+            <td>${o.id||'-'}</td>
+            <td>골드바</td>
+            <td style="text-align:right;">${don}</td>
+            <td style="text-align:right;">${fmt(sup)}</td>
+            <td style="text-align:right;">${fmt(total)}</td>
+            <td style="text-align:right;">${fmt(deposit)}</td>
+            <td>${o.status||'-'}</td>
+            <td>${ts}</td>
+          </tr>`;
+        }).join('') +
+        '</tbody></table>';
 
-      // 2) fallback: /api/inquiries (전역 리스트)
-      if (!Array.isArray(list) || !list.length){
-        const all = await getList('/api/inquiries');
-        if (Array.isArray(all)) list = all.filter(matchMe);
-      }
-      if (!Array.isArray(list)) list = [];
-
-      const wrap = $('#messagesWrap');
-      if (!list.length){ wrap.innerHTML = '<div class="orders-empty">내 1:1 문의가 없습니다.</div>'; return; }
-      wrap.innerHTML = list.slice().reverse().map(m=>{
-        const ans = firstAnswer(m);
-        const hasAnswer = !!ans;
-        const status = hasAnswer ? '답변완료' : (m.status || '미답변');
-        return `
-          <div class="msg-item" data-qid="${m.id||m.qid||m.ts||''}">
-            <div class="msg-hd">
-              <div style="font-weight:600;display:flex;gap:8px;align-items:center;">
-                <span>${m.title||'1:1 문의'}</span>
-                <small style="color:#9ab;opacity:.9">${timeString(m)}</small>
-              </div>
-              <span class="msg-status" style="background:${status==='답변완료'?'#2e7d32':(status==='미답변'?'#b71c1c':'#455a64')}">${status}</span>
-            </div>
-            <div class="msg-text">${msgText(m).replace(/\n/g,'<br>')}</div>
-            <div class="msg-answer">
-              ${ hasAnswer ? `<div style="margin-top:0;padding:8px 10px;background:#08221f;border:1px solid #1e4d47;border-radius:8px;"><strong style="color:#FFD700;">[답변]</strong> ${ans}</div>` : '' }
-            </div>
+      // 상세 이벤트 위임
+      el.querySelector('tbody').addEventListener('click', (e)=>{
+        const tr = e.target.closest('tr.order-row');
+        if(!tr) return;
+        const id = tr.getAttribute('data-id');
+        const o = mine.find(x=>String(x.id)===String(id)) || {};
+        const don = Number(o.don||o.qty||0);
+        const sup = Number(o.supplyPrice||supplyPrice||0);
+        const total = Number(o.totalPrice || (don*sup));
+        const deposit = Math.round(total*0.5);
+        const addr = o.address||{};
+        const html = `
+          <div class="kpi"><div class="row"><span class="lab">주문번호</span><strong class="val">${o.id||'-'}</strong></div></div>
+          <div class="kpi"><div class="row"><span class="lab">주문자</span><strong class="val">${o.name||CURRENT_USER?.name||'-'} / ${o.phone||CURRENT_USER?.phone||'-'}</strong></div></div>
+          <div class="kpi"><div class="row"><span class="lab">돈수</span><strong class="val">${don}</strong></div></div>
+          <div class="kpi"><div class="row"><span class="lab">공급가</span><strong class="val">${fmt(sup)}</strong></div></div>
+          <div class="kpi"><div class="row"><span class="lab">총금액</span><strong class="val">${fmt(total)}</strong></div></div>
+          <div class="kpi"><div class="row"><span class="lab">입금금액(50%)</span><strong class="val">${fmt(deposit)}</strong></div></div>
+          <div class="kpi"><div class="row"><span class="lab">상태</span><strong class="val">${o.status||'-'}</strong></div></div>
+          <div class="kpi"><div class="row"><span class="lab">주문일시</span><strong class="val">${firstDateLike(o)}</strong></div></div>
+          <div class="kpi">
+            <div class="lab" style="margin-bottom:6px;">배송지</div>
+            <div>(${addr.postCode||'-'}) ${addr.addr1||'-'} ${addr.addr2||''}</div>
+            <div>수령인: ${addr.recvName||'-'} / ${addr.recvPhone||'-'}</div>
+            ${o.memo? `<div class="mini-hint" style="margin-top:6px;">요청사항: ${o.memo}</div>`:''}
           </div>
         `;
-      }).join('');
+        openOrderDetailPanel(html);
+      });
     }
 
-    /* ===== 주문 생성 패널 ===== */
-    const SUP = SUPPLY_PRICE;
-    let market = 0;
-    async function loadPrice(){ await loadGoldPrice(); market = marketPrice; }
+    // ----- 1:1 문의 목록(본문 즉시 표시) + 답변 토글 -----
+    function buildAnswerBlock(m){
+      const answerText = m.answer || m.adminAnswer || m.reply || m.adminReply || m.response || '';
+      if (!answerText) return '';
+      return `<div class="answer"><strong style="color:#FFD700;">[답변]</strong> ${answerText}</div>`;
+    }
+    async function renderInquiries(){
+      const all  = await fetchInquiriesAll();
+      const mine = all.filter(myMatch);
+      const wrap = $('#messagesWrap');
+      if(!mine.length){ wrap.innerHTML = '<div class="orders-empty">문의가 없습니다.</div>'; return; }
+      wrap.innerHTML = mine.slice().reverse().map(m=>{
+        const hasAnswer = !!(m.answer || m.adminAnswer || m.reply || m.adminReply || m.response);
+        const status = hasAnswer ? '답변완료' : (m.status || '미답변');
+        return `
+        <div class="msg-item" data-id="${m.id||''}">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <div style="font-weight:600;">${m.title||'1:1 문의'}</div>
+            <span class="msg-status" style="font-size:11px;padding:2px 6px;border-radius:10px;background:${status==='답변완료'?'#2e7d32':(status==='미답변'?'#b71c1c':'#455a64')};color:#fff;white-space:nowrap;">${status}</span>
+          </div>
+          <div class="body">${(m.content||m.message||'').replace(/\n/g,'<br>')}</div>
+          ${buildAnswerBlock(m)}
+          <div style="font-size:11px;color:#888;margin-top:6px;">${firstDateLike(m)}</div>
+        </div>`;
+      }).join('');
 
-    const productList=[0.5,1,2,3,5,10];
-    let totalDon=0;
+      // 답변 토글
+      wrap.addEventListener('click', (e)=>{
+        const item = e.target.closest('.msg-item');
+        if (!item) return;
+        item.classList.toggle('open');
+      });
+    }
+
+    // ===== 주문 패널 =====
+    const productList = [0.5,1,2,3,5,10];
+    let totalDon = 0;
+    function openOrderPanel(){ $('#orderPanel').classList.add('show'); totalDon = 0; updateOrderCalc(); loadGoldPrice().then(updateOrderCalc); }
+    function closeOrderPanel(){ $('#orderPanel').classList.remove('show'); }
+    $('#addOrderBtn')?.addEventListener('click', openOrderPanel);
+    $('#closeOrderPanel')?.addEventListener('click', closeOrderPanel);
+
     function updateOrderCalc(){
       $('#totalDon').textContent = totalDon;
-      $('#supplyPrice').textContent = fmt(SUP);
-      $('#currentPrice').textContent = fmt(market||0);
-      const totalPrice   = totalDon * SUP;
-      const currentTotal = totalDon * (market||0);
+      $('#supplyPrice').textContent = fmt(supplyPrice);
+      $('#currentPrice').textContent = fmt(currentPrice||0);
+      const totalPrice   = totalDon * supplyPrice;
+      const currentTotal = totalDon * (currentPrice||0);
       $('#totalPrice').textContent   = fmt(totalPrice);
       $('#currentTotal').textContent = fmt(currentTotal);
       $('#priceDiff').textContent    = fmt(currentTotal - totalPrice);
-      const okAddr = ($('#postCode').value.trim() && $('#addr1').value.trim());
-      $('#orderSubmit').disabled = !(totalDon>0 && okAddr);
+      $('#depositAmount').textContent= fmt(Math.round(totalPrice*0.5));
+      const requiredAddr = ($('#postCode').value.trim() && $('#addr1').value.trim());
+      $('#orderSubmit').disabled = !(totalDon>0 && requiredAddr);
     }
-    function openOrderPanel(){ $('#orderPanel').classList.add('show'); totalDon=0; updateOrderCalc(); loadPrice().then(updateOrderCalc); }
-    function closeOrderPanel(){ $('#orderPanel').classList.remove('show'); }
-    (function makeDonButtons(){
-      const wrap=$('#productBtns'); wrap.innerHTML='';
-      productList.forEach(d=>{
-        const b=document.createElement('button'); b.className='pill'; b.textContent=`${d}돈`;
-        b.addEventListener('click', ()=>{ totalDon+=d; updateOrderCalc(); });
-        wrap.appendChild(b);
-      });
-    })();
+    const btnWrap = $('#productBtns'); btnWrap.innerHTML='';
+    productList.forEach(don=>{
+      const b=document.createElement('button');
+      b.className='pill';
+      b.textContent = `${don}돈`;
+      b.addEventListener('click', ()=>{ totalDon += don; updateOrderCalc(); });
+      btnWrap.appendChild(b);
+    });
+    $('#resetDon')?.addEventListener('click', ()=>{ totalDon=0; updateOrderCalc(); });
 
-    let postcodeManual=false;
+    // 주소 입력/우편번호
+    let postcodeManual = false;
     async function ensureDaumPostcodeScript(){
       if(window.daum && window.daum.Postcode) return true;
-      return new Promise(res=>{
-        const s=document.createElement('script'); s.src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
-        s.onload=()=>res(true); s.onerror=()=>res(false); document.head.appendChild(s);
+      return new Promise((resolve)=>{
+        const s = document.createElement('script');
+        s.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+        s.onload = ()=>resolve(true);
+        s.onerror = ()=>resolve(false);
+        document.head.appendChild(s);
       });
     }
     async function openPostcode(){
       $('#postcodeHelp').style.display='none';
-      if(postcodeManual){ alert('직접 입력 모드입니다.'); return; }
+      if(postcodeManual){ alert('현재 직접 입력 모드입니다. 우편번호를 직접 입력하세요.'); return; }
       const ok = await ensureDaumPostcodeScript();
-      if(!ok){ $('#postcodeHelp').style.display='block'; $('#postcodeHelp').textContent='우편번호 서비스 연결 실패. 필요 시 직접 입력을 사용하세요.'; return; }
-      new daum.Postcode({
-        oncomplete: function(data){
-          $('#postCode').value = data.zonecode||''; $('#addr1').value = data.roadAddress || data.jibunAddress || ''; updateOrderCalc();
-        }
-      }).open();
+      if(!ok){
+        $('#postcodeHelp').style.display='block';
+        $('#postcodeHelp').textContent = '우편번호 서비스에 연결되지 않았습니다. 네트워크/VPN 환경을 확인하시고, 필요 시 "직접 입력"으로 전환하세요.';
+        return;
+      }
+      try{
+        new daum.Postcode({
+          oncomplete: function(data){
+            $('#postCode').value = data.zonecode||'';
+            $('#addr1').value = data.roadAddress || data.jibunAddress || '';
+            updateOrderCalc();
+          },
+          width:'100%', height:'100%'
+        }).open();
+      }catch(e){
+        $('#postcodeHelp').style.display='block';
+        $('#postcodeHelp').textContent = '우편번호 서비스에 접속을 시도했으나 연결되지 않았습니다. 필요 시 "직접 입력"을 사용해 주세요.';
+      }
     }
     $('#btnFindPostcode').addEventListener('click', openPostcode);
-    $('#btnManualPostcode').addEventListener('click', ()=>{ postcodeManual=!postcodeManual; $('#btnManualPostcode').textContent = postcodeManual?'자동검색 사용':'직접 입력'; });
+    $('#btnManualPostcode').addEventListener('click', ()=>{
+      postcodeManual = !postcodeManual;
+      $('#btnManualPostcode').textContent = postcodeManual ? '자동검색 사용' : '직접 입력';
+      $('#postcodeHelp').style.display='block';
+      $('#postcodeHelp').textContent = postcodeManual ? '직접 입력 모드입니다. 우편번호와 주소를 직접 작성하세요.' : '우편번호 검색 모드입니다.';
+    });
+    ;['postCode','addr1','addr2','recvName','recvPhone','memo'].forEach(id=>$('#'+id).addEventListener('input', updateOrderCalc));
 
-    ['postCode','addr1','addr2','recvName','recvPhone','memo'].forEach(id=> $('#'+id).addEventListener('input', updateOrderCalc));
+    // 주문 저장
+    $('#orderSubmit')?.addEventListener('click', async ()=>{
+      // 세션이 없더라도 CURRENT_USER로 식별 (최후 보루)
+      const uname = normalizeName(SESSION?.username || CURRENT_USER?.username || deriveUnameFromEmail(SESSION?.email));
+      if(!uname){ alert('로그인 세션을 확인할 수 없습니다. 다시 로그인해 주세요.'); return; }
+      if(totalDon<=0){ alert('상품을 선택하세요.'); return; }
+      if(!$('#postCode').value.trim() || !$('#addr1').value.trim()){ alert('배송지(우편번호/주소)를 입력해 주세요.'); return; }
 
-    /* ===== 이벤트 ===== */
-    $('#addOrderBtn').addEventListener('click', openOrderPanel);
-    $('#closeOrderPanel').addEventListener('click', closeOrderPanel);
-    $('#resetDon').addEventListener('click', ()=>{ totalDon=0; updateOrderCalc(); });
-
-    $('#orderSubmit').addEventListener('click', async ()=>{
-      if (!ID.username){ alert('로그인이 필요합니다.'); location.href='login.html'; return; }
       const order = {
         id:'O'+Date.now(),
-        user: ID.username, username: ID.username, email: ID.email, phone: ID.phone,
-        ts: Date.now(), date: new Date().toISOString(),
-        don: totalDon, supplyPrice: SUP, currentPrice: market,
-        totalPrice: totalDon*SUP, depositAmount: Math.round(totalDon*SUP*0.5),
-        address:{
+        date:new Date().toISOString(),
+        user: uname,
+        username: uname,
+        name: CURRENT_USER?.name,
+        email: CURRENT_USER?.email,
+        phone: CURRENT_USER?.phone,
+        don: totalDon,
+        supplyPrice, currentPrice,
+        totalPrice: totalDon*supplyPrice,
+        depositAmount: Math.round(totalDon*supplyPrice*0.5),
+        address: {
           postCode: $('#postCode').value.trim(),
           addr1: $('#addr1').value.trim(),
           addr2: $('#addr2').value.trim(),
           recvName: $('#recvName').value.trim(),
-          recvPhone: $('#recvPhone').value.trim()
+          recvPhone: $('#recvPhone').value.trim(),
         },
         memo: $('#memo').value.trim(),
-        status:'결제대기'
+        status: '결제대기'
       };
-      const key = ownerKeyOf(ID);
-      // 1) KV per-user에 저장 시도
-      let ok = await (async ()=>{ 
-        const cur = await kvGet('ORDERS', key); 
-        let list = unwrap(await safeDecrypt(cur));
-        if (!Array.isArray(list)) list = [];
-        list.push(order);
-        return await kvSet('ORDERS', key, list);
-      })();
-      // 2) 실패 시 /api/orders 전역 리스트로 백업 저장
-      if (!ok){
-        try{
-          const all = await getList('/api/orders');
-          const list = Array.isArray(all) ? all : [];
-          const enc = window.encrypt ? await window.encrypt(list.concat(order)) : list.concat(order);
-          await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:enc})});
-          ok = true;
-        }catch(_){}
-      }
-      if (!ok){ alert('주문 저장 실패. 잠시 후 다시 시도하세요.'); return; }
+      const all = await fetchOrdersAll();
+      all.push(order);
+      await saveOrdersAll(all);
       alert('주문이 등록되었습니다.');
       closeOrderPanel();
-      await loadOrders();
+      await renderOrders();
     });
 
-    $('#ordersContainer').addEventListener('click', (e)=>{
-      const tr = e.target.closest('tr'); if(!tr) return;
-      const oid = tr.dataset.oid; const o = ORDER_MAP[oid]; if (o) openOrderDetail(o);
-    });
-    $('#closeOrderDetail').addEventListener('click', ()=> $('#orderDetailPanel').classList.remove('show'));
-    $('#orderDetailPanel').addEventListener('click', (e)=>{ if(e.target.id==='orderDetailPanel') $('#orderDetailPanel').classList.remove('show'); });
+    // 문의 등록 (본문 즉시 표시, 답변은 토글)
+    $('#sendMsgBtn')?.addEventListener('click', async ()=>{
+      const uname = normalizeName(SESSION?.username || CURRENT_USER?.username || deriveUnameFromEmail(SESSION?.email));
+      if(!uname){ alert('로그인 세션 오류'); return; }
+      const txt = $('#msgInput').value.trim();
+      if(!txt) return;
 
-    $('#sendMsgBtn').addEventListener('click', async ()=>{
-      if (!ID.username){ alert('로그인이 필요합니다.'); location.href='login.html'; return; }
-      const txt = $('#msgInput').value.trim(); if(!txt) return;
-      const key = ownerKeyOf(ID);
+      const nowTs = Date.now();
+      const newInquiry = {
+        id:'Q'+nowTs,
+        user: uname,
+        username: uname,
+        email: CURRENT_USER?.email,
+        phone: CURRENT_USER?.phone,
+        title:'1:1 문의',
+        content: txt,
+        ts: nowTs,
+        date: new Date(nowTs).toISOString(),
+        status:'미답변'
+      };
 
-      // 1) KV per-user append
-      let ok = await (async ()=>{
-        const cur = await kvGet('INQUIRIES', key);
-        let list = unwrap(await safeDecrypt(cur));
-        if (!Array.isArray(list)) list = [];
-        list.push({ id:'Q'+Date.now(), user:ID.username, username:ID.username, email:ID.email, phone:ID.phone,
-          ts: Date.now(), date: new Date().toISOString(), title:'1:1 문의', content: txt, status:'미답변', replies:[] });
-        return await kvSet('INQUIRIES', key, list);
-      })();
-
-      // 2) 실패 시 전역 리스트 백업 저장
-      if (!ok){
-        try{
-          const all = await getList('/api/inquiries');
-          const list = Array.isArray(all)?all:[];
-          const item={ id:'Q'+Date.now(), user:ID.username, username:ID.username, email:ID.email, phone:ID.phone,
-            ts: Date.now(), date: new Date().toISOString(), title:'1:1 문의', content: txt, status:'미답변', replies:[] };
-          const enc = window.encrypt ? await window.encrypt(list.concat(item)) : list.concat(item);
-          await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:enc})});
-          ok = true;
-        }catch(_){}
-      }
-      if (!ok){ alert('문의 저장 실패. 잠시 후 다시 시도하세요.'); return; }
+      const all = await fetchInquiriesAll();
+      all.push(newInquiry);
+      await saveInquiriesAll(all);
       $('#msgInput').value = '';
-      await loadInquiries();
       alert('문의가 등록되었습니다.');
+      await renderInquiries();
     });
 
-    $('#messagesWrap').addEventListener('click', (e)=>{
-      const item = e.target.closest('.msg-item'); if(!item) return;
-      item.classList.toggle('open'); // 기본 본문은 항상 보이고, 답변만 토글
-    });
-
-    $('#logoutBtn').addEventListener('click', ()=>{
+    // 로그아웃
+    $('#logoutBtn')?.addEventListener('click', ()=>{
       if(!confirm('로그아웃 하시겠습니까?')) return;
       try{ AdminAuth?.logout?.(); }catch(_){}
       try{
@@ -712,39 +746,55 @@
       location.href='index.html';
     });
 
-    $('#homeLogo')?.addEventListener('click', e=>{
-      e.preventDefault();
-      try{
-        const snap = SESSION || readLS('admin_session_v1') || readLS('gs_user') || {};
-        localStorage.setItem('gs_user_backup', JSON.stringify(snap));
-        localStorage.setItem('gs_logged_in','1');
-      }catch(_){}
-      location.href='index.html';
-    });
-
-    /* ===== 초기 부팅 ===== */
+    // ===== 초기화: Fast-path → 백그라운드 보강 =====
     (async function init(){
-      await loadUser();   // USERS
-      await loadGoldPrice();
-      await Promise.all([loadOrders(), loadInquiries()]); // ORDERS / INQUIRIES
+      const hint = $('#sessionHint');
+      // fast path
+      SESSION = getAdminSessionSync() || getGsSessionSync();
+      if (SESSION){
+        try{ localStorage.setItem('gs_logged_in','1'); }catch(_){}
+      }else{
+        hint.style.display='block';
+        hint.textContent = '세션 확인중…';
+      }
 
-      // 비차단 세션 보강: 서버가 따로 세션 API를 제공하면 갱신
-      (async ()=>{
-        const candidates=['/api/me','/api/session','/api/auth/me','/api/user','/auth/me','/users/me','/api/profile'];
-        for (const u of candidates){
-          const j = await fetchJSON(u);
-          if (j && (j.username || j.email)){
-            const newId = deriveIdentity(j);
-            if (newId.username && newId.username !== ID.username){
-              ID = newId;
-              await loadUser();
-              await loadOrders();
-              await loadInquiries();
-            }
-            break;
-          }
+      await loadCurrentUser();
+      await Promise.all([loadGoldPrice(), renderOrders(), renderInquiries()]);
+      hint.style.display='none';
+
+      // background: AdminAuth가 늦게 뜨는 경우 갱신
+      if (!SESSION){
+        const late = await getAdminSessionAsync();
+        if (late){
+          SESSION = late;
+          stampLoginMarkers(late);
+          await loadCurrentUser();
+          await Promise.all([renderOrders(), renderInquiries()]);
         }
-      })();
+        hint.style.display='none';
+      }
+
+      // 탭 복귀/주기 새로고침
+      document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ renderOrders(); renderInquiries(); } });
+      setInterval(async ()=>{
+        const live = getAdminSessionSync() || getGsSessionSync();
+        if (live) SESSION = live; else {
+          try{
+            const backup = localStorage.getItem('gs_user_backup');
+            if (backup) SESSION = JSON.parse(backup);
+          }catch(_){}
+        }
+        renderOrders(); renderInquiries();
+      }, 6000);
+
+      // 다른 탭 로그인/로그아웃 감지
+      window.addEventListener('storage', (e)=>{
+        if (e.key === 'admin_session_v1' || e.key === 'gs_user'){
+          const ns = getAdminSessionSync() || getGsSessionSync();
+          if (ns){ SESSION = ns; stampLoginMarkers(ns); }
+        }
+        if (e.key === 'gs_logout'){ location.href = 'index.html'; }
+      });
     })();
   });
   </script>
