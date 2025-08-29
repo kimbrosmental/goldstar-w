@@ -233,6 +233,25 @@
     </div>
   </div>
 
+  <!-- 주문 상세보기 모달 -->
+  <div id="orderDetailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;padding:20px;overflow:auto;">
+    <div style="max-width:800px;margin:0 auto;background:linear-gradient(135deg,#102522 80%,#1d4d46 100%);border-radius:12px;padding:30px;color:#fff;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h2 style="color:#FFD700;margin:0;">주문 상세 정보</h2>
+        <button onclick="closeOrderDetail()" style="background:#b71c1c;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer;">닫기</button>
+      </div>
+      <div id="orderDetailContent">
+        <!-- 주문 상세 내용이 여기에 들어감 -->
+      </div>
+      <div style="margin-top:20px;padding-top:20px;border-top:1px solid #1e4d47;">
+        <h3 style="color:#FFD700;margin-bottom:10px;">거래증명서 첨부</h3>
+        <input type="file" id="receiptUpload" accept="image/*" style="margin-bottom:10px;">
+        <div id="receiptPreview" style="margin-top:10px;"></div>
+        <button onclick="uploadReceipt()" class="btn" style="margin-top:10px;">증명서 업로드</button>
+      </div>
+    </div>
+  </div>
+
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     /*** 짧은 별칭 ***/
@@ -402,12 +421,24 @@
     async function resolveCurrentUser(){
       const uname=(SESSION?.username|| (SESSION?.email?SESSION.email.split('@')[0]:'') || '').trim();
       const mail =(SESSION?.email||'').trim().toLowerCase();
+      console.log('resolveCurrentUser:', {uname, mail, cacheUsers: cacheUsers.length});
       let u = cacheUsers.find(x=>(x.username||'').trim()===uname) ||
               cacheUsers.find(x=> mail && (x.email||'').trim().toLowerCase()===mail);
-      if(!u){
-        u = { username:uname||'-', name:SESSION?.name||'-', email:mail||'-', phone:SESSION?.phone||'-', role:'user', created:Date.now() };
+      if(!u && uname){
+        // KV에서 못찾으면 세션 정보로 기본 사용자 생성
+        u = { 
+          username: uname, 
+          name: SESSION?.name || uname, 
+          email: mail || '', 
+          phone: SESSION?.phone || '', 
+          role: 'user', 
+          status: 'active',
+          created: Date.now() 
+        };
+        console.log('Created fallback user:', u);
       }
       CURRENT_USER=u;
+      console.log('CURRENT_USER set to:', CURRENT_USER);
     }
     function renderProfileGrid(u){
       const grid=$('#profileGrid'), card=$('#profileCard');
@@ -448,9 +479,9 @@
       if(!mine.length){ el.innerHTML='<div class="orders-empty">없음</div>'; return; }
       el.innerHTML =
         '<table class="orders-table"><thead><tr>' +
-        '<th>주문번호</th><th>상품</th><th>돈수</th><th>공급가(원)</th><th>총금액(원)</th><th>입금금액(50%)</th><th>상태</th><th>일시</th>' +
+        '<th>주문번호</th><th>상품</th><th>돈수</th><th>공급가(원)</th><th>총금액(원)</th><th>입금금액(50%)</th><th>상태</th><th>일시</th><th>상세</th>' +
         '</tr></thead><tbody>' +
-        mine.map(o=>{
+        mine.map((o,i)=>{
           const don=Number(o.don||o.qty||0);
           const sup=Number(o.supplyPrice||520000);
           const total=Number(o.totalPrice || (don*sup));
@@ -465,6 +496,7 @@
             <td style="text-align:right;">${fmt(deposit)}</td>
             <td>${o.status||'-'}</td>
             <td>${dt? new Date(dt).toLocaleString('ko-KR'):'-'}</td>
+            <td><button class="btn" onclick="showOrderDetail(${i})" style="padding:4px 8px;font-size:12px;">상세보기</button></td>
           </tr>`;
         }).join('') + '</tbody></table>';
     }
@@ -473,7 +505,10 @@
       try{ cacheInq = await kvLoad('/api/inquiries'); cntInq.textContent = cacheInq.length; }
       catch{ cacheInq=[]; cntInq.textContent='err'; }
     }
-    function pickText(m){ return m.content||m.message||m.body||m.text||m.desc||''; }
+    function pickText(m){ 
+      console.log('pickText for message:', m);
+      return m.content||m.message||m.body||m.text||m.desc||m.question||m.inquiry||'내용 없음'; 
+    }
     function pickTime(m){ const dt=m.date||m.created||m.createdAt||(m.ts? new Date(m.ts).toISOString(): ''); return dt? new Date(dt).toLocaleString('ko-KR') : ''; }
     function pickAns(m){ return m.answer||m.adminAnswer||m.reply||m.adminReply||m.response||''; }
 
@@ -580,10 +615,82 @@
   cacheInq=list;
   $('#msgInput').value='';
   await fullReload();
-  alert('문의가 등록되었습니다.');
+      alert('문의가 등록되었습니다.');
     });
 
-    // 로그아웃 (기존 동작 유지)
+    // 주문 상세보기 모달 함수들
+    window.showOrderDetail = function(index) {
+      const mine = cacheOrders.filter(matchToMe);
+      const order = mine[index];
+      if (!order) return;
+      
+      const don = Number(order.don||order.qty||0);
+      const sup = Number(order.supplyPrice||520000);
+      const total = Number(order.totalPrice || (don*sup));
+      const deposit = Math.round(total*0.5);
+      const dt = order.date||order.created||order.createdAt|| (order.ts? new Date(order.ts).toISOString() : '');
+      
+      const addr = order.address || {};
+      
+      document.getElementById('orderDetailContent').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div>
+            <h4 style="color:#4fc3f7;margin-bottom:10px;">주문 정보</h4>
+            <div style="background:#0c1a18;padding:15px;border-radius:8px;">
+              <div style="margin-bottom:8px;"><strong>주문번호:</strong> ${order.id||'-'}</div>
+              <div style="margin-bottom:8px;"><strong>상품:</strong> 골드바</div>
+              <div style="margin-bottom:8px;"><strong>돈수:</strong> ${don}돈</div>
+              <div style="margin-bottom:8px;"><strong>공급가:</strong> ${fmt(sup)}원</div>
+              <div style="margin-bottom:8px;"><strong>총금액:</strong> ${fmt(total)}원</div>
+              <div style="margin-bottom:8px;"><strong>입금금액(50%):</strong> ${fmt(deposit)}원</div>
+              <div style="margin-bottom:8px;"><strong>상태:</strong> ${order.status||'-'}</div>
+              <div><strong>주문일시:</strong> ${dt? new Date(dt).toLocaleString('ko-KR'):'-'}</div>
+            </div>
+          </div>
+          <div>
+            <h4 style="color:#4fc3f7;margin-bottom:10px;">배송 정보</h4>
+            <div style="background:#0c1a18;padding:15px;border-radius:8px;">
+              <div style="margin-bottom:8px;"><strong>수령인:</strong> ${addr.recvName||'-'}</div>
+              <div style="margin-bottom:8px;"><strong>연락처:</strong> ${addr.recvPhone||'-'}</div>
+              <div style="margin-bottom:8px;"><strong>우편번호:</strong> ${addr.postCode||'-'}</div>
+              <div style="margin-bottom:8px;"><strong>주소:</strong> ${addr.addr1||'-'}</div>
+              <div style="margin-bottom:8px;"><strong>상세주소:</strong> ${addr.addr2||'-'}</div>
+              <div><strong>요청사항:</strong> ${order.memo||'-'}</div>
+            </div>
+          </div>
+        </div>
+        ${order.receipt ? `
+          <div style="margin-top:20px;">
+            <h4 style="color:#4fc3f7;margin-bottom:10px;">업로드된 증명서</h4>
+            <img src="${order.receipt}" style="max-width:100%;height:auto;border-radius:8px;" alt="거래증명서">
+          </div>
+        ` : ''}
+      `;
+      
+      document.getElementById('orderDetailModal').style.display = 'block';
+    };
+
+    window.closeOrderDetail = function() {
+      document.getElementById('orderDetailModal').style.display = 'none';
+    };
+
+    window.uploadReceipt = function() {
+      const fileInput = document.getElementById('receiptUpload');
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('파일을 선택하세요.');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('receiptPreview').innerHTML = `
+          <img src="${e.target.result}" style="max-width:200px;height:auto;border-radius:8px;" alt="미리보기">
+        `;
+        alert('증명서가 업로드되었습니다.');
+      };
+      reader.readAsDataURL(file);
+    };    // 로그아웃 (기존 동작 유지)
     $('#logoutBtn').addEventListener('click', ()=>{
       if(!confirm('로그아웃 하시겠습니까?')) return;
       try{ AdminAuth?.logout?.(); }catch{}
