@@ -105,8 +105,8 @@
         <h1 style="font-size:30px;color:#4fc3f7;">내 정보</h1>
         <div id="summaryLine"></div>
 
-        <!-- ▽ 세션/데이터 진단(토글 가능) -->
-        <div id="diagBox" class="diag" hidden>
+        <!-- ▽ 세션/데이터 진단(토글 가능) - 숨김 처리 -->
+        <div id="diagBox" class="diag" style="display:none;">
           <div><small>세션/데이터 상태</small></div>
           <div class="kv" style="margin-top:6px;">
             <div>세션상태</div><div id="sessState">-</div>
@@ -124,7 +124,7 @@
         <div class="actions" style="margin-top:4px;">
           <button class="btn" id="addOrderBtn" disabled>주문 추가</button>
           <button class="btn danger" id="logoutBtn">로그아웃</button>
-          <span id="toggleDiag" class="linklike" style="margin-left:8px;">세션 상태: <span id="diagMsg" style="color:#FFD700;font-weight:bold;">확인중...</span></span>
+          <span style="margin-left:8px;">세션 상태: <span id="diagMsg" style="color:#FFD700;font-weight:bold;">확인중...</span></span>
         </div>
       </div>
 
