@@ -269,13 +269,16 @@
     function normalizeSession(s, source){
       if(!s) return null;
       const email=(s.email||'').trim();
-      const username=(s.username||s.user||(email?email.split('@')[0]: '')||'').trim();
+      // username, userId, id 중 하나라도 있으면 사용
+      const username=(s.username||s.userId||s.id||s.user||(email?email.split('@')[0]: '')||'').trim();
       return {
         source,
         username,
         email,
-        name:s.name||s.displayName||'',
-        phone:s.phone||'',
+        name:s.name||s.displayName||s.realName||'',
+        phone:s.phone||s.phoneNumber||'',
+        role:s.role||'user',
+        status:s.status||'active',
         token:s.token||s.jwt||s.idToken||null,
         raw:s
       };
@@ -310,31 +313,62 @@
       
       // localStorage에서 직접 세션 확인 (로그인 완료 상태라면 이미 저장되어 있음)
       try {
+        // 먼저 로그인 페이지에서 저장하는 "user" 키 확인
+        const loginUserData = JSON.parse(localStorage.getItem('user') || 'null');
         const adminSession = JSON.parse(localStorage.getItem('admin_session_v1') || 'null');
         const gsSession = JSON.parse(localStorage.getItem('gs_user') || 'null');
         
-        if (adminSession && adminSession.username) {
-          setSession(normalizeSession(adminSession, 'LocalStorage'));
+        console.log('세션 확인:', { loginUserData, adminSession, gsSession });
+        
+        // "user" 키에서 로그인 데이터 확인 (로그인 페이지에서 저장)
+        if (loginUserData && (loginUserData.username || loginUserData.userId || loginUserData.id)) {
+          const normalized = normalizeSession(loginUserData, 'Login');
+          console.log('Login 세션 사용:', normalized);
+          setSession(normalized);
           diagMsg.textContent='세션 확인 완료';
           return;
         }
         
-        if (gsSession && gsSession.username) {
-          setSession(normalizeSession(gsSession, 'LocalStorage'));
+        // admin_session_v1 확인
+        if (adminSession && (adminSession.username || adminSession.user)) {
+          const normalized = normalizeSession(adminSession, 'LocalStorage');
+          console.log('Admin 세션 사용:', normalized);
+          setSession(normalized);
           diagMsg.textContent='세션 확인 완료';
           return;
         }
         
-        // 세션이 없으면 로그인 페이지로 이동
+        // gs_user 확인
+        if (gsSession && (gsSession.username || gsSession.user)) {
+          const normalized = normalizeSession(gsSession, 'LocalStorage');
+          console.log('GS 세션 사용:', normalized);
+          setSession(normalized);
+          diagMsg.textContent='세션 확인 완료';
+          return;
+        }
+        
+        // 둘 다 없으면 로그인 상태 확인
+        const loggedIn = localStorage.getItem('gs_logged_in');
+        if (loggedIn) {
+          // 로그인 상태 마커가 있으면 기본 세션 생성
+          console.log('로그인 마커 발견, 기본 세션 생성');
+          const defaultSession = {
+            username: 'user_' + Date.now(),
+            name: '사용자',
+            role: 'user',
+            status: 'active'
+          };
+          setSession(normalizeSession(defaultSession, 'Default'));
+          diagMsg.textContent='세션 확인 완료';
+          return;
+        }
+        
+        console.log('세션 없음');
         diagMsg.textContent='세션 없음 - 로그인 필요';
-        alert('로그인이 필요합니다.');
-        location.href='login.html';
         
       } catch(e) {
         console.error('세션 확인 오류:', e);
         diagMsg.textContent='세션 확인 실패';
-        alert('로그인이 필요합니다.');
-        location.href='login.html';
       }
     }
 
@@ -712,6 +746,7 @@
         localStorage.removeItem('gs_user');
         localStorage.removeItem('gs_user_backup');
         localStorage.removeItem('gs_logged_in');
+        localStorage.removeItem('user'); // 로그인 페이지에서 저장하는 키
         localStorage.setItem('gs_logout', String(Date.now()));
       }catch{}
       location.href='index.html';
@@ -733,20 +768,37 @@
     $('#btnReload').addEventListener('click', fullReload);
 
     (async function init(){
+      console.log('Profile 페이지 초기화 시작');
+      
       // 세션 확인 (localStorage에서 직접 읽기)
       await resolveSession();
       
-      // 세션이 있으면 데이터 로딩
-      if (SESSION && SESSION.username) {
-        await fullReload();
+      // 세션이 있는지 엄격하게 확인
+      console.log('세션 확인 후 SESSION 상태:', SESSION);
+      
+      if (!SESSION || !SESSION.username) {
+        console.log('세션 없음 - 로그인 페이지로 이동');
+        alert('로그인이 필요합니다.');
+        location.href='login.html';
+        return;
       }
+      
+      console.log('유효한 세션 확인됨:', SESSION.username);
+      
+      // 세션이 있으면 데이터 로딩
+      await fullReload();
 
       // 다른 탭 세션 변화 감지
       window.addEventListener('storage', async (e)=>{
-        if(['admin_session_v1','gs_user'].includes(e.key||'')){
+        if(['admin_session_v1','gs_user','user'].includes(e.key||'')){
+          console.log('다른 탭에서 세션 변화 감지:', e.key);
           await resolveSession();
           if (SESSION && SESSION.username) {
             await fullReload();
+          } else {
+            console.log('세션 삭제됨 - 로그인 페이지로 이동');
+            alert('세션이 만료되었습니다.');
+            location.href='login.html';
           }
         }
       });
