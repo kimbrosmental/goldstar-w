@@ -70,6 +70,14 @@
     .home-icon{display:flex;align-items:center;justify-content:center;width:56px;height:56px;background:#004d40;border-radius:16px;border:2px solid #00695C;transition:.3s;text-decoration:none;}
     .home-icon span{font-size:30px;color:#FFD700;}
     #summaryLine{display:none;}
+
+    /* 세션 진단 박스 */
+    .diag {background:#0c1a18;border:1px dashed #1e4d47;border-radius:10px;padding:10px 12px;margin:6px 0 14px;}
+    .diag small{color:#9bd3ff;}
+    .diag .kv{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;font-size:13px;}
+    .diag .kv div{word-break:break-word;}
+    .diag .row{display:flex;gap:10px;align-items:center;margin-top:8px;}
+    .linklike{cursor:pointer;color:#9bd3ff;text-decoration:underline;}
   </style>
 </head>
 <body>
@@ -97,19 +105,32 @@
         <h1 style="font-size:30px;color:#4fc3f7;">내 정보</h1>
         <div id="summaryLine"></div>
 
+        <!-- ▽ 세션/데이터 진단(토글 가능) -->
+        <div id="diagBox" class="diag" hidden>
+          <div><small>세션/데이터 상태</small></div>
+          <div class="kv" style="margin-top:6px;">
+            <div>세션상태</div><div id="sessState">-</div>
+            <div>세션소스</div><div id="sessSource">-</div>
+            <div>아이디</div><div id="sessUser">-</div>
+            <div>이메일</div><div id="sessEmail">-</div>
+            <div>USERS</div><div id="cntUsers">-</div>
+            <div>ORDERS</div><div id="cntOrders">-</div>
+            <div>INQUIRIES</div><div id="cntInq">-</div>
+          </div>
+          <div class="row">
+            <button id="btnReload" class="btn">다시 불러오기</button>
+          </div>
+        </div>
         <div class="actions" style="margin-top:4px;">
           <button class="btn" id="addOrderBtn" disabled>주문 추가</button>
           <button class="btn danger" id="logoutBtn">로그아웃</button>
-          <span style="margin-left:8px;color:#9bd3ff;">세션 상태: <span id="diagMsg" style="color:#FFD700;font-weight:bold;">확인중...</span></span>
+          <span id="toggleDiag" class="linklike" style="margin-left:8px;">세션 상태: <span id="diagMsg" style="color:#FFD700;font-weight:bold;">확인중...</span></span>
         </div>
       </div>
 
       <!-- 기본 정보 -->
       <div class="profile-card" id="profileCard">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-          <h2 style="margin:0;">회원 기본 정보</h2>
-          <button id="btnReload" class="btn" style="font-size:12px;padding:6px 12px;">새로고침</button>
-        </div>
+        <h2>회원 기본 정보</h2>
         <div class="profile-grid" id="profileGrid">
           <div style="color:#aaa;">로딩 중…</div>
         </div>
@@ -272,13 +293,20 @@
       updateSessionUI();
     }
 
-    /** 세션 상태 UI **/
-    const diagMsg=$('#diagMsg');
+    /** 세션 상태/진단 메시지 UI **/
+    const diagBox = $('#diagBox'), sessState=$('#sessState'), sessSource=$('#sessSource'), sessUser=$('#sessUser'), sessEmail=$('#sessEmail');
+    const cntUsers=$('#cntUsers'), cntOrders=$('#cntOrders'), cntInq=$('#cntInq'), diagMsg=$('#diagMsg');
+    // 진단 박스 클릭 비활성화 (상세 정보 숨김)
+    // $('#toggleDiag').addEventListener('click', ()=>{ diagBox.hidden=!diagBox.hidden; });
 
     function updateSessionUI(){
       const ready=!!(SESSION&&SESSION.username);
       $('#addOrderBtn').disabled=!ready;
       $('#sendMsgBtn').disabled=!ready;
+      sessState.textContent = ready? '연결됨' : '대기/없음';
+      sessSource.textContent= SESSION?.source || '-';
+      sessUser.textContent  = SESSION?.username || '-';
+      sessEmail.textContent = SESSION?.email || '-';
     }
 
     async function resolveSession(){
@@ -298,7 +326,7 @@
           const normalized = normalizeSession(loginUserData, 'Login');
           console.log('Login 세션 사용:', normalized);
           setSession(normalized);
-          diagMsg.textContent='세션 확인 완료';
+          diagMsg.textContent='세션 확인 성공';
           return;
         }
         
@@ -307,7 +335,7 @@
           const normalized = normalizeSession(adminSession, 'LocalStorage');
           console.log('Admin 세션 사용:', normalized);
           setSession(normalized);
-          diagMsg.textContent='세션 확인 완료';
+          diagMsg.textContent='세션 확인 성공';
           return;
         }
         
@@ -316,7 +344,7 @@
           const normalized = normalizeSession(gsSession, 'LocalStorage');
           console.log('GS 세션 사용:', normalized);
           setSession(normalized);
-          diagMsg.textContent='세션 확인 완료';
+          diagMsg.textContent='세션 확인 성공';
           return;
         }
         
@@ -332,12 +360,12 @@
             status: 'active'
           };
           setSession(normalizeSession(defaultSession, 'Default'));
-          diagMsg.textContent='세션 확인 완료';
+          diagMsg.textContent='세션 확인 성공';
           return;
         }
         
         console.log('세션 없음');
-        diagMsg.textContent='세션 없음 - 로그인 필요';
+        diagMsg.textContent='세션 확인 실패';
         
       } catch(e) {
         console.error('세션 확인 오류:', e);
@@ -829,7 +857,7 @@
 
     /*** ====== 초기 흐름 ====== ***/
     async function fullReload(){
-      diagMsg.textContent='데이터 불러오는 중…';
+      diagMsg.textContent='데이터 로딩중...';
       await loadUsers();         // USERS
       await resolveCurrentUser();
       renderProfileSummary(CURRENT_USER);
