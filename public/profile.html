@@ -453,12 +453,23 @@
 
     function matchToMe(item){
       const uname=(SESSION?.username|| (SESSION?.email?SESSION.email.split('@')[0]:'') || '').trim();
-      const mail =(CURRENT_USER?.email||'').trim().toLowerCase();
+      const mail =(CURRENT_USER?.email||SESSION?.email||'').trim().toLowerCase();
       const ufields=[item.user,item.username,item.member,item.uid,item.userId,item.userid];
       const mfields=[item.email,item.userEmail];
+      
+      console.log('matchToMe 체크:', {
+        sessionUsername: uname,
+        sessionEmail: mail,
+        itemFields: { user: item.user, username: item.username, email: item.email },
+        item: item
+      });
+      
       const hitUser=ufields.some(v=>(v||'').toString().trim()===uname);
       const hitMail=mfields.some(v=>(v||'').toString().trim().toLowerCase()===mail);
-      return hitUser || (mail && hitMail);
+      const result = hitUser || (mail && hitMail);
+      
+      console.log('매칭 결과:', { hitUser, hitMail, result });
+      return result;
     }
 
     async function loadUsers(){
@@ -568,28 +579,39 @@
       console.log('현재 SESSION:', SESSION);
       console.log('현재 CURRENT_USER:', CURRENT_USER);
       
-      if(!mine.length){ 
+      // 필터링된 결과가 없으면 임시로 모든 문의를 보여줌 (디버깅용)
+      let displayInquiries = mine;
+      if(!mine.length && cacheInq.length > 0) {
+        console.log('필터링된 문의가 없어서 모든 문의를 표시합니다 (디버깅용)');
+        displayInquiries = cacheInq;
+      }
+      
+      if(!displayInquiries.length){ 
         wrap.innerHTML='<div class="orders-empty">문의가 없습니다.</div>'; 
         return; 
       }
       
-      wrap.innerHTML = mine.slice().reverse().map(m=>{
+      wrap.innerHTML = displayInquiries.slice().reverse().map(m=>{
         console.log('렌더링할 문의:', m);
         const ans = pickAns(m);
         const status = ans ? '답변완료' : (m.status || '미답변');
         const textContent = pickText(m);
         console.log('문의 텍스트:', textContent);
         
+        // 임시로 표시되는 문의는 배경색을 다르게 표시
+        const isFiltered = mine.includes(m);
+        const bgColor = isFiltered ? '#0c1a18' : '#1a0c18'; // 내 문의가 아니면 붉은 배경
+        
         // 기본: 내 문의 내용은 항상 보임, 답변은 클릭해서 펼침
         return `
-        <details class="msg-item" ${ans ? '' : ''} style="background:#0c1a18;padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:10px;">
+        <details class="msg-item" ${ans ? '' : ''} style="background:${bgColor};padding:10px 12px;border:1px solid #1e4d47;border-radius:8px;margin-bottom:10px;">
           <summary style="display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;">
-            <div style="font-weight:600;">${m.title||'1:1 문의'}</div>
+            <div style="font-weight:600;">${m.title||'1:1 문의'} ${!isFiltered ? '(전체)' : ''}</div>
             <span class="msg-status" style="font-size:11px;padding:2px 6px;border-radius:10px;background:${status==='답변완료'?'#2e7d32':(status==='미답변'?'#b71c1c':'#455a64')};color:#fff;white-space:nowrap;">${status}</span>
           </summary>
           <div style="margin-top:8px;">${textContent}</div>
           ${ans ? `<div style="margin-top:8px;padding:8px 10px;background:#08221f;border:1px solid #1e4d47;border-radius:8px;"><strong style="color:#FFD700;">[답변]</strong> ${ans}</div>` : ''}
-          <div style="font-size:11px;color:#888;margin-top:6px;">${pickTime(m) || '-'}</div>
+          <div style="font-size:11px;color:#888;margin-top:6px;">${pickTime(m) || '-'} | 작성자: ${m.user || m.username || m.email || '알 수 없음'}</div>
         </details>`;
       }).join('');
     }
