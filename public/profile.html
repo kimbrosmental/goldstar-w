@@ -165,6 +165,20 @@
         <!-- 돈수 버튼 -->
         <div class="pill-wrap" id="productBtns"></div>
 
+        <!-- 제작 유형 선택 -->
+        <h3 class="sheet-h" style="font-size:1.15em;margin-top:14px;">제작 유형 선택</h3>
+        <div class="kpi">
+          <select id="productType" style="width:100%;padding:12px;border-radius:8px;border:1px solid #1e4d47;background:#071412;color:#fff;font-size:14px;">
+            <option value="basic">골드바 (기본, 추가비 없음)</option>
+            <option value="key">황금 열쇠 (추가비 5만원)</option>
+            <option value="pig">황금 돼지 (추가비 5만원)</option>
+            <option value="clover">네잎 클로버 (추가비 5만원)</option>
+            <option value="custom">커스텀 (직접입력, 관리자 문의)</option>
+          </select>
+          <div id="typeNotice" style="margin-top:8px;font-size:12px;color:#888;">3돈 이하는 골드바 형태로 통일 제작됩니다.</div>
+          <div id="customMessage" style="margin-top:8px;font-size:12px;color:#4fc3f7;display:none;">관리자에게 메시지로 원하시는 유형을 보내주세요.</div>
+        </div>
+
         <!-- 총 돈수 -->
         <div class="kpi row">
           <span class="lab">총 돈수</span>
@@ -572,14 +586,21 @@
         const rawData = await kvLoad('/api/inquiries'); 
         console.log('원본 문의 데이터:', rawData);
         
-        // 데이터가 {userInquiry: {...}} 형태로 래핑되어 있는지 확인
-        cacheInq = rawData.map(item => {
-          if (item && item.userInquiry) {
-            console.log('userInquiry 래핑 데이터 발견:', item);
-            return item.userInquiry;
-          }
-          return item;
-        }).filter(item => item && typeof item === 'object');
+        // 새로운 구조: {data: [...]} 또는 기존 배열 구조 모두 지원
+        if (rawData && rawData.data && Array.isArray(rawData.data)) {
+          // 새로운 구조: {data: [...]}
+          cacheInq = rawData.data;
+        } else if (Array.isArray(rawData)) {
+          // 기존 배열 구조
+          cacheInq = rawData.map(item => {
+            if (item && item.userInquiry) {
+              return item.userInquiry;
+            }
+            return item;
+          }).filter(item => item && typeof item === 'object');
+        } else {
+          cacheInq = [];
+        }
         
         console.log('처리된 문의 데이터:', cacheInq);
         cntInq.textContent = cacheInq.length; 
@@ -689,11 +710,51 @@
       $('#totalDon').textContent=totalDon;
       $('#supplyPrice').textContent=fmt(supplyPrice);
       $('#currentPrice').textContent=fmt(currentPrice||0);
-      const totalPrice=totalDon*supplyPrice, currentTotal=totalDon*(currentPrice||0);
+      
+      // 제작 유형별 추가비 계산
+      const productType = $('#productType').value;
+      let additionalFee = 0;
+      if (totalDon > 3) { // 3돈 초과일 때만 추가비 적용
+        switch(productType) {
+          case 'key':
+          case 'pig':
+          case 'clover':
+            additionalFee = 50000;
+            break;
+          case 'custom':
+            additionalFee = 0; // 관리자 문의
+            break;
+        }
+      }
+      
+      const totalPrice=totalDon*supplyPrice + additionalFee;
+      const currentTotal=totalDon*(currentPrice||0) + additionalFee;
       $('#totalPrice').textContent=fmt(totalPrice);
       $('#currentTotal').textContent=fmt(currentTotal);
       $('#priceDiff').textContent=fmt(currentTotal-totalPrice);
       $('#depositAmount').textContent=fmt(Math.round(totalPrice*0.5));
+      
+      // 제작 유형별 메시지 표시
+      const typeNotice = $('#typeNotice');
+      const customMessage = $('#customMessage');
+      
+      if (totalDon <= 3) {
+        typeNotice.textContent = '3돈 이하는 골드바 형태로 통일 제작됩니다.';
+        typeNotice.style.display = 'block';
+        $('#productType').disabled = true;
+        $('#productType').value = 'basic';
+      } else {
+        typeNotice.textContent = '3돈 이상부터 선택 가능합니다.';
+        typeNotice.style.display = 'block';
+        $('#productType').disabled = false;
+      }
+      
+      if (productType === 'custom' && totalDon > 3) {
+        customMessage.style.display = 'block';
+      } else {
+        customMessage.style.display = 'none';
+      }
+      
       const requiredAddr = ($('#postCode').value.trim() && $('#addr1').value.trim());
       $('#orderSubmit').disabled = !(totalDon>0 && requiredAddr && SESSION && SESSION.username);
     }
@@ -710,6 +771,13 @@
     $('#addOrderBtn').addEventListener('click', openOrderPanel);
     $('#closeOrderPanel').addEventListener('click', closeOrderPanel);
     $('#resetDon').addEventListener('click', ()=>{ totalDon=0; updateOrderCalc(); });
+    
+    // 제작 유형 변경 이벤트
+    document.addEventListener('change', (e) => {
+      if (e.target.id === 'productType') {
+        updateOrderCalc();
+      }
+    });
 
     // 간단한 현재가 로딩(실패해도 주문 가능)
     (async()=>{ try{ const j=await fetchAsJSON('/api/security?type=goldprice'); const manual=j?.manualGoldPrice?Number(j.manualGoldPrice):0; if(manual>0) currentPrice=manual; }catch{} })();
@@ -733,24 +801,87 @@
       if(!CURRENT_USER) return;
       if(totalDon<=0){ alert('상품을 선택하세요.'); return; }
       if(!$('#postCode').value.trim() || !$('#addr1').value.trim()){ alert('배송지(우편번호/주소)를 입력해 주세요.'); return; }
+      
+      // 제작 유형별 추가비 계산
+      const productType = $('#productType').value;
+      let additionalFee = 0;
+      let productTypeName = '골드바';
+      
+      if (totalDon > 3) {
+        switch(productType) {
+          case 'key':
+            additionalFee = 50000;
+            productTypeName = '황금 열쇠';
+            break;
+          case 'pig':
+            additionalFee = 50000;
+            productTypeName = '황금 돼지';
+            break;
+          case 'clover':
+            additionalFee = 50000;
+            productTypeName = '네잎 클로버';
+            break;
+          case 'custom':
+            additionalFee = 0;
+            productTypeName = '커스텀';
+            break;
+          default:
+            productTypeName = '골드바';
+        }
+      }
+      
+      const finalTotalPrice = totalDon*supplyPrice + additionalFee;
+      const addressInfo = {
+        postCode: $('#postCode').value.trim(),
+        addr1: $('#addr1').value.trim(),
+        addr2: $('#addr2').value.trim(),
+        recvName: $('#recvName').value.trim(),
+        recvPhone: $('#recvPhone').value.trim()
+      };
+      
       const order={
         id:'O'+Date.now(),
         date:new Date().toISOString(),
         user:SESSION.username, username:SESSION.username,
         name:CURRENT_USER.name, email:CURRENT_USER.email, phone:CURRENT_USER.phone,
         don:totalDon, supplyPrice, currentPrice,
-        totalPrice: totalDon*supplyPrice,
-        depositAmount: Math.round(totalDon*supplyPrice*0.5),
-        address:{ postCode:$('#postCode').value.trim(), addr1:$('#addr1').value.trim(), addr2:$('#addr2').value.trim(), recvName:$('#recvName').value.trim(), recvPhone:$('#recvPhone').value.trim() },
-        memo:$('#memo').value.trim(), status:'결제대기'
+        productType: productType,
+        productTypeName: productTypeName,
+        additionalFee: additionalFee,
+        totalPrice: finalTotalPrice,
+        depositAmount: Math.round(finalTotalPrice*0.5),
+        address: addressInfo,
+        memo:$('#memo').value.trim(), 
+        status:'주문 승인 대기'
       };
-  const list=[...cacheOrders, order];
-  const ok=await kvSave('/api/orders', list);
-  if(!ok){ alert('주문 저장 실패'); return; }
-  cacheOrders=list;
-  closeOrderPanel();
-  await fullReload();
-  alert('주문이 등록되었습니다.');
+      
+      // 주문 저장
+      const orderList=[...cacheOrders, order];
+      const orderOk=await kvSave('/api/orders', orderList);
+      if(!orderOk){ alert('주문 저장 실패'); return; }
+      
+      // 사용자 주소 정보도 USERS에 업데이트
+      try {
+        const userIndex = cacheUsers.findIndex(u => u.username === SESSION.username);
+        if (userIndex !== -1) {
+          cacheUsers[userIndex] = {
+            ...cacheUsers[userIndex],
+            address: addressInfo,
+            updated: new Date().toISOString()
+          };
+          const userOk = await kvSave('/api/users', cacheUsers);
+          if (!userOk) {
+            console.warn('사용자 주소 업데이트 실패');
+          }
+        }
+      } catch (e) {
+        console.warn('사용자 주소 업데이트 오류:', e);
+      }
+      
+      cacheOrders=orderList;
+      closeOrderPanel();
+      await fullReload();
+      alert('주문이 등록되었습니다.');
     });
 
     // 1:1 문의 등록
@@ -759,28 +890,57 @@
       if(!CURRENT_USER) return;
       const txt=$('#msgInput').value.trim(); if(!txt) return;
       const inq={ id:'Q'+Date.now(), user:SESSION.username, username:SESSION.username, email:CURRENT_USER.email, phone:CURRENT_USER.phone, title:'1:1 문의', content:txt, ts:Date.now(), date:new Date().toISOString(), status:'미답변' };
-      const list=[inq, ...cacheInq];
-      const ok=await kvSave('/api/inquiries', list);
+      
+      // 새로운 데이터 구조에 맞게 저장: {data: [...]}
+      const updatedList = [inq, ...cacheInq];
+      const payload = { data: updatedList };
+      const ok=await kvSave('/api/inquiries', payload);
       if(!ok){ alert('문의 저장 실패'); return; }
-  cacheInq=list;
-  $('#msgInput').value='';
-  await fullReload();
+      
+      cacheInq=updatedList;
+      $('#msgInput').value='';
+      await fullReload();
       alert('문의가 등록되었습니다.');
     });
 
     // 주문 상세보기 모달 함수들
-    window.showOrderDetail = function(index) {
+    window.showOrderDetail = async function(index) {
       const mine = cacheOrders.filter(matchToMe);
       const order = mine[index];
       if (!order) return;
       
       const don = Number(order.don||order.qty||0);
       const sup = Number(order.supplyPrice||520000);
-      const total = Number(order.totalPrice || (don*sup));
+      const additionalFee = Number(order.additionalFee||0);
+      const total = Number(order.totalPrice || (don*sup + additionalFee));
       const deposit = Math.round(total*0.5);
       const dt = order.date||order.created||order.createdAt|| (order.ts? new Date(order.ts).toISOString() : '');
       
       const addr = order.address || {};
+      
+      // 은행 정보 가져오기 (입금대기 상태일 때만)
+      let bankInfo = '';
+      if (order.status === '입금대기') {
+        try {
+          const securityRes = await fetchAsJSON('/api/security');
+          if (securityRes.bankInfo) {
+            const bank = securityRes.bankInfo;
+            bankInfo = `
+              <div style="margin-top:20px;">
+                <h4 style="color:#FFD700;margin-bottom:10px;">입금 정보</h4>
+                <div style="background:#0c1a18;padding:15px;border-radius:8px;border:2px solid #FFD700;">
+                  <div style="margin-bottom:8px;"><strong>은행:</strong> ${bank.bankName||'-'}</div>
+                  <div style="margin-bottom:8px;"><strong>계좌번호:</strong> ${bank.accountNumber||'-'}</div>
+                  <div style="margin-bottom:8px;"><strong>예금주:</strong> ${bank.accountHolder||'-'}</div>
+                  <div style="color:#FFD700;font-weight:bold;">입금금액: ${fmt(deposit)}원</div>
+                </div>
+              </div>
+            `;
+          }
+        } catch (e) {
+          console.warn('은행 정보 로딩 실패:', e);
+        }
+      }
       
       document.getElementById('orderDetailContent').innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
@@ -788,9 +948,10 @@
             <h4 style="color:#4fc3f7;margin-bottom:10px;">주문 정보</h4>
             <div style="background:#0c1a18;padding:15px;border-radius:8px;">
               <div style="margin-bottom:8px;"><strong>주문번호:</strong> ${order.id||'-'}</div>
-              <div style="margin-bottom:8px;"><strong>상품:</strong> 골드바</div>
+              <div style="margin-bottom:8px;"><strong>상품:</strong> ${order.productTypeName||'골드바'}</div>
               <div style="margin-bottom:8px;"><strong>돈수:</strong> ${don}돈</div>
               <div style="margin-bottom:8px;"><strong>공급가:</strong> ${fmt(sup)}원</div>
+              ${additionalFee > 0 ? `<div style="margin-bottom:8px;"><strong>추가비:</strong> ${fmt(additionalFee)}원</div>` : ''}
               <div style="margin-bottom:8px;"><strong>총금액:</strong> ${fmt(total)}원</div>
               <div style="margin-bottom:8px;"><strong>입금금액(50%):</strong> ${fmt(deposit)}원</div>
               <div style="margin-bottom:8px;"><strong>상태:</strong> ${order.status||'-'}</div>
@@ -809,6 +970,7 @@
             </div>
           </div>
         </div>
+        ${bankInfo}
         ${order.receipt ? `
           <div style="margin-top:20px;">
             <h4 style="color:#4fc3f7;margin-bottom:10px;">업로드된 증명서</h4>

@@ -117,6 +117,17 @@
         <span id='manualGoldPriceMode' style='color:#d4af37;font-weight:bold;'></span>
       </div>`;
 
+    html += `<h3>입금 계좌 정보 설정</h3>
+      <div style='margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;'>
+        <input type='text' id='bankName' placeholder='은행명' style='padding:10px;font-size:14px;' />
+        <input type='text' id='accountNumber' placeholder='계좌번호' style='padding:10px;font-size:14px;' />
+        <input type='text' id='accountHolder' placeholder='예금주명' style='padding:10px;font-size:14px;' />
+      </div>
+      <div style='margin-bottom:32px;'>
+        <button class='btn' id='btnSaveBankInfo'>은행 정보 저장</button>
+        <span id='bankInfoStatus' style='color:#d4af37;font-weight:bold;margin-left:10px;'></span>
+      </div>`;
+
     html += `<h3>관리자 계정 관리 <button class="btn" id="btnAddAdmin">추가</button></h3>`;
     html += '<table class="admin-table"><thead><tr><th>아이디</th><th>권한</th><th>상태</th><th>관리</th></tr></thead><tbody>';
     admins.forEach((a,i)=>{
@@ -158,6 +169,57 @@
     updateMode();
     document.getElementById('btnSaveGoldPrice').onclick = ()=> saveGoldPrice(priceInput.value);
     priceInput.oninput = updateMode;
+
+    // 은행 정보
+    loadBankInfo();
+    document.getElementById('btnSaveBankInfo').onclick = saveBankInfo;
+  }
+
+  // -----------------------------
+  // 은행 정보 저장/로드
+  async function saveBankInfo() {
+    const bankName = document.getElementById('bankName').value.trim();
+    const accountNumber = document.getElementById('accountNumber').value.trim();
+    const accountHolder = document.getElementById('accountHolder').value.trim();
+    
+    if (!bankName || !accountNumber || !accountHolder) {
+      alert('모든 은행 정보를 입력해주세요.');
+      return;
+    }
+    
+    try {
+      const bankInfo = { bankName, accountNumber, accountHolder };
+      const res = await fetch('/api/security?type=bankinfo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bankInfo })
+      });
+      
+      if (!res.ok) throw new Error('서버 저장 실패');
+      
+      document.getElementById('bankInfoStatus').textContent = '저장 완료';
+      setTimeout(() => {
+        document.getElementById('bankInfoStatus').textContent = '';
+      }, 3000);
+    } catch (e) {
+      alert('은행 정보 저장 실패: ' + e.message);
+    }
+  }
+  
+  async function loadBankInfo() {
+    try {
+      const res = await fetch('/api/security?type=bankinfo');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.bankInfo) {
+          document.getElementById('bankName').value = json.bankInfo.bankName || '';
+          document.getElementById('accountNumber').value = json.bankInfo.accountNumber || '';
+          document.getElementById('accountHolder').value = json.bankInfo.accountHolder || '';
+        }
+      }
+    } catch (e) {
+      console.warn('은행 정보 로드 실패:', e);
+    }
   }
 
   // -----------------------------
