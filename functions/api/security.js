@@ -2,48 +2,57 @@ export async function onRequest({ request, env }) {
   const kv = env.SECURITY;
   const url = new URL(request.url);
   const type = url.searchParams.get("type"); 
-  const cors = { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" };
+  const cors = { 
+    "Access-Control-Allow-Origin": "*", 
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Content-Type": "application/json" 
+  };
+
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
 
   // -----------------------------
   // 금시세 (goldprice)
   if (type === "goldprice") {
     if (request.method === "GET") {
-      return new Response(await kv.get("goldprice") || "{}", { headers: cors });
+      const value = await kv.get("goldprice");
+      return new Response(JSON.stringify({ manualGoldPrice: value || '' }), { headers: cors });
     }
     if (request.method === "POST") {
       const body = await request.json();
-      await kv.put("goldprice", JSON.stringify(body));
-      return new Response("ok", { headers: cors });
+      const price = String(Number(body.manualGoldPrice || 0));
+      await kv.put("goldprice", price);
+      return new Response(JSON.stringify({ ok: true }), { headers: cors });
     }
   }
 
   // -----------------------------
-  // 관리자 계정 관리 (admins + adminid)
+  // 입금 계좌 정보 (depositbank)
+  if (type === "depositbank") {
+    if (request.method === "GET") {
+      const raw = await kv.get("depositbank");
+      const data = raw ? JSON.parse(raw) : {};
+      return new Response(JSON.stringify(data), { headers: cors });
+    }
+    if (request.method === "POST") {
+      const body = await request.json();
+      await kv.put("depositbank", JSON.stringify(body));
+      return new Response(JSON.stringify({ ok: true }), { headers: cors });
+    }
+  }
+
+  // -----------------------------
+  // 관리자 계정 관리 (adminid)
   if (type === "admin") {
     if (request.method === "GET") {
-      const raw = await kv.get("admins");      // 암호화된 전체 관리자 배열
-      const adminid = await kv.get("adminid"); // 개별 관리자 기본 계정
-      if (raw) {
-        return new Response(JSON.stringify({ data: raw, adminid }), { status: 200, headers: cors });
-      } else {
-        // fallback: 전체 KV 스캔
-        const list = [];
-        for await (const key of kv.list()) {
-          const admin = await kv.get(key.name);
-          if (admin) list.push(JSON.parse(admin));
-        }
-        return new Response(JSON.stringify(list), { status: 200, headers: cors });
-      }
+      const raw = await kv.get("adminid");
+      const data = raw ? JSON.parse(raw) : { admins: [] };
+      return new Response(JSON.stringify(data), { headers: cors });
     }
-
     if (request.method === "POST") {
-      const { data, adminid } = await request.json();
-      if (!data) return new Response("Missing data", { status: 400, headers: cors });
-
-      await kv.put("admins", data);
-      if (adminid) await kv.put("adminid", adminid);
-
-      return new Response("ok", { status: 200, headers: cors });
+      const body = await request.json();
+      await kv.put("adminid", JSON.stringify(body));
+      return new Response(JSON.stringify({ ok: true }), { headers: cors });
     }
   }
 
@@ -51,12 +60,33 @@ export async function onRequest({ request, env }) {
   // IP 접근 관리 (iprules)
   if (type === "iprules") {
     if (request.method === "GET") {
-      return new Response(await kv.get("iprules") || "[]", { headers: cors });
+      const raw = await kv.get("iprules");
+      const data = raw ? JSON.parse(raw) : [];
+      return new Response(JSON.stringify(data), { headers: cors });
     }
     if (request.method === "POST") {
       const body = await request.json();
       await kv.put("iprules", JSON.stringify(body.rules || []));
-      return new Response("ok", { headers: cors });
+      return new Response(JSON.stringify({ ok: true }), { headers: cors });
+    }
+  }
+
+  // -----------------------------
+  // 기본 응답 (type 파라미터 없는 경우)
+  if (!type) {
+    if (request.method === "GET") {
+      // 모든 보안 설정 반환
+      const goldprice = await kv.get("goldprice");
+      const depositbank = await kv.get("depositbank");
+      const adminid = await kv.get("adminid");
+      const iprules = await kv.get("iprules");
+      
+      return new Response(JSON.stringify({
+        goldprice: goldprice || '',
+        depositbank: depositbank ? JSON.parse(depositbank) : {},
+        adminid: adminid ? JSON.parse(adminid) : { admins: [] },
+        iprules: iprules ? JSON.parse(iprules) : []
+      }), { headers: cors });
     }
   }
 

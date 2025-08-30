@@ -997,5 +997,113 @@
     }
   });
   </script>
+
+  <script>
+  // 접속 로그 수집 및 전송
+  (function() {
+    const sessionStartTime = Date.now();
+    let pageVisitTime = 0;
+    let isLogSent = false;
+
+    // 방문자 정보 수집
+    function collectVisitorInfo() {
+      const userAgent = navigator.userAgent;
+      let browser = 'Unknown';
+      
+      if (userAgent.includes('Chrome')) browser = 'Chrome';
+      else if (userAgent.includes('Firefox')) browser = 'Firefox';
+      else if (userAgent.includes('Safari')) browser = 'Safari';
+      else if (userAgent.includes('Edge')) browser = 'Edge';
+      else if (userAgent.includes('Opera')) browser = 'Opera';
+
+      return {
+        userAgent: browser + '/' + (userAgent.match(/(?:Chrome|Firefox|Safari|Edge|Opera)\/(\d+)/)?.[1] || 'Unknown'),
+        page: window.location.pathname,
+        referer: document.referrer || 'direct',
+        screenResolution: screen.width + 'x' + screen.height,
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    // 대략적인 IP 기반 국가 추정 (실제로는 서버에서 처리하는 것이 좋음)
+    function estimateCountry() {
+      const lang = navigator.language || navigator.userLanguage;
+      if (lang.startsWith('ko')) return 'Korea';
+      if (lang.startsWith('en')) return 'English';
+      if (lang.startsWith('ja')) return 'Japan';
+      if (lang.startsWith('zh')) return 'China';
+      return 'Unknown';
+    }
+
+    // 로그 전송 함수
+    async function sendAccessLog() {
+      if (isLogSent) return;
+      
+      try {
+        const visitorInfo = collectVisitorInfo();
+        const sessionTime = Math.floor((Date.now() - sessionStartTime) / 1000);
+        
+        const logData = {
+          id: 'LOG' + Date.now() + Math.random().toString(36).substr(2, 9),
+          ip: 'visitor_' + Math.random().toString(36).substr(2, 8), // 실제 IP는 서버에서 처리
+          ...visitorInfo,
+          sessionTime: sessionTime,
+          country: estimateCountry(),
+          visitCount: parseInt(localStorage.getItem('visitCount') || '1')
+        };
+
+        // 방문 횟수 증가
+        const currentCount = parseInt(localStorage.getItem('visitCount') || '0') + 1;
+        localStorage.setItem('visitCount', currentCount.toString());
+        logData.visitCount = currentCount;
+
+        // 기존 로그 가져오기
+        const response = await fetch('/api/logs');
+        let existingLogs = [];
+        if (response.ok) {
+          const data = await response.json();
+          existingLogs = data.data || [];
+        }
+
+        // 새 로그 추가
+        existingLogs.push(logData);
+
+        // 로그 저장 (최근 1000개만 유지)
+        if (existingLogs.length > 1000) {
+          existingLogs = existingLogs.slice(-1000);
+        }
+
+        await fetch('/api/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: existingLogs })
+        });
+
+        isLogSent = true;
+        console.log('접속 로그 전송 완료');
+      } catch (error) {
+        console.error('로그 전송 실패:', error);
+      }
+    }
+
+    // 페이지 로드 시 즉시 로그 전송
+    document.addEventListener('DOMContentLoaded', sendAccessLog);
+
+    // 페이지를 떠날 때도 로그 전송 (세션 시간 업데이트)
+    window.addEventListener('beforeunload', function() {
+      if (!isLogSent) {
+        navigator.sendBeacon('/api/logs', JSON.stringify({
+          action: 'update_session',
+          sessionTime: Math.floor((Date.now() - sessionStartTime) / 1000)
+        }));
+      }
+    });
+
+    // 주기적으로 세션 시간 업데이트 (5분마다)
+    setInterval(function() {
+      pageVisitTime = Math.floor((Date.now() - sessionStartTime) / 1000);
+    }, 5 * 60 * 1000);
+  })();
+  </script>
 </body>
 </html>

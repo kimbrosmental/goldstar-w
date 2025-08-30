@@ -2,92 +2,23 @@
 (function(){
   window.admins = [];
   let ipRules = [];
+  let bankInfo = {};
+  let goldPrice = '';
 
   // -----------------------------
-  // 기본 관리자 계정 항상 보장
-  function ensureDefaultAdmin() {
-    if (!admins.some(a => a.username === 'admin')) {
-      admins.unshift({ username:'admin', role:'ADMIN', status:'active', password:'admin', default:true });
-    }
-  }
-
-  // -----------------------------
-  // 관리자 계정 저장/로드
-  async function saveAdmins() {
+  // 데이터 로드/저장 함수들
+  async function loadGoldPrice() {
     try {
-      const encrypted = await window.encrypt(window.admins);
-      const adminid = window.admins.length > 0 ? JSON.stringify(window.admins[0]) : '';
-      const res = await fetch('/api/security?type=admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: encrypted, adminid })
-      });
-      if (!res.ok) throw new Error('서버 저장 실패');
-
-      await loadAdmins(); // 저장 후 최신 데이터 다시 로드
-      render();
-    } catch (err) {
-      alert('관리자 저장 오류: ' + err.message);
-    }
-  }
-
-  async function loadAdmins() {
-    try {
-      const res = await fetch('/api/security?type=admin');
-      const json = await res.json();
-      if (json && json.data) {
-        try { window.admins = window.decrypt(json.data); }
-        catch { window.admins = []; }
-      } else if (Array.isArray(json)) {
-        window.admins = json;
-      } else {
-        window.admins = [];
+      const res = await fetch('/api/security?type=goldprice');
+      if (res.ok) {
+        const data = await res.json();
+        goldPrice = data.manualGoldPrice || '';
       }
-      if (json && json.adminid) {
-        try { window.adminid = JSON.parse(json.adminid); }
-        catch { window.adminid = null; }
-      }
-    } catch {
-      window.admins = [];
-      window.adminid = null;
-    }
-    ensureDefaultAdmin();
-  }
-
-  // -----------------------------
-  // IP 규칙 저장/로드
-  async function saveIPRules() {
-    try {
-      const res = await fetch('/api/security?type=iprules', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rules: ipRules })
-      });
-      if (!res.ok) throw new Error('IP 규칙 저장 실패');
-
-      await loadIPRules(); // 저장 후 최신 데이터 다시 로드
-      render();
-    } catch (err) {
-      alert('IP 규칙 저장 오류: ' + err.message);
+    } catch (e) {
+      console.error('금시세 로드 오류:', e);
     }
   }
 
-  async function loadIPRules() {
-    try {
-      const res = await fetch('/api/security?type=iprules');
-      const json = await res.json();
-      if (Array.isArray(json)) {
-        ipRules = json;
-      } else {
-        ipRules = [];
-      }
-    } catch {
-      ipRules = [];
-    }
-  }
-
-  // -----------------------------
-  // 금시세 수동 입력 저장
   async function saveGoldPrice(price) {
     try {
       await fetch('/api/security?type=goldprice', {
@@ -95,88 +26,35 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ manualGoldPrice: price })
       });
-      const res = await fetch('/api/security?type=goldprice');
-      const json = await res.json();
-      localStorage.setItem('manualGoldPrice', json.manualGoldPrice || '');
-      alert('오늘의 금시세가 저장되었습니다.');
-      render();
+      document.getElementById('manualGoldPriceMode').textContent = '저장됨';
+      setTimeout(() => {
+        document.getElementById('manualGoldPriceMode').textContent = '';
+      }, 2000);
+      console.log('금시세 저장 완료');
     } catch (e) {
-      alert('금시세 저장 실패');
+      console.error('금시세 저장 오류:', e);
     }
   }
 
-  // -----------------------------
-  // 렌더링
-  function render(){
-    ensureDefaultAdmin();
-
-    var html = `<h3>오늘의 금시세(수동입력 모드)</h3>
-      <div style='margin-bottom:16px;'>
-        <input type='number' id='manualGoldPrice' placeholder='금액 입력(원)' style='width:200px;font-size:18px;' />
-        <button class='btn' id='btnSaveGoldPrice'>저장</button>
-        <span id='manualGoldPriceMode' style='color:#d4af37;font-weight:bold;'></span>
-      </div>`;
-
-    html += `<h3>입금 계좌 정보 설정</h3>
-      <div style='margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;'>
-        <input type='text' id='bankName' placeholder='은행명' style='padding:10px;font-size:14px;' />
-        <input type='text' id='accountNumber' placeholder='계좌번호' style='padding:10px;font-size:14px;' />
-        <input type='text' id='accountHolder' placeholder='예금주명' style='padding:10px;font-size:14px;' />
-      </div>
-      <div style='margin-bottom:32px;'>
-        <button class='btn' id='btnSaveBankInfo'>은행 정보 저장</button>
-        <span id='bankInfoStatus' style='color:#d4af37;font-weight:bold;margin-left:10px;'></span>
-      </div>`;
-
-    html += `<h3>관리자 계정 관리 <button class="btn" id="btnAddAdmin">추가</button></h3>`;
-    html += '<table class="admin-table"><thead><tr><th>아이디</th><th>권한</th><th>상태</th><th>관리</th></tr></thead><tbody>';
-    admins.forEach((a,i)=>{
-      html += `<tr><td>${a.username}</td><td>${a.role}</td><td>${a.status}</td><td>
-        <button class="btn small list-btn" onclick="editAdmin(${i})">수정</button>
-        <button class="btn small list-btn" onclick="deleteAdmin(${i})">삭제</button>
-        <button class="btn small list-btn" onclick="changePwAdmin(${i})">비번변경</button>
-      </td></tr>`;
-    });
-    html += '</tbody></table><div id="adminModal" class="modal" style="display:none;"></div>';
-
-    html += `<h3 style="margin-top:32px;">IP 접근 관리 <button class="btn" id="btnAddIP">추가</button></h3>`;
-    html += '<table class="admin-table"><thead><tr><th>타입</th><th>CIDR</th><th>라벨</th><th>상태</th><th>관리</th></tr></thead><tbody>';
-    ipRules.forEach((r,i)=>{
-      html += `<tr><td>${r.type}</td><td>${r.cidr}</td><td>${r.label}</td><td>${r.enabled?'활성':'비활성'}</td><td>
-        <button class="btn small list-btn" onclick="editIP(${i})">수정</button>
-        <button class="btn small list-btn" onclick="deleteIP(${i})">삭제</button>
-      </td></tr>`;
-    });
-    html += '</tbody></table><div id="ipModal" class="modal" style="display:none;"></div>';
-
-    document.getElementById('view-security').innerHTML = html;
-    document.getElementById('btnAddAdmin').onclick = showAddAdmin;
-    document.getElementById('btnAddIP').onclick = showAddIP;
-
-    // 금시세
-    const priceInput = document.getElementById('manualGoldPrice');
-    const priceMode = document.getElementById('manualGoldPriceMode');
-    priceInput.value = localStorage.getItem('manualGoldPrice')||'';
-    function updateMode(){
-      if(priceInput.value && Number(priceInput.value)>0){
-        priceMode.textContent = '수동입력 모드';
-        priceMode.style.color = '#d4af37';
-      }else{
-        priceMode.textContent = '자동 크롤링 모드';
-        priceMode.style.color = '#888';
+  async function loadBankInfo() {
+    try {
+      const res = await fetch('/api/security?type=depositbank');
+      if (res.ok) {
+        const data = await res.json();
+        bankInfo = data || {};
+        
+        // UI에 반영
+        if (document.getElementById('bankName')) {
+          document.getElementById('bankName').value = bankInfo.bankName || '';
+          document.getElementById('accountNumber').value = bankInfo.accountNumber || '';
+          document.getElementById('accountHolder').value = bankInfo.accountHolder || '';
+        }
       }
+    } catch (e) {
+      console.error('은행정보 로드 오류:', e);
     }
-    updateMode();
-    document.getElementById('btnSaveGoldPrice').onclick = ()=> saveGoldPrice(priceInput.value);
-    priceInput.oninput = updateMode;
-
-    // 은행 정보
-    loadBankInfo();
-    document.getElementById('btnSaveBankInfo').onclick = saveBankInfo;
   }
 
-  // -----------------------------
-  // 은행 정보 저장/로드
   async function saveBankInfo() {
     const bankName = document.getElementById('bankName').value.trim();
     const accountNumber = document.getElementById('accountNumber').value.trim();
@@ -186,83 +64,234 @@
       alert('모든 은행 정보를 입력해주세요.');
       return;
     }
+
+    bankInfo = { bankName, accountNumber, accountHolder };
     
     try {
-      const bankInfo = { bankName, accountNumber, accountHolder };
-      const res = await fetch('/api/security?type=bankinfo', {
+      await fetch('/api/security?type=depositbank', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bankInfo })
+        body: JSON.stringify(bankInfo)
       });
-      
-      if (!res.ok) throw new Error('서버 저장 실패');
-      
       document.getElementById('bankInfoStatus').textContent = '저장 완료';
       setTimeout(() => {
         document.getElementById('bankInfoStatus').textContent = '';
-      }, 3000);
+      }, 2000);
     } catch (e) {
-      alert('은행 정보 저장 실패: ' + e.message);
+      console.error('은행정보 저장 오류:', e);
+      alert('은행 정보 저장 중 오류가 발생했습니다.');
     }
   }
-  
-  async function loadBankInfo() {
+
+  async function loadAdmins() {
     try {
-      const res = await fetch('/api/security?type=bankinfo');
+      const res = await fetch('/api/security?type=admin');
       if (res.ok) {
-        const json = await res.json();
-        if (json.bankInfo) {
-          document.getElementById('bankName').value = json.bankInfo.bankName || '';
-          document.getElementById('accountNumber').value = json.bankInfo.accountNumber || '';
-          document.getElementById('accountHolder').value = json.bankInfo.accountHolder || '';
+        const data = await res.json();
+        if (data.admins) {
+          window.admins = Array.isArray(data.admins) ? data.admins : [];
         }
       }
     } catch (e) {
-      console.warn('은행 정보 로드 실패:', e);
+      console.error('관리자 로드 오류:', e);
+    }
+    ensureDefaultAdmin();
+  }
+
+  async function saveAdmins() {
+    try {
+      await fetch('/api/security?type=admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ admins: window.admins })
+      });
+      console.log('관리자 저장 완료');
+    } catch (e) {
+      console.error('관리자 저장 오류:', e);
+    }
+  }
+
+  async function loadIPRules() {
+    try {
+      const res = await fetch('/api/security?type=iprules');
+      if (res.ok) {
+        const data = await res.json();
+        ipRules = Array.isArray(data) ? data : [];
+      }
+    } catch (e) {
+      console.error('IP규칙 로드 오류:', e);
+    }
+  }
+
+  async function saveIPRules() {
+    try {
+      await fetch('/api/security?type=iprules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rules: ipRules })
+      });
+      console.log('IP규칙 저장 완료');
+    } catch (e) {
+      console.error('IP규칙 저장 오류:', e);
     }
   }
 
   // -----------------------------
-  // 기존 이벤트 핸들러 (수정/삭제/추가/비번변경) 동일 유지
+  // 기본 관리자 계정 항상 보장
+  function ensureDefaultAdmin() {
+    if (!window.admins.some(a => a.username === 'admin')) {
+      window.admins.unshift({
+        username: 'admin',
+        passwordHash: 'admin123',
+        role: 'super',
+        status: 'active',
+        created: new Date().toISOString()
+      });
+    }
+  }
+
+  // -----------------------------
+  // 데이터 로드 및 새로고침
+  async function reloadAndRender() {
+    await Promise.all([
+      loadGoldPrice(),
+      loadBankInfo(),
+      loadAdmins(),
+      loadIPRules()
+    ]);
+    render();
+  }
+
+  // -----------------------------
+  // 렌더링
+  function render(){
+    ensureDefaultAdmin();
+
+    var html = `<div style="margin-bottom:16px;">
+      <button class="dashboard-top-btn" id="btnRefreshSecurity" style="margin-bottom:20px;">새로고침</button>
+    </div>`;
+
+    html += `<h3>오늘의 금시세(수동입력 모드)</h3>
+      <div style='margin-bottom:32px;'>
+        <input type='number' id='manualGoldPrice' placeholder='금액 입력(원)' value='${goldPrice}' style='width:200px;font-size:18px;padding:10px;border:1px solid #d4af37;border-radius:6px;' />
+        <button class='btn' id='btnSaveGoldPrice' style='margin-left:10px;'>저장</button>
+        <span id='manualGoldPriceMode' style='color:#d4af37;font-weight:bold;margin-left:10px;'></span>
+      </div>`;
+
+    html += `<h3>입금 계좌 정보 설정</h3>
+      <div style='margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;'>
+        <input type='text' id='bankName' placeholder='은행명' value='${bankInfo.bankName||''}' style='padding:10px;font-size:14px;border:1px solid #d4af37;border-radius:6px;' />
+        <input type='text' id='accountNumber' placeholder='계좌번호' value='${bankInfo.accountNumber||''}' style='padding:10px;font-size:14px;border:1px solid #d4af37;border-radius:6px;' />
+        <input type='text' id='accountHolder' placeholder='예금주명' value='${bankInfo.accountHolder||''}' style='padding:10px;font-size:14px;border:1px solid #d4af37;border-radius:6px;' />
+      </div>
+      <div style='margin-bottom:32px;'>
+        <button class='btn' id='btnSaveBankInfo'>은행 정보 저장</button>
+        <span id='bankInfoStatus' style='color:#d4af37;font-weight:bold;margin-left:10px;'></span>
+      </div>`;
+
+    html += `<h3>관리자 계정 관리 <button class="btn" id="btnAddAdmin">추가</button></h3>`;
+    html += '<table class="admin-table"><thead><tr><th>아이디</th><th>권한</th><th>상태</th><th>생성일</th><th>관리</th></tr></thead><tbody>';
+    window.admins.forEach((a,i)=>{
+      html += `<tr>
+        <td>${a.username}</td>
+        <td>${a.role}</td>
+        <td>${a.status}</td>
+        <td>${a.created ? new Date(a.created).toLocaleDateString('ko-KR') : ''}</td>
+        <td>
+          <button class="btn small" onclick="editAdmin(${i})">수정</button>
+          <button class="btn small" onclick="deleteAdmin(${i})">삭제</button>
+          <button class="btn small" onclick="changePwAdmin(${i})">비번변경</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table><div id="adminModal" class="modal" style="display:none;"></div>';
+
+    html += `<h3 style="margin-top:32px;">IP 접근 관리 <button class="btn" id="btnAddIP">추가</button></h3>`;
+    html += '<table class="admin-table"><thead><tr><th>타입</th><th>CIDR</th><th>라벨</th><th>상태</th><th>관리</th></tr></thead><tbody>';
+    ipRules.forEach((r,i)=>{
+      html += `<tr>
+        <td>${r.type}</td>
+        <td>${r.cidr}</td>
+        <td>${r.label}</td>
+        <td>${r.status}</td>
+        <td>
+          <button class="btn small" onclick="editIP(${i})">수정</button>
+          <button class="btn small" onclick="deleteIP(${i})">삭제</button>
+        </td>
+      </tr>`;
+    });
+    html += '</tbody></table><div id="ipModal" class="modal" style="display:none;"></div>';
+
+    document.getElementById('view-security').innerHTML = html;
+    
+    // 이벤트 리스너 설정
+    document.getElementById('btnRefreshSecurity').onclick = reloadAndRender;
+    document.getElementById('btnAddAdmin').onclick = showAddAdmin;
+    document.getElementById('btnAddIP').onclick = showAddIP;
+    document.getElementById('btnSaveGoldPrice').onclick = ()=> saveGoldPrice(document.getElementById('manualGoldPrice').value);
+    document.getElementById('btnSaveBankInfo').onclick = saveBankInfo;
+    
+    // 은행 정보 표시
+    loadBankInfo();
+  }
+
+  // -----------------------------
+  // 관리자 관리 함수들
   window.editAdmin = function(idx){
-    const a = admins[idx];
-    showAdminModal('관리자 정보 수정', a, function(data){
-      (async()=>{ admins[idx] = {...a, ...data}; await saveAdmins(); })();
+    const a = window.admins[idx];
+    showAdminModal('관리자 수정', a, function(data){
+      window.admins[idx] = {...a, ...data};
+      saveAdmins().then(reloadAndRender);
     });
   };
+
   window.deleteAdmin = function(idx){
-    const a = admins[idx];
-    if(a && a.username === 'admin'){ alert('기본 관리자 계정은 삭제할 수 없습니다.'); return; }
+    if(window.admins[idx].username === 'admin') {
+      alert('기본 관리자 계정은 삭제할 수 없습니다.');
+      return;
+    }
     if(confirm('정말 삭제하시겠습니까?')){
-      (async()=>{ admins.splice(idx,1); await saveAdmins(); })();
+      window.admins.splice(idx,1);
+      saveAdmins().then(reloadAndRender);
     }
   };
+
   window.changePwAdmin = function(idx){
-    const a = admins[idx];
+    const a = window.admins[idx];
     showAdminModal('비밀번호 변경', a, function(data){
-      (async()=>{ admins[idx].password = data.password; await saveAdmins(); })();
+      window.admins[idx].passwordHash = data.passwordHash;
+      saveAdmins().then(reloadAndRender);
     }, true);
   };
+
   function showAddAdmin(){
-    if(admins.length>=3){ alert('최대 3개까지 등록 가능합니다.'); return; }
     showAdminModal('관리자 추가', {}, function(data){
-      (async()=>{ admins.push({...data, status:'active'}); await saveAdmins(); })();
+      window.admins.push({...data, created: new Date().toISOString()});
+      saveAdmins().then(reloadAndRender);
     });
   }
+
   function showAdminModal(title, admin, onSave, pwOnly){
     const modal = document.getElementById('adminModal');
     let html = `<div class="modal-content"><h3>${title}</h3><form id="adminForm">`;
     if(!pwOnly){
       html += `<label>아이디<input name="username" value="${admin.username||''}" required></label>`;
-      html += `<label>권한<select name="role"><option value="ADMIN"${admin.role==='ADMIN'?' selected':''}>ADMIN</option><option value="MANAGER"${admin.role==='MANAGER'?' selected':''}>MANAGER</option></select></label>`;
-      html += `<label>상태<select name="status"><option value="active"${admin.status==='active'?' selected':''}>활성</option><option value="disabled"${admin.status==='disabled'?' selected':''}>비활성</option></select></label>`;
+      html += `<label>권한<select name="role">
+        <option value="admin"${admin.role==='admin'?' selected':''}>관리자</option>
+        <option value="super"${admin.role==='super'?' selected':''}>최고관리자</option>
+      </select></label>`;
+      html += `<label>상태<select name="status">
+        <option value="active"${admin.status==='active'?' selected':''}>활성</option>
+        <option value="inactive"${admin.status==='inactive'?' selected':''}>비활성</option>
+      </select></label>`;
     }
-    html += `<label>비밀번호<input name="password" type="password" value="${admin.password||''}" required></label>`;
-    html += `<div style="margin-top:16px;text-align:right;"><button type="submit" class="btn">저장</button> <button type="button" class="btn" id="btnCancel">취소</button></div>`;
+    html += `<label>비밀번호<input name="passwordHash" type="password" required></label>`;
+    html += `<div style="margin-top:16px;text-align:right;"><button type="submit" class="btn">저장</button> <button type="button" class="btn" id="btnCancelAdmin">취소</button></div>`;
     html += `</form></div>`;
     modal.innerHTML = html;
     modal.style.display = 'block';
-    document.getElementById('btnCancel').onclick = ()=>{ modal.style.display='none'; };
+    
+    document.getElementById('btnCancelAdmin').onclick = ()=>{ modal.style.display='none'; };
     document.getElementById('adminForm').onsubmit = function(e){
       e.preventDefault();
       const data = Object.fromEntries(new FormData(this));
@@ -271,48 +300,61 @@
     };
   }
 
+  // -----------------------------
+  // IP 규칙 관리 함수들
   window.editIP = function(idx){
     const r = ipRules[idx];
     showIPModal('IP 규칙 수정', r, function(data){
-      (async()=>{ ipRules[idx] = {...r, ...data}; await saveIPRules(); })();
+      ipRules[idx] = {...r, ...data};
+      saveIPRules().then(reloadAndRender);
     });
   };
+
   window.deleteIP = function(idx){
     if(confirm('정말 삭제하시겠습니까?')){
-      (async()=>{ ipRules.splice(idx,1); await saveIPRules(); })();
+      ipRules.splice(idx,1);
+      saveIPRules().then(reloadAndRender);
     }
   };
+
   function showAddIP(){
     showIPModal('IP 규칙 추가', {}, function(data){
-      (async()=>{ ipRules.push({...data, enabled:true}); await saveIPRules(); })();
+      ipRules.push(data);
+      saveIPRules().then(reloadAndRender);
     });
   }
+
   function showIPModal(title, rule, onSave){
     const modal = document.getElementById('ipModal');
     let html = `<div class="modal-content"><h3>${title}</h3><form id="ipForm">`;
-    html += `<label>타입<select name="type"><option value="allow"${rule.type==='allow'?' selected':''}>허용</option><option value="block"${rule.type==='block'?' selected':''}>차단</option></select></label>`;
-    html += `<label>CIDR<input name="cidr" value="${rule.cidr||''}" required></label>`;
-    html += `<label>라벨<input name="label" value="${rule.label||''}"></label>`;
-    html += `<label>상태<select name="enabled"><option value="true"${rule.enabled?' selected':''}>활성</option><option value="false"${!rule.enabled?' selected':''}>비활성</option></select></label>`;
-    html += `<div style="margin-top:16px;text-align:right;"><button type="submit" class="btn">저장</button> <button type="button" class="btn" id="btnCancel">취소</button></div>`;
+    html += `<label>타입<select name="type">
+      <option value="allow"${rule.type==='allow'?' selected':''}>허용</option>
+      <option value="deny"${rule.type==='deny'?' selected':''}>차단</option>
+    </select></label>`;
+    html += `<label>CIDR<input name="cidr" value="${rule.cidr||''}" placeholder="예: 192.168.1.0/24" required></label>`;
+    html += `<label>라벨<input name="label" value="${rule.label||''}" placeholder="설명"></label>`;
+    html += `<label>상태<select name="status">
+      <option value="active"${rule.status==='active'?' selected':''}>활성</option>
+      <option value="inactive"${rule.status==='inactive'?' selected':''}>비활성</option>
+    </select></label>`;
+    html += `<div style="margin-top:16px;text-align:right;"><button type="submit" class="btn">저장</button> <button type="button" class="btn" id="btnCancelIP">취소</button></div>`;
     html += `</form></div>`;
     modal.innerHTML = html;
     modal.style.display = 'block';
-    document.getElementById('btnCancel').onclick = ()=>{ modal.style.display='none'; };
+    
+    document.getElementById('btnCancelIP').onclick = ()=>{ modal.style.display='none'; };
     document.getElementById('ipForm').onsubmit = function(e){
       e.preventDefault();
       const data = Object.fromEntries(new FormData(this));
-      data.enabled = data.enabled==='true';
       if(onSave) onSave(data);
       modal.style.display = 'none';
     };
   }
 
   // -----------------------------
+  // 전역 렌더 함수 노출
+  window.renderSecurity = reloadAndRender;
+
   // 초기 로드
-  document.addEventListener('DOMContentLoaded', async ()=>{ 
-    await loadAdmins();
-    await loadIPRules();
-    render();
-  });
+  document.addEventListener('DOMContentLoaded', reloadAndRender);
 })();
